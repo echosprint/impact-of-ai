@@ -1,0 +1,11 @@
+---
+import ChapterContentLayout from '../layouts/ChapterContentLayout.astro';
+
+export interface Props {
+  chapter?: string;
+}
+
+const { chapter } = Astro.props;
+---
+
+<ChapterContentLayout chapter={chapter} />

@@ -1,0 +1,55 @@
+---
+import { getCollection } from 'astro:content';
+
+export interface Props {
+  currentChapter?: string;
+  bookTitle?: string;
+}
+
+const { currentChapter, bookTitle } = Astro.props;
+
+// Get all chapters from the content collection
+let chapters: Array<{ fileName: string; title: string; chapter: number }> = [];
+
+try {
+  const allChapters = await getCollection('chapters');
+  
+  // Transform the collection data to match our component's needs
+  chapters = allChapters.map(chapter => ({
+    fileName: chapter.slug,
+    title: chapter.data.title,
+    chapter: chapter.data.chapter,
+  }));
+
+  // Sort chapters by chapter number
+  chapters.sort((a, b) => a.chapter - b.chapter);
+} catch (error) {
+  console.error('Error loading chapters from content collection:', error);
+}
+---
+
+<div class="bg-white shadow-lg rounded-2xl p-6 sticky top-8">
+  <div class="text-center mb-6">
+    <h1 class="text-xl font-bold text-slate-900 mb-2">{bookTitle}</h1>
+    <div class="w-12 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
+  </div>
+  <nav class="py-4">
+    <ul class="space-y-1">
+      {chapters.map(({ fileName, title, chapter }) => (
+        <li>
+          <a 
+            href={`${import.meta.env.BASE_URL}/${fileName}`}
+            class={`block px-2 py-2 text-sm transition-colors duration-150 ${
+              currentChapter === fileName 
+                ? 'text-blue-700 bg-blue-50 font-medium border-l-2 border-blue-500' 
+                : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <span class="text-xs text-current opacity-60 block mb-1">Chapter {chapter}</span>
+            <span class="leading-snug">{title}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</div> 

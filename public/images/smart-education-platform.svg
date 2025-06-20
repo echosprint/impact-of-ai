@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="700" height="350" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100%" height="100%" fill="#4ECDC4"/>
+    <text x="350" y="175" 
+          font-family="Arial, sans-serif" 
+          font-size="30" 
+          font-weight="bold"
+          fill="#FFFFFF" 
+          text-anchor="middle" 
+          dominant-baseline="middle">
+        智能教育平台
+    </text>
+</svg>

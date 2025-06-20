@@ -1,0 +1,11 @@
+---
+import BookLayout from '../layouts/BookLayout.astro';
+import '../styles/global.css';
+import { SITE_CONFIG } from '../config/site.ts';
+
+// Get the current chapter from URL query parameters
+const url = new URL(Astro.request.url);
+const currentChapter = url.searchParams.get('chapter') || undefined;
+---
+
+<BookLayout currentChapter={currentChapter} bookTitle={SITE_CONFIG.bookTitle} />

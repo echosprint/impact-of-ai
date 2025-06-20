@@ -1,0 +1,12 @@
+---
+import TableOfContentsLayout from '../layouts/TableOfContentsLayout.astro';
+
+export interface Props {
+  currentChapter?: string;
+  bookTitle?: string;
+}
+
+const { currentChapter, bookTitle } = Astro.props;
+---
+
+<TableOfContentsLayout currentChapter={currentChapter} bookTitle={bookTitle} /> 

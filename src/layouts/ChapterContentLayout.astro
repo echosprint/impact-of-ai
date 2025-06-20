@@ -1,0 +1,322 @@
+---
+import { getEntry } from 'astro:content';
+
+export interface Props {
+  chapter?: string;
+}
+
+const { chapter } = Astro.props;
+
+// If no chapter is specified, show the preface
+const targetChapter = chapter || 'preface';
+
+let chapterData;
+let title;
+let wordCount = 0;
+let readingTime = 0;
+
+// Function to calculate word count from markdown content
+function calculateWordCount(content: string): number {
+  // Remove markdown syntax (headers, links, code blocks, etc.)
+  const plainText = content
+    .replace(/#{1,6}\s+/g, '') // Remove headers
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to text
+    .replace(/`{1,3}[^`]*`{1,3}/g, '') // Remove code blocks and inline code
+    .replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1') // Remove bold/italic
+    .replace(/_{1,2}([^_]+)_{1,2}/g, '$1') // Remove bold/italic
+    .replace(/^[\s\-\*\+]\s+/gm, '') // Remove list markers
+    .replace(/^\s*>/gm, '') // Remove blockquotes
+    .replace(/^\s*---+\s*$/gm, '') // Remove horizontal rules
+    .replace(/---/g, '') // Remove frontmatter separators
+    .trim();
+  
+  // Count Chinese characters and English words separately
+  let wordCount = 0;
+  
+  // Regular expressions for different character types
+  const chineseRegex = /[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]/g;
+  const englishWordRegex = /[a-zA-Z0-9]+/g;
+  
+  // Count Chinese characters (each character is typically one word)
+  const chineseMatches = plainText.match(chineseRegex);
+  if (chineseMatches) {
+    wordCount += chineseMatches.length;
+  }
+  
+  // Remove Chinese characters to avoid double counting
+  const textWithoutChinese = plainText.replace(chineseRegex, ' ');
+  
+  // Count English words
+  const englishMatches = textWithoutChinese.match(englishWordRegex);
+  if (englishMatches) {
+    wordCount += englishMatches.length;
+  }
+  
+  return wordCount;
+}
+
+// Function to calculate reading time (assuming 200 words per minute average reading speed)
+function calculateReadingTime(wordCount: number): number {
+  const wordsPerMinute = 200;
+  return Math.ceil(wordCount / wordsPerMinute);
+}
+
+try {
+  // Get the chapter entry from the content collection
+  chapterData = await getEntry('chapters', targetChapter);
+  
+  if (chapterData) {
+    title = chapterData.data.title;
+    
+    // Calculate word count and reading time from the raw content
+    const content = chapterData.body;
+    wordCount = calculateWordCount(content);
+    readingTime = calculateReadingTime(wordCount);
+  } else {
+    // Fallback if chapter doesn't exist
+    throw new Error(`Chapter "${targetChapter}" not found`);
+  }
+} catch (error) {
+  console.error('Error loading chapter:', error);
+  // Set fallback data
+  chapterData = null;
+}
+
+// Render the markdown content
+const { Content } = chapterData ? await chapterData.render() : { Content: null };
+---
+
+<h1 class="text-3xl md:text-4xl font-bold text-center mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{title}</h1>
+
+<!-- Chapter metadata -->
+{chapterData && (
+  <div class="text-right mb-6">
+    <div class="inline-flex items-center gap-2 text-xs text-slate-400 font-medium tracking-wide">
+      <span>{wordCount.toLocaleString()} words</span>
+      <span>•</span>
+      <span>{readingTime} min read</span>
+    </div>
+  </div>
+)}
+
+<div class="prose prose-xl prose-slate max-w-none">
+  <div class="book-content">
+    {Content ? (
+      <Content />
+    ) : (
+      <div class="text-center py-12">
+        <h1 class="text-3xl font-bold text-red-600 mb-4">Content Not Found</h1>
+        <p class="text-lg text-slate-600">
+          The requested chapter could not be loaded. Please check the chapter name and try again.
+        </p>
+      </div>
+    )}
+  </div>
+</div>
+
+<style>
+  .book-content {
+    /* Enhanced typography for book reading */
+    font-family: 'Georgia', 'SimSun', 'Times New Roman', serif;
+    line-height: 1.8;
+    color: #374151;
+  }
+  
+  .book-content :global(h1),
+  .book-content :global(h2),
+  .book-content :global(h3),
+  .book-content :global(h4) {
+    font-family: 'Segoe UI', 'SimSun', 'Helvetica Neue', sans-serif;
+    letter-spacing: -0.025em;
+  }
+  
+  .book-content :global(h1) {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 3rem;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    text-align: center;
+    background: linear-gradient(to right, #2563eb, #9333ea);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+  
+  .book-content :global(h2) {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 4rem;
+    margin-bottom: 2.5rem;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    border-bottom: 2px solid #dbeafe;
+    padding-bottom: 1rem;
+  }
+  
+  .book-content :global(h3) {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-top: 3rem;
+    margin-bottom: 2rem;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+  }
+  
+  .book-content :global(h4) {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+  }
+  
+  .book-content :global(p) {
+    margin-bottom: 2rem;
+    color: #374151;
+    line-height: 1.8;
+    font-size: 1.125rem;
+    font-weight: 400;
+    letter-spacing: 0.025em;
+    text-align: justify;
+    hyphens: auto;
+    text-indent: 1.5rem;
+    word-spacing: 0.1em;
+  }
+  
+  .book-content :global(p:first-of-type),
+  .book-content :global(h1 + p),
+  .book-content :global(h2 + p),
+  .book-content :global(h3 + p),
+  .book-content :global(h4 + p) {
+    text-indent: 0;
+  }
+  
+  .book-content :global(strong) {
+    font-weight: 600;
+    color: #0f172a;
+  }
+  
+  .book-content :global(em) {
+    font-style: italic;
+    color: #374151;
+    font-weight: 500;
+  }
+  
+  .book-content :global(ul),
+  .book-content :global(ol) {
+    margin: 2rem 0;
+    padding-left: 0;
+  }
+  
+  .book-content :global(li) {
+    margin-bottom: 1rem;
+    color: #374151;
+    line-height: 1.7;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+  
+  .book-content :global(ul li)::before {
+    content: '▸';
+    color: #3b82f6;
+    font-weight: 700;
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  
+  .book-content :global(ol li) {
+    list-style-type: decimal;
+    list-style-position: inside;
+  }
+  
+  .book-content :global(blockquote) {
+    border-left: 4px solid #bfdbfe;
+    padding-left: 1.5rem;
+    margin-left: 0;
+    font-style: italic;
+    color: #475569;
+    background-color: #eff6ff;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+  }
+  
+  .book-content :global(code) {
+    background-color: #f1f5f9;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    color: #1e293b;
+  }
+  
+  .book-content :global(pre) {
+    background-color: #0f172a;
+    color: #f1f5f9;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 2rem 0;
+  }
+  
+  .book-content :global(pre code) {
+    background-color: transparent;
+    padding: 0;
+    color: #f1f5f9;
+  }
+  
+  .book-content :global(a) {
+    color: #2563eb;
+    text-decoration: underline;
+    transition: color 0.15s ease-in-out;
+  }
+  
+  .book-content :global(a:hover) {
+    color: #1e40af;
+  }
+  
+  /* Improved readability on smaller screens */
+  @media (max-width: 1024px) {
+    .book-content {
+      font-size: 16px;
+      line-height: 1.7;
+    }
+    
+    .book-content :global(p) {
+      text-indent: 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+    }
+    
+    .book-content :global(h1) {
+      font-size: 1.875rem;
+      margin-bottom: 2rem;
+    }
+    
+    .book-content :global(h2) {
+      font-size: 1.5rem;
+      margin-top: 3rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .book-content :global(h3) {
+      font-size: 1.25rem;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+  }
+  
+  /* Enhanced focus for accessibility */
+  .book-content :global(*:focus) {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+</style> 
