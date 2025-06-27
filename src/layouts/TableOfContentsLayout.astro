@@ -28,12 +28,12 @@ try {
 }
 ---
 
-<div class="bg-white shadow-lg rounded-2xl p-6 sticky top-8">
-  <div class="text-center mb-6">
-    <h1 class="text-xl font-bold text-slate-900 mb-2">{bookTitle}</h1>
+<div class="bg-white shadow-lg rounded-2xl p-4 lg:p-6 lg:sticky lg:top-8">
+  <div class="text-center mb-4 lg:mb-6">
+    <h1 class="text-lg lg:text-xl font-bold text-slate-900 mb-2">{bookTitle}</h1>
     <div class="w-12 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
   </div>
-  <nav class="py-4">
+  <nav class="py-2 lg:py-4">
     <ul class="space-y-1">
       {chapters.map(({ fileName, title, chapter }) => (
         <li>

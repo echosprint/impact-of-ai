@@ -13,19 +13,39 @@ const { currentChapter, bookTitle } = Astro.props;
 
 <BaseLayout title={bookTitle}>
   <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
-    <div class="max-w-7xl mx-auto px-4 py-8">
-      <div class="flex gap-8">
-        <!-- Table of Contents Sidebar -->
-        <div class="w-80 flex-shrink-0">
-          <div class="sticky top-8">
+    <!-- Mobile Hamburger Button -->
+    <button 
+      id="mobile-menu-button"
+      class="lg:hidden fixed top-4 left-4 z-50 bg-white shadow-lg rounded-full p-3 hover:bg-slate-50 transition-colors"
+      aria-label="Toggle table of contents"
+    >
+      <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+
+    <!-- Mobile Overlay -->
+    <div 
+      id="mobile-overlay" 
+      class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30 hidden"
+    ></div>
+
+    <div class="max-w-7xl mx-auto px-4 py-4 lg:py-8">
+      <div class="flex flex-col lg:flex-row gap-4 lg:gap-8">
+        <!-- Table of Contents - Hidden on mobile, sidebar on desktop -->
+        <div 
+          id="table-of-contents"
+          class="fixed lg:relative top-0 left-0 h-full lg:h-auto w-80 lg:w-80 lg:flex-shrink-0 order-2 lg:order-1 z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out"
+        >
+          <div class="lg:sticky lg:top-8 h-full lg:h-auto overflow-y-auto lg:overflow-visible">
             <TableOfContents currentChapter={currentChapter} bookTitle={bookTitle} />
           </div>
         </div>
         
         <!-- Main Content Area -->
-        <div class="flex-1 max-w-4xl mx-auto">
+        <div class="flex-1 order-1 lg:order-2">
           <div class="bg-white shadow-2xl rounded-3xl overflow-hidden">
-            <div class="px-8 md:px-16 py-12 md:py-16">
+            <div class="px-4 md:px-8 lg:px-16 py-8 md:py-12 lg:py-16">
               <ChapterContent chapter={currentChapter} />
             </div>
           </div>
@@ -33,4 +53,51 @@ const { currentChapter, bookTitle } = Astro.props;
       </div>
     </div>
   </div>
+
+  <script>
+    // Mobile menu toggle functionality
+    const menuButton = document.getElementById('mobile-menu-button');
+    const tableOfContents = document.getElementById('table-of-contents');
+    const overlay = document.getElementById('mobile-overlay');
+
+    function toggleMenu() {
+      const isOpen = !tableOfContents?.classList.contains('-translate-x-full');
+      
+      if (isOpen) {
+        // Close menu
+        tableOfContents?.classList.add('-translate-x-full');
+        overlay?.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      } else {
+        // Open menu
+        tableOfContents?.classList.remove('-translate-x-full');
+        overlay?.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+      }
+    }
+
+    // Button click handler
+    menuButton?.addEventListener('click', toggleMenu);
+
+    // Overlay click handler (close menu when clicking outside)
+    overlay?.addEventListener('click', toggleMenu);
+
+    // Close menu when clicking on a link (navigation)
+    tableOfContents?.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement)?.tagName === 'A') {
+        toggleMenu();
+      }
+    });
+
+    // Handle window resize (ensure menu is properly positioned on desktop)
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 1024) { // lg breakpoint
+        tableOfContents?.classList.remove('-translate-x-full');
+        overlay?.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      } else {
+        tableOfContents?.classList.add('-translate-x-full');
+      }
+    });
+  </script>
 </BaseLayout> 
