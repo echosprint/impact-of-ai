@@ -1,5 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
 import tailwindcss from '@tailwindcss/vite';
 
@@ -16,7 +18,7 @@ export default defineConfig({
       theme: 'github-light',
       wrap: true
     },
-    remarkPlugins: [],
-    rehypePlugins: [],
+    remarkPlugins: [remarkMath],
+    rehypePlugins: [rehypeKatex],
   }
 });
