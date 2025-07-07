@@ -50,7 +50,7 @@
 .prose :lang(zh-TW) p,
 .prose .chinese-text p {
   text-indent: 2em !important;
-  margin-bottom: 1.8em;
+  margin-bottom: 1.2em;
   text-align: justify;
   hyphens: auto;
   orphans: 2;
@@ -86,8 +86,8 @@ body {
 }
 
 .prose p {
-  margin-top: 1.5rem;
-  margin-bottom: 1.8rem;
+  margin-top: 1rem;
+  margin-bottom: 1.2rem;
   line-height: 1.8;
   color: #2d3748;
   text-align: justify;
@@ -301,12 +301,70 @@ body {
 }
 
 .prose blockquote {
-  font-style: italic;
-  border-left: 4px solid #cbd5e0;
-  padding-left: 1.5rem;
-  margin: 2rem 0;
-  color: #718096;
-  font-size: 1.1em;
+  position: relative !important;
+  font-style: normal !important;
+  background: #f8f9fa !important;
+  background-color: #f8f9fa !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 1.5rem 2rem 1.25rem 2rem !important;
+  margin: 2rem 0 !important;
+  color: #374151 !important;
+  font-size: 0.95em !important;
+  line-height: 1.7 !important;
+  font-family: 'Crimson Text', 'Noto Serif SC', Georgia, serif !important;
+  box-shadow: none !important;
+  transition: none !important;
+}
+
+.prose blockquote::before {
+  display: none;
+}
+
+.prose blockquote p {
+  margin: 0;
+  text-indent: 1.5em !important;
+  color: inherit;
+  font-weight: 400;
+  font-style: normal !important;
+  text-align: justify;
+  hyphens: auto;
+}
+
+.prose blockquote p:not(:last-child) {
+  margin-bottom: 0.5rem !important;
+}
+
+/* Academic citation styling for blockquotes */
+.prose blockquote p:last-of-type {
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #d1d5db;
+  font-size: 0.85em;
+  font-style: normal;
+  color: #6b7280;
+  text-align: right;
+  font-weight: 400;
+  text-indent: 0 !important;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.025em;
+}
+
+/* Special styling for Chinese blockquotes */
+.prose :lang(zh) blockquote,
+.prose :lang(zh-CN) blockquote,
+.prose :lang(zh-TW) blockquote,
+.prose .chinese-text blockquote {
+  font-family: 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', serif;
+  letter-spacing: 0.03em;
+  line-height: 1.8;
+}
+
+.prose :lang(zh) blockquote p,
+.prose :lang(zh-CN) blockquote p,
+.prose :lang(zh-TW) blockquote p,
+.prose .chinese-text blockquote p {
+  text-indent: 2em !important;
 }
 
 .prose code {
@@ -401,7 +459,33 @@ body {
   }
   
   .prose blockquote {
-    border-left: 2pt solid #000;
-    padding-left: 12pt;
+    background: #f9f9f9 !important;
+    border: 1pt solid #ccc;
+    border-left: 3pt solid #333;
+    padding: 8pt 12pt;
+    margin: 12pt 0;
+    font-size: 9pt;
+    line-height: 1.4;
+    font-style: normal;
+  }
+  
+  .prose blockquote p {
+    text-indent: 10pt !important;
+    margin: 0;
+    text-align: justify;
+  }
+  
+  .prose blockquote p:not(:last-child) {
+    margin-bottom: 6pt;
+  }
+  
+  .prose blockquote p:last-of-type {
+    border-top: 0.5pt solid #ccc;
+    padding-top: 4pt;
+    margin-top: 6pt;
+    font-size: 8pt;
+    font-style: normal;
+    text-indent: 0 !important;
+    text-align: right;
   }
 }
