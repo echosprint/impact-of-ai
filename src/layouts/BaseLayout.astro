@@ -18,7 +18,12 @@ const { title, description = '' } = Astro.props;
   {description && <meta name="description" content={description}>}
   <meta name="language" content="zh-CN">
   <meta property="og:title" content={title}>
+  <meta property="og:type" content="website">
   {description && <meta property="og:description" content={description}>}
+  <meta name="theme-color" content="#1e40af">
+  <link rel="icon" href="/impact-of-ai/favicon.svg" type="image/svg+xml">
+  <link rel="shortcut icon" href="/impact-of-ai/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/impact-of-ai/favicon.svg">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
