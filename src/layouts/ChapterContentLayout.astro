@@ -100,7 +100,7 @@ const { Content } = chapterData ? await chapterData.render() : { Content: null }
 )}
 
 <div class="prose prose-xl prose-slate max-w-none">
-  <div class="book-content">
+  <div class="book-content max-w-4xl mx-auto">
     {Content ? (
       <Content />
     ) : (
@@ -117,17 +117,21 @@ const { Content } = chapterData ? await chapterData.render() : { Content: null }
 <style>
   .book-content {
     /* Enhanced typography for book reading */
-    font-family: 'Georgia', 'SimSun', 'Times New Roman', serif;
-    line-height: 1.8;
-    color: #374151;
+    font-family: 'Noto Serif SC', 'Source Han Serif SC', 'Georgia', 'SimSun', 'Times New Roman', serif;
+    line-height: 2.0;
+    color: #1a202c;
+    font-feature-settings: 'liga' 1, 'kern' 1, 'calt' 1;
+    font-variant-numeric: oldstyle-nums;
   }
   
   .book-content :global(h1),
   .book-content :global(h2),
   .book-content :global(h3),
   .book-content :global(h4) {
-    font-family: 'Segoe UI', 'SimSun', 'Helvetica Neue', sans-serif;
-    letter-spacing: -0.025em;
+    font-family: 'Inter', 'Noto Serif SC', 'SimSun', 'Helvetica Neue', sans-serif;
+    letter-spacing: -0.03em;
+    font-feature-settings: 'liga' 1, 'kern' 1;
+    font-weight: 600;
   }
   
   .book-content :global(h1) {
@@ -145,48 +149,61 @@ const { Content } = chapterData ? await chapterData.render() : { Content: null }
   }
   
   .book-content :global(h2) {
-    font-size: 1.875rem;
+    font-size: 2rem;
     font-weight: 700;
     color: #0f172a;
-    margin-top: 4rem;
-    margin-bottom: 2.5rem;
-    line-height: 1.1;
-    letter-spacing: -0.025em;
-    border-bottom: 2px solid #dbeafe;
-    padding-bottom: 1rem;
+    margin-top: 4.5rem;
+    margin-bottom: 3rem;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    padding-bottom: 1.5rem;
+    position: relative;
+  }
+  
+  .book-content :global(h2)::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background: rgba(51, 65, 85, 0.25);
+    border: none;
   }
   
   .book-content :global(h3) {
-    font-size: 1.5rem;
+    font-size: 1.625rem;
     font-weight: 700;
     color: #1e293b;
-    margin-top: 3rem;
-    margin-bottom: 2rem;
-    line-height: 1.1;
-    letter-spacing: -0.025em;
+    margin-top: 3.5rem;
+    margin-bottom: 2.2rem;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
   }
   
   .book-content :global(h4) {
-    font-size: 1.25rem;
+    font-size: 1.375rem;
     font-weight: 600;
-    color: #1e293b;
-    margin-top: 2rem;
-    margin-bottom: 1.5rem;
-    line-height: 1.1;
-    letter-spacing: -0.025em;
+    color: #334155;
+    margin-top: 2.5rem;
+    margin-bottom: 1.8rem;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
   }
   
   .book-content :global(p) {
-    margin-bottom: 2rem;
-    color: #374151;
-    line-height: 1.8;
+    margin-bottom: 2.2rem;
+    color: #2d3748;
+    line-height: 2.1;
     font-size: 1.125rem;
     font-weight: 400;
-    letter-spacing: 0.025em;
+    letter-spacing: 0.03em;
     text-align: justify;
     hyphens: auto;
-    text-indent: 1.5rem;
-    word-spacing: 0.1em;
+    text-indent: 2rem;
+    word-spacing: 0.12em;
+    orphans: 2;
+    widows: 2;
   }
   
   .book-content :global(p:first-of-type),
@@ -200,12 +217,14 @@ const { Content } = chapterData ? await chapterData.render() : { Content: null }
   .book-content :global(strong) {
     font-weight: 600;
     color: #0f172a;
+    letter-spacing: -0.01em;
   }
   
   .book-content :global(em) {
     font-style: italic;
-    color: #374151;
+    color: #2d3748;
     font-weight: 500;
+    letter-spacing: 0.01em;
   }
   
   .book-content :global(ul),
@@ -285,31 +304,46 @@ const { Content } = chapterData ? await chapterData.render() : { Content: null }
   /* Improved readability on smaller screens */
   @media (max-width: 1024px) {
     .book-content {
-      font-size: 16px;
-      line-height: 1.7;
+      font-size: 17px;
+      line-height: 1.9;
     }
     
     .book-content :global(p) {
-      text-indent: 1rem;
-      margin-bottom: 1.5rem;
-      font-size: 1rem;
+      text-indent: 1.5rem;
+      margin-bottom: 1.8rem;
+      font-size: 1.0625rem;
+      line-height: 1.9;
     }
     
     .book-content :global(h1) {
-      font-size: 1.875rem;
-      margin-bottom: 2rem;
+      font-size: 2rem;
+      margin-bottom: 2.5rem;
     }
     
     .book-content :global(h2) {
-      font-size: 1.5rem;
-      margin-top: 3rem;
-      margin-bottom: 1.5rem;
+      font-size: 1.625rem;
+      margin-top: 3.5rem;
+      margin-bottom: 2rem;
     }
     
     .book-content :global(h3) {
-      font-size: 1.25rem;
-      margin-top: 2rem;
-      margin-bottom: 1rem;
+      font-size: 1.375rem;
+      margin-top: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .book-content {
+      font-size: 16px;
+      line-height: 1.8;
+    }
+    
+    .book-content :global(p) {
+      text-indent: 1.2rem;
+      margin-bottom: 1.6rem;
+      font-size: 1rem;
+      line-height: 1.8;
     }
   }
   

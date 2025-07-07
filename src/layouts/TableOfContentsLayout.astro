@@ -28,28 +28,42 @@ try {
 }
 ---
 
-<div class="bg-white shadow-lg rounded-2xl p-4 lg:p-6 lg:sticky lg:top-8">
-  <div class="text-center mb-4 lg:mb-6">
-    <h1 class="text-lg lg:text-xl font-bold text-slate-900 mb-2">{bookTitle}</h1>
-    <div class="w-12 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
+<div class="relative bg-gradient-to-br from-white/60 via-slate-50/40 to-white/60 backdrop-blur-md border border-white/20 rounded-xl p-5 lg:p-6 lg:sticky lg:top-8 h-fit shadow-sm shadow-slate-200/50 overflow-hidden">
+  <div class="mb-6">
+    <h1 class="text-base lg:text-lg font-medium text-slate-800 mb-1">{bookTitle}</h1>
+    <div class="w-8 h-px bg-gradient-to-r from-slate-300/60 to-transparent rounded-full"></div>
   </div>
-  <nav class="py-2 lg:py-4">
+  <nav class="py-1">
     <ul class="space-y-1">
       {chapters.map(({ fileName, title, chapter }) => (
         <li>
           <a 
             href={`${import.meta.env.BASE_URL}/${fileName}`}
-            class={`block px-2 py-2 text-sm transition-colors duration-150 ${
+            class={`block px-3 py-2.5 text-sm transition-all duration-200 rounded-lg group relative ${
               currentChapter === fileName 
-                ? 'text-blue-700 bg-blue-50 font-medium border-l-2 border-blue-500' 
-                : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
+                ? 'text-blue-900 bg-gradient-to-r from-blue-50 to-blue-100/80 font-semibold border-l-3 border-blue-500 shadow-md backdrop-blur-sm' 
+                : 'text-slate-600 hover:text-slate-800 hover:bg-white/60 hover:backdrop-blur-sm'
             }`}
           >
-            <span class="text-xs text-current opacity-60 block mb-1">Chapter {chapter}</span>
-            <span class="leading-snug">{title}</span>
+            {currentChapter === fileName && (
+              <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r-full"></div>
+            )}
+            <span class={`text-xs block mb-0.5 transition-colors ${
+              currentChapter === fileName 
+                ? 'text-blue-600 font-medium' 
+                : 'text-slate-400 group-hover:text-slate-500'
+            }`}>Chapter {chapter}</span>
+            <span class="leading-relaxed text-sm">{title}</span>
           </a>
         </li>
       ))}
     </ul>
   </nav>
+  
+  <!-- Subtle decorative elements -->
+  <div class="absolute -top-2 -right-2 w-16 h-16 bg-gradient-to-br from-blue-100/30 to-purple-100/30 rounded-full blur-xl"></div>
+  <div class="absolute -bottom-4 -left-4 w-20 h-20 bg-gradient-to-tl from-slate-100/40 to-blue-50/30 rounded-full blur-2xl"></div>
+  
+  <!-- Paper-like texture overlay -->
+  <div class="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent pointer-events-none"></div>
 </div> 

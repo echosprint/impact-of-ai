@@ -12,14 +12,14 @@ const { currentChapter, bookTitle } = Astro.props;
 ---
 
 <BaseLayout title={bookTitle}>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50/60 via-white to-blue-50/20">
     <!-- Mobile Hamburger Button -->
     <button 
       id="mobile-menu-button"
-      class="lg:hidden fixed top-4 left-4 z-50 bg-white shadow-lg rounded-full p-3 hover:bg-slate-50 transition-all duration-300"
+      class="lg:hidden fixed top-4 left-4 z-50 bg-white/90 backdrop-blur-sm shadow-sm border border-slate-200/50 rounded-lg p-2.5 hover:bg-white hover:shadow-md transition-all duration-300"
       aria-label="Toggle table of contents"
     >
-      <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
       </svg>
     </button>
@@ -30,26 +30,29 @@ const { currentChapter, bookTitle } = Astro.props;
       class="lg:hidden fixed inset-0 z-30 hidden"
     ></div>
 
-    <div class="max-w-7xl mx-auto px-4 py-4 lg:py-8">
-      <div class="flex flex-col lg:flex-row gap-4 lg:gap-8">
+    <div class="max-w-full mx-auto px-4 py-4 lg:py-8">
+      <div class="flex flex-col lg:flex-row gap-4 lg:gap-8 justify-center">
         <!-- Table of Contents - Hidden on mobile, sidebar on desktop -->
         <div 
           id="table-of-contents"
-          class="fixed lg:relative top-0 left-0 h-full lg:h-auto w-80 lg:w-80 lg:flex-shrink-0 order-2 lg:order-1 z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out"
+          class="fixed lg:relative top-0 left-0 h-full lg:h-auto w-80 lg:w-72 lg:flex-shrink-0 order-2 lg:order-1 z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out"
         >
           <div class="lg:sticky lg:top-8 h-full lg:h-auto overflow-y-auto lg:overflow-visible">
             <TableOfContents currentChapter={currentChapter} bookTitle={bookTitle} />
           </div>
         </div>
         
-        <!-- Main Content Area -->
-        <div class="flex-1 order-1 lg:order-2">
-          <div class="bg-white shadow-2xl rounded-3xl overflow-hidden">
-            <div class="px-4 md:px-8 lg:px-16 py-8 md:py-12 lg:py-16">
+        <!-- Main Content Area - Centered with optimal reading width -->
+        <div class="flex-1 order-1 lg:order-2 lg:max-w-4xl lg:mx-auto">
+          <div class="bg-white shadow-lg rounded-2xl overflow-hidden border border-slate-200/30">
+            <div class="px-6 md:px-12 lg:px-16 xl:px-20 py-8 md:py-12 lg:py-16">
               <ChapterContent chapter={currentChapter} />
             </div>
           </div>
         </div>
+        
+        <!-- Right spacer to balance layout -->
+        <div class="hidden lg:block lg:w-72 lg:flex-shrink-0 order-3"></div>
       </div>
     </div>
   </div>
