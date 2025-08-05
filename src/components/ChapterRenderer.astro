@@ -57,13 +57,13 @@ for (let i = 0; i < parts.length; i++) {
   {contentParts.map((part, index) => (
     part.type === 'content' ? (
       <div class="prose prose-xl prose-slate max-w-none mb-6" set:html={part.content} />
-    ) : (
+    ) : part.note ? (
       <NoteBlock 
         noteId={part.note.id}
         noteContent={encodeURIComponent(part.note.content)}
         referenceText={part.note.referenceText ? encodeURIComponent(JSON.stringify(part.note.referenceText)) : undefined}
       />
-    )
+    ) : null
   ))}
 </div>
 

@@ -26,8 +26,8 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
   >
     <div class="reference-card bg-gray-50/80 border border-gray-200/40 rounded-lg text-sm shadow-sm">
       <!-- Fixed header -->
-      <div class="reference-header px-3 pt-3 pb-2 bg-gradient-to-r from-blue-50/80 to-indigo-50/60 border-b border-gray-200/50 sticky top-0 z-10">
-        <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">引用 #{noteId}</span>
+      <div class="reference-header px-3 pt-3 pb-2 bg-gradient-to-r from-amber-50/80 to-orange-50/60 border-b border-amber-200/50 sticky top-0 z-10">
+        <span class="text-xs font-medium text-amber-700 uppercase tracking-wide">引用 #{noteId}</span>
       </div>
       
       <!-- Scrollable content area -->
@@ -37,7 +37,7 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
         </div>
         
         {(reference.source || reference.page) && (
-          <div class="text-xs text-gray-500 pt-2 border-t border-gray-200/50 sticky bottom-0 bg-white/95 backdrop-blur-sm mt-3">
+          <div class="text-xs text-amber-700 pt-2 border-t border-amber-200/50 sticky bottom-0 bg-amber-50/95 backdrop-blur-sm mt-3">
             {reference.source && <div class="py-1">{reference.source}</div>}
             {reference.page && <div class="py-1">{reference.page}</div>}
           </div>
@@ -54,47 +54,38 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     transition: all 0.4s ease;
   }
   
-  /* Visual indicator for active note - no layout changes */
+  /* Clean paper-like selection for active note */
   .note-inline-content.note-active {
-    background: linear-gradient(135deg, 
-      rgba(59, 130, 246, 0.12) 0%, 
-      rgba(147, 197, 253, 0.10) 25%,
-      rgba(219, 234, 254, 0.08) 50%,
-      rgba(147, 197, 253, 0.10) 75%,
-      rgba(59, 130, 246, 0.12) 100%
-    );
-    box-shadow: 
-      0 0 24px rgba(59, 130, 246, 0.18),
-      0 0 12px rgba(59, 130, 246, 0.12);
     position: relative;
-    border-radius: 8px;
+    background: rgba(250, 248, 242, 0.6);
+    border-left: 4px solid rgba(139, 69, 19, 0.3);
+    padding-left: 12px;
+    margin-left: -16px;
+    border-radius: 0 4px 4px 0;
+    box-shadow: 
+      inset 2px 0 4px rgba(139, 69, 19, 0.08),
+      0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.25s ease-out;
   }
   
-  
-  /* Enhanced steady glowing background effect for active note - no layout impact */
+  /* Longer, lighter connection line */
   .note-inline-content.note-active::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, 
-      rgba(59, 130, 246, 0.06), 
-      rgba(147, 197, 253, 0.05), 
-      rgba(219, 234, 254, 0.04),
-      rgba(59, 130, 246, 0.05)
-    );
-    border-radius: 8px;
-    z-index: -1;
+    right: -16px;
+    top: 50%;
+    width: 16px;
+    height: 2px;
+    transform: translateY(-50%);
+    background: rgba(139, 69, 19, 0.4);
     pointer-events: none;
   }
   
   .reference-card {
     /* Enhanced styling for fixed position references */
-    background: rgba(255, 255, 255, 0.96);
-    border: 2px solid rgba(59, 130, 246, 0.2);
-    box-shadow: 0 12px 48px rgba(59, 130, 246, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1);
+    background: rgba(250, 248, 242, 0.96);
+    border: 2px solid rgba(139, 69, 19, 0.2);
+    box-shadow: 0 12px 48px rgba(139, 69, 19, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1);
     transition: all 0.4s ease;
     backdrop-filter: blur(16px);
     border-radius: 16px;
@@ -159,16 +150,16 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     transform: translateY(-50%);
     width: 4px;
     height: 24px;
-    background: linear-gradient(180deg, rgba(59, 130, 246, 0.6), rgba(96, 165, 250, 0.4));
+    background: linear-gradient(180deg, rgba(139, 69, 19, 0.6), rgba(160, 82, 45, 0.4));
     border-radius: 0 2px 2px 0;
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 0 8px rgba(139, 69, 19, 0.25);
     opacity: 0.7;
   }
   
   .reference-card:hover {
-    background: rgba(255, 255, 255, 0.98);
-    box-shadow: 0 24px 72px rgba(59, 130, 246, 0.3), 0 12px 32px rgba(0, 0, 0, 0.18);
-    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(250, 248, 242, 0.98);
+    box-shadow: 0 24px 72px rgba(139, 69, 19, 0.3), 0 12px 32px rgba(0, 0, 0, 0.18);
+    border-color: rgba(139, 69, 19, 0.5);
     transform: translateY(-8px) translateX(-20%) scale(1.05); /* Reduced expansion to stay on screen */
     width: 130% !important; /* Reduced from 170% to 130% for wider column */
     max-width: 480px; /* Reduced maximum to prevent overflow */
@@ -207,7 +198,7 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
   .reference-content {
     /* Custom scrollbar for webkit browsers */
     scrollbar-width: thin;
-    scrollbar-color: rgba(59, 130, 246, 0.3) transparent;
+    scrollbar-color: rgba(139, 69, 19, 0.3) transparent;
   }
   
   .reference-content::-webkit-scrollbar {
@@ -219,13 +210,13 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
   }
   
   .reference-content::-webkit-scrollbar-thumb {
-    background: rgba(59, 130, 246, 0.3);
+    background: rgba(139, 69, 19, 0.3);
     border-radius: 3px;
     transition: background 0.3s ease;
   }
   
   .reference-content::-webkit-scrollbar-thumb:hover {
-    background: rgba(59, 130, 246, 0.5);
+    background: rgba(139, 69, 19, 0.5);
   }
   
   /* Enhanced header styling for scrollable references */
@@ -234,15 +225,15 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     border-radius: 16px 16px 0 0;
   }
   
-  /* Fade effect for scrollable content */
+  /* Subtle fade effect for scrollable content - reduced interference */
   .reference-content::before {
     content: '';
     position: sticky;
     top: 0;
     display: block;
-    height: 12px;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), transparent);
-    margin: -3px -3px 0 -3px;
+    height: 6px;
+    background: linear-gradient(to bottom, rgba(250, 248, 242, 0.4), transparent);
+    margin: -3px -3px -6px -3px;
     pointer-events: none;
     z-index: 5;
   }
@@ -253,7 +244,7 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     bottom: 0;
     display: block;
     height: 12px;
-    background: linear-gradient(to top, rgba(255, 255, 255, 0.8), transparent);
+    background: linear-gradient(to top, rgba(250, 248, 242, 0.8), transparent);
     margin: 0 -3px -3px -3px;
     pointer-events: none;
     z-index: 5;
@@ -295,45 +286,6 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     font-weight: 500; /* Bold on hover */
   }
   
-  /* Connection line effect - positioned outside text area */
-  .note-inline-content.note-active::after {
-    content: '';
-    position: absolute;
-    right: -2rem;
-    top: 50%;
-    width: 24px;
-    height: 2px;
-    background: linear-gradient(90deg, rgba(59, 130, 246, 0.4) 0%, rgba(96, 165, 250, 0.3) 70%, transparent 100%);
-    border-radius: 2px;
-    transform: translateY(-50%);
-    box-shadow: 0 0 4px rgba(59, 130, 246, 0.2);
-    opacity: 0.5;
-    pointer-events: none;
-  }
-  
-  /* Additional arrow indicator */
-  .note-inline-content.note-active {
-    position: relative;
-  }
-  
-  .note-inline-content.note-active:before {
-    /* Glowing background (already defined above) */
-  }
-  
-  /* Arrow pointing towards reference - positioned outside text area */
-  .note-inline-content.note-active .note-connection-arrow {
-    position: absolute;
-    right: -1.5rem;
-    top: 50%;
-    transform: translateY(-50%) rotate(45deg);
-    width: 8px;
-    height: 8px;
-    border-right: 1px solid rgba(59, 130, 246, 0.4);
-    border-top: 1px solid rgba(59, 130, 246, 0.4);
-    opacity: 0.4;
-    filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.15));
-    pointer-events: none;
-  }
   
   /* Smooth transitions for all notes */
   .note-inline-content {
@@ -349,8 +301,14 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
 </style>
 
 <script>
-  let referencesInColumn = [];
-  let isInitialized = false;
+  interface ReferenceItem {
+    noteId: string;
+    element: HTMLElement;
+    noteElement: HTMLElement;
+  }
+
+  let referencesInColumn: ReferenceItem[] = [];
+  let isInitialized: boolean = false;
   
   // Position references in the right column aligned with their notes
   function positionReferences() {
@@ -374,13 +332,15 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     
     noteContents.forEach((noteContent, index) => {
       const noteId = noteContent.getAttribute('data-note-id');
+      if (!noteId) return; // Skip if no noteId
+      
       const referenceElement = document.querySelector(`.reference-for-positioning[data-note-id="${noteId}"]`);
       
       console.log(`Processing note ${noteId}, reference found:`, !!referenceElement);
       
       if (referenceElement) {
         // Clone the reference element
-        const clonedReference = referenceElement.cloneNode(true);
+        const clonedReference = referenceElement.cloneNode(true) as HTMLElement;
         clonedReference.classList.remove('hidden');
         clonedReference.style.display = 'none'; // Initially hidden
         clonedReference.style.pointerEvents = 'auto'; // Allow interactions with reference cards
@@ -389,7 +349,7 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
         referencesInColumn.push({
           noteId,
           element: clonedReference,
-          noteElement: noteContent
+          noteElement: noteContent as HTMLElement
         });
       }
     });
@@ -408,8 +368,8 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     const centerY = viewportHeight / 2;
     const centerTolerance = viewportHeight * 0.4; // 40% of viewport height around center
     
-    let activeReference = null;
-    let maxVisibility = 0;
+    let activeReference: ReferenceItem | null = null;
+    let maxVisibility: number = 0;
     
     // Find the most prominent note in the center area
     referencesInColumn.forEach(ref => {
@@ -643,9 +603,9 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
   });
   
   // Update reference visibility on scroll
-  let scrollTimeout;
-  let isScrolling = false;
-  let lastScrollTime = 0;
+  let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+  let isScrolling: boolean = false;
+  let lastScrollTime: number = 0;
   
   window.addEventListener('scroll', () => {
     const now = Date.now();
@@ -664,7 +624,9 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     }
     
     // Also set a timeout as fallback
-    clearTimeout(scrollTimeout);
+    if (scrollTimeout) {
+      clearTimeout(scrollTimeout);
+    }
     scrollTimeout = setTimeout(() => {
       if (!isScrolling) {
         updateReferenceVisibility();
