@@ -28,18 +28,21 @@ try {
 }
 ---
 
-<div class="relative bg-gradient-to-br from-white/60 via-slate-50/40 to-white/60 backdrop-blur-md border border-white/20 rounded-xl p-5 lg:p-6 lg:sticky lg:top-8 h-fit shadow-sm shadow-slate-200/50 overflow-hidden">
-  <div class="mb-6">
+<div class="relative bg-gradient-to-br from-white/60 via-slate-50/40 to-white/60 backdrop-blur-md border border-white/20 rounded-xl shadow-sm shadow-slate-200/50 overflow-hidden flex flex-col max-h-[calc(100vh-8rem)] lg:max-h-[calc(100vh-8rem)]">
+  <!-- Fixed Header -->
+  <div class="flex-shrink-0 p-5 lg:p-6 pb-3 lg:pb-4">
     <h1 class="text-base lg:text-lg font-medium text-slate-800 mb-1">{bookTitle}</h1>
     <div class="w-8 h-px bg-gradient-to-r from-slate-300/60 to-transparent rounded-full"></div>
   </div>
-  <nav class="py-1">
-    <ul class="space-y-1">
+  
+  <!-- Scrollable Navigation -->
+  <nav class="flex-1 overflow-y-auto px-5 lg:px-6 pb-5 lg:pb-6">
+    <ul class="space-y-0.5 toc-list">
       {chapters.map(({ fileName, title, chapter }) => (
         <li>
           <a 
             href={`${import.meta.env.BASE_URL}/${fileName}`}
-            class={`block px-3 py-2.5 text-sm transition-all duration-200 rounded-lg group relative ${
+            class={`block px-3 py-1.5 text-sm transition-all duration-200 rounded-lg group relative ${
               currentChapter === fileName 
                 ? 'text-blue-900 bg-gradient-to-r from-blue-50 to-blue-100/80 font-semibold border-l-3 border-blue-500 shadow-md backdrop-blur-sm' 
                 : 'text-slate-600 hover:text-slate-800 hover:bg-white/60 hover:backdrop-blur-sm'
@@ -48,12 +51,12 @@ try {
             {currentChapter === fileName && (
               <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r-full"></div>
             )}
-            <span class={`text-xs block mb-0.5 transition-colors ${
+            <span class={`text-xs block mb-0 transition-colors ${
               currentChapter === fileName 
                 ? 'text-blue-600 font-medium' 
                 : 'text-slate-400 group-hover:text-slate-500'
             }`}>Chapter {chapter}</span>
-            <span class="leading-relaxed text-sm">{title}</span>
+            <span class="leading-snug text-sm">{title}</span>
           </a>
         </li>
       ))}
@@ -66,4 +69,75 @@ try {
   
   <!-- Paper-like texture overlay -->
   <div class="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent pointer-events-none"></div>
-</div> 
+</div>
+
+<style>
+  /* Custom scrollbar styling for table of contents */
+  nav {
+    /* Custom scrollbar for webkit browsers */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(59, 130, 246, 0.2) transparent;
+  }
+  
+  nav::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  nav::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  nav::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.2);
+    border-radius: 3px;
+    transition: background 0.3s ease;
+  }
+  
+  nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.4);
+  }
+  
+  /* Fade effects to indicate scrollable content */
+  nav::before {
+    content: '';
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 12px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), transparent);
+    z-index: 10;
+    pointer-events: none;
+    margin: 0 -1.25rem -12px -1.25rem;
+  }
+  
+  nav::after {
+    content: '';
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 12px;
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.9), transparent);
+    z-index: 10;
+    pointer-events: none;
+    margin: -12px -1.25rem 0 -1.25rem;
+  }
+  
+  /* Smooth scrolling behavior */
+  nav {
+    scroll-behavior: smooth;
+  }
+  
+  /* Enhanced hover states for better UX when scrolling */
+  .toc-list li a:hover {
+    transform: translateX(2px);
+  }
+  
+  /* Mobile scroll optimization */
+  @media (max-width: 1023px) {
+    nav {
+      -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    }
+  }
+</style> 

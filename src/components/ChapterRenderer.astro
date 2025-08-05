@@ -1,0 +1,75 @@
+---
+import NoteBlock from './NoteBlock.astro';
+import { parseReferenceFile } from '../utils/notes-parser';
+import fs from 'fs';
+import path from 'path';
+
+export interface Props {
+  chapterContent: string;
+  rawContent: string;
+}
+
+const { chapterContent, rawContent } = Astro.props;
+
+// Load references
+let references = new Map();
+try {
+  const referenceFilePath = path.join(process.cwd(), 'src/content/reference.md');
+  if (fs.existsSync(referenceFilePath)) {
+    const referenceContent = fs.readFileSync(referenceFilePath, 'utf-8');
+    references = parseReferenceFile(referenceContent);
+  }
+} catch (error) {
+  console.error('Error loading references:', error);
+}
+
+// Extract note blocks from raw content
+const noteBlocks: Array<{id: string, content: string, referenceText?: any}> = [];
+const noteBlockRegex = /---notes\[([^\]]+)\]([\s\S]*?)---!notes\[\1\]/g;
+let match;
+while ((match = noteBlockRegex.exec(rawContent)) !== null) {
+  const id = match[1];
+  const content = match[2].trim();
+  const reference = references.get(id);
+  noteBlocks.push({ id, content, referenceText: reference });
+}
+
+// Split content by note blocks to render them separately
+const parts = rawContent.split(/---notes\[[^\]]+\][\s\S]*?---!notes\[[^\]]+\]/);
+const contentParts = [];
+
+let partIndex = 0;
+let noteIndex = 0;
+
+// Process the content part by part
+for (let i = 0; i < parts.length; i++) {
+  if (parts[i].trim()) {
+    contentParts.push({ type: 'content', content: parts[i] });
+  }
+  if (noteIndex < noteBlocks.length) {
+    contentParts.push({ type: 'note', note: noteBlocks[noteIndex] });
+    noteIndex++;
+  }
+}
+---
+
+<div class="chapter-renderer">
+  {contentParts.map((part, index) => (
+    part.type === 'content' ? (
+      <div class="prose prose-xl prose-slate max-w-none mb-6" set:html={part.content} />
+    ) : (
+      <NoteBlock 
+        noteId={part.note.id}
+        noteContent={encodeURIComponent(part.note.content)}
+        referenceText={part.note.referenceText ? encodeURIComponent(JSON.stringify(part.note.referenceText)) : undefined}
+      />
+    )
+  ))}
+</div>
+
+<style>
+  .chapter-renderer {
+    max-width: 4xl;
+    margin: 0 auto;
+  }
+</style>

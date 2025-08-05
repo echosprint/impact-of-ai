@@ -1,0 +1,674 @@
+---
+export interface Props {
+  noteId: string;
+  noteContent: string;
+  referenceText?: string;
+}
+
+const { noteId, noteContent, referenceText } = Astro.props;
+
+// Decode the content
+const decodedNoteContent = decodeURIComponent(noteContent);
+const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) : null;
+---
+
+<!-- Note content flows inline with main book content -->
+<div class="note-inline-content" data-note-id={noteId}>
+  <div set:html={decodedNoteContent}></div>
+</div>
+
+<!-- Reference text for right column positioning -->
+{reference && (
+  <div 
+    class="reference-for-positioning hidden" 
+    data-note-id={noteId}
+    data-reference-content={JSON.stringify(reference)}
+  >
+    <div class="reference-card bg-gray-50/80 border border-gray-200/40 rounded-lg text-sm shadow-sm">
+      <!-- Fixed header -->
+      <div class="reference-header px-3 pt-3 pb-2 bg-gradient-to-r from-blue-50/80 to-indigo-50/60 border-b border-gray-200/50 sticky top-0 z-10">
+        <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">引用 #{noteId}</span>
+      </div>
+      
+      <!-- Scrollable content area -->
+      <div class="reference-content overflow-y-auto px-3 py-3" style="max-height: calc(70vh - 80px);">
+        <div class="text-gray-700 text-xs leading-relaxed mb-3">
+          <div set:html={reference.content.replace(/\n\n/g, '</p><p>').replace(/^/, '<p>').replace(/$/, '</p>')}></div>
+        </div>
+        
+        {(reference.source || reference.page) && (
+          <div class="text-xs text-gray-500 pt-2 border-t border-gray-200/50 sticky bottom-0 bg-white/95 backdrop-blur-sm mt-3">
+            {reference.source && <div class="py-1">{reference.source}</div>}
+            {reference.page && <div class="py-1">{reference.page}</div>}
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+)}
+
+<style>
+  .note-inline-content {
+    /* Notes flow as normal book content */
+    margin: 0;
+    transition: all 0.4s ease;
+  }
+  
+  /* Visual indicator for active note - no layout changes */
+  .note-inline-content.note-active {
+    background: linear-gradient(135deg, 
+      rgba(59, 130, 246, 0.12) 0%, 
+      rgba(147, 197, 253, 0.10) 25%,
+      rgba(219, 234, 254, 0.08) 50%,
+      rgba(147, 197, 253, 0.10) 75%,
+      rgba(59, 130, 246, 0.12) 100%
+    );
+    box-shadow: 
+      0 0 24px rgba(59, 130, 246, 0.18),
+      0 0 12px rgba(59, 130, 246, 0.12);
+    position: relative;
+    border-radius: 8px;
+  }
+  
+  
+  /* Enhanced steady glowing background effect for active note - no layout impact */
+  .note-inline-content.note-active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+      rgba(59, 130, 246, 0.06), 
+      rgba(147, 197, 253, 0.05), 
+      rgba(219, 234, 254, 0.04),
+      rgba(59, 130, 246, 0.05)
+    );
+    border-radius: 8px;
+    z-index: -1;
+    pointer-events: none;
+  }
+  
+  .reference-card {
+    /* Enhanced styling for fixed position references */
+    background: rgba(255, 255, 255, 0.96);
+    border: 2px solid rgba(59, 130, 246, 0.2);
+    box-shadow: 0 12px 48px rgba(59, 130, 246, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s ease;
+    backdrop-filter: blur(16px);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden; /* Changed from visible to enable scrolling */
+    width: 100%; /* Use full assigned width */
+    box-sizing: border-box;
+    /* Dynamic height constraints */
+    max-height: 70vh; /* Maximum 70% of viewport height */
+    min-height: 120px; /* Minimum height for readability */
+  }
+  
+  /* Responsive adjustments for reference cards */
+  @media (min-width: 1024px) {
+    .reference-card {
+      margin: 0;
+      max-width: none;
+    }
+  }
+  
+  @media (max-width: 1023px) {
+    .reference-card {
+      margin: 0;
+      max-width: none;
+      font-size: 0.875rem;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .reference-card {
+      border-radius: 12px;
+      font-size: 0.8125rem;
+      max-height: 60vh; /* Smaller max height on mobile */
+    }
+    
+    .reference-content {
+      max-height: calc(60vh - 60px) !important; /* Adjust for mobile header */
+    }
+    
+    .reference-card:hover {
+      width: 125% !important; /* Reduced from 145% to 125% */
+      max-width: 320px; /* Reduced maximum for mobile */
+      transform: translateY(-5px) translateX(-20%) scale(1.03); /* Adjusted mobile hover */
+    }
+  }
+  
+  /* Tablet hover adjustments */
+  @media (max-width: 1023px) and (min-width: 641px) {
+    .reference-card:hover {
+      width: 135% !important; /* Reduced from 155% to 135% */
+      max-width: 400px; /* Reduced maximum for tablet */
+      transform: translateY(-6px) translateX(-26%) scale(1.04); /* Adjusted tablet hover */
+    }
+  }
+  
+  /* Connection indicator on reference card */
+  .reference-card::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 24px;
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.6), rgba(96, 165, 250, 0.4));
+    border-radius: 0 2px 2px 0;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+    opacity: 0.7;
+  }
+  
+  .reference-card:hover {
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 24px 72px rgba(59, 130, 246, 0.3), 0 12px 32px rgba(0, 0, 0, 0.18);
+    border-color: rgba(59, 130, 246, 0.5);
+    transform: translateY(-8px) translateX(-20%) scale(1.05); /* Reduced expansion to stay on screen */
+    width: 130% !important; /* Reduced from 170% to 130% for wider column */
+    max-width: 480px; /* Reduced maximum to prevent overflow */
+    z-index: 30 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Ensure smooth transition for width changes */
+  .reference-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .reference-card :global(p) {
+    margin-bottom: 0.75rem; /* Increased from old hover state */
+    line-height: 1.6; /* Increased from old hover state */
+    color: #374151;
+    font-size: 0.875rem; /* Increased from old hover state */
+    transition: font-size 0.3s ease, line-height 0.3s ease;
+  }
+  
+  .reference-card:hover :global(p) {
+    font-size: 1rem; /* Even larger on hover */
+    line-height: 1.7; /* Even more spacing */
+    margin-bottom: 1rem; /* More space between paragraphs */
+  }
+  
+  .reference-card :global(p:last-child) {
+    margin-bottom: 0;
+  }
+  
+  .reference-card:hover :global(p:last-child) {
+    margin-bottom: 0;
+  }
+  
+  /* Scrollable content area styling */
+  .reference-content {
+    /* Custom scrollbar for webkit browsers */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(59, 130, 246, 0.3) transparent;
+  }
+  
+  .reference-content::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .reference-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .reference-content::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.3);
+    border-radius: 3px;
+    transition: background 0.3s ease;
+  }
+  
+  .reference-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.5);
+  }
+  
+  /* Enhanced header styling for scrollable references */
+  .reference-header {
+    backdrop-filter: blur(8px);
+    border-radius: 16px 16px 0 0;
+  }
+  
+  /* Fade effect for scrollable content */
+  .reference-content::before {
+    content: '';
+    position: sticky;
+    top: 0;
+    display: block;
+    height: 12px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), transparent);
+    margin: -3px -3px 0 -3px;
+    pointer-events: none;
+    z-index: 5;
+  }
+  
+  .reference-content::after {
+    content: '';
+    position: sticky;
+    bottom: 0;
+    display: block;
+    height: 12px;
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.8), transparent);
+    margin: 0 -3px -3px -3px;
+    pointer-events: none;
+    z-index: 5;
+  }
+  
+  /* Enhanced header styling - make default match old hover state */
+  .reference-header span {
+    font-size: 0.8125rem; /* Increased default size */
+    color: #6b7280; /* Slightly more prominent default color */
+    font-weight: 500; /* Medium weight by default */
+    transition: all 0.3s ease;
+  }
+  
+  .reference-card:hover .reference-header span {
+    font-size: 0.9375rem; /* Even larger on hover */
+    color: #3b82f6; /* Blue on hover */
+    font-weight: 600; /* Bold on hover */
+  }
+  
+  /* Enhanced metadata styling - make default match old hover state */
+  .reference-card div:last-child {
+    padding-top: 0.75rem; /* Increased default padding */
+    font-size: 0.8125rem; /* Increased default size */
+    transition: all 0.3s ease;
+  }
+  
+  .reference-card div:last-child div {
+    color: #4b5563; /* More prominent default color */
+    font-weight: 450; /* Slightly heavier by default */
+  }
+  
+  .reference-card:hover div:last-child {
+    padding-top: 1rem; /* Even more padding on hover */
+    font-size: 0.9375rem; /* Even larger on hover */
+  }
+  
+  .reference-card:hover div:last-child div {
+    color: #374151; /* Darker on hover */
+    font-weight: 500; /* Bold on hover */
+  }
+  
+  /* Connection line effect - positioned outside text area */
+  .note-inline-content.note-active::after {
+    content: '';
+    position: absolute;
+    right: -2rem;
+    top: 50%;
+    width: 24px;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.4) 0%, rgba(96, 165, 250, 0.3) 70%, transparent 100%);
+    border-radius: 2px;
+    transform: translateY(-50%);
+    box-shadow: 0 0 4px rgba(59, 130, 246, 0.2);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  
+  /* Additional arrow indicator */
+  .note-inline-content.note-active {
+    position: relative;
+  }
+  
+  .note-inline-content.note-active:before {
+    /* Glowing background (already defined above) */
+  }
+  
+  /* Arrow pointing towards reference - positioned outside text area */
+  .note-inline-content.note-active .note-connection-arrow {
+    position: absolute;
+    right: -1.5rem;
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+    width: 8px;
+    height: 8px;
+    border-right: 1px solid rgba(59, 130, 246, 0.4);
+    border-top: 1px solid rgba(59, 130, 246, 0.4);
+    opacity: 0.4;
+    filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.15));
+    pointer-events: none;
+  }
+  
+  /* Smooth transitions for all notes */
+  .note-inline-content {
+    position: relative;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Enhanced transition for when note becomes active - no layout changes */
+  .note-inline-content:not(.note-active) {
+    background: transparent;
+    box-shadow: none;
+  }
+</style>
+
+<script>
+  let referencesInColumn = [];
+  let isInitialized = false;
+  
+  // Position references in the right column aligned with their notes
+  function positionReferences() {
+    const referencesColumn = document.getElementById('references-column');
+    if (!referencesColumn || window.innerWidth < 1024) return;
+    
+    console.log('Positioning references...');
+    
+    // Set up references column for fixed positioning
+    referencesColumn.style.position = 'relative';
+    referencesColumn.style.pointerEvents = 'none'; // Allow clicks to pass through
+    
+    // Clear existing references in column
+    referencesColumn.innerHTML = '';
+    referencesInColumn = [];
+    
+    // Get all note contents and their corresponding references
+    const noteContents = document.querySelectorAll('.note-inline-content[data-note-id]');
+    
+    console.log(`Found ${noteContents.length} note contents`);
+    
+    noteContents.forEach((noteContent, index) => {
+      const noteId = noteContent.getAttribute('data-note-id');
+      const referenceElement = document.querySelector(`.reference-for-positioning[data-note-id="${noteId}"]`);
+      
+      console.log(`Processing note ${noteId}, reference found:`, !!referenceElement);
+      
+      if (referenceElement) {
+        // Clone the reference element
+        const clonedReference = referenceElement.cloneNode(true);
+        clonedReference.classList.remove('hidden');
+        clonedReference.style.display = 'none'; // Initially hidden
+        clonedReference.style.pointerEvents = 'auto'; // Allow interactions with reference cards
+        
+        referencesColumn.appendChild(clonedReference);
+        referencesInColumn.push({
+          noteId,
+          element: clonedReference,
+          noteElement: noteContent
+        });
+      }
+    });
+    
+    console.log(`Added ${referencesInColumn.length} references to column`);
+    
+    // Now update visibility based on viewport
+    updateReferenceVisibility();
+  }
+  
+  function updateReferenceVisibility() {
+    const referencesColumn = document.getElementById('references-column');
+    if (!referencesColumn) return;
+    
+    const viewportHeight = window.innerHeight;
+    const centerY = viewportHeight / 2;
+    const centerTolerance = viewportHeight * 0.4; // 40% of viewport height around center
+    
+    let activeReference = null;
+    let maxVisibility = 0;
+    
+    // Find the most prominent note in the center area
+    referencesInColumn.forEach(ref => {
+      const noteRect = ref.noteElement.getBoundingClientRect();
+      const noteTop = noteRect.top;
+      const noteBottom = noteRect.bottom;
+      const noteCenter = noteTop + noteRect.height / 2;
+      
+      // Check if note is at least partially visible
+      const isVisible = (noteBottom > 0) && (noteTop < viewportHeight);
+      
+      if (isVisible) {
+        // Calculate how much of the note is in the center area
+        const centerStart = centerY - centerTolerance;
+        const centerEnd = centerY + centerTolerance;
+        
+        const visibleStart = Math.max(noteTop, centerStart);
+        const visibleEnd = Math.min(noteBottom, centerEnd);
+        const visibleHeight = Math.max(0, visibleEnd - visibleStart);
+        
+        // Calculate visibility score (how prominent this note is)
+        const totalHeight = noteRect.height;
+        const visibilityScore = visibleHeight / totalHeight;
+        
+        // Boost score for notes closer to center
+        const distanceFromCenter = Math.abs(noteCenter - centerY);
+        const centerBonus = Math.max(0, 1 - (distanceFromCenter / centerTolerance));
+        const finalScore = visibilityScore * (1 + centerBonus);
+        
+        if (finalScore > maxVisibility && finalScore > 0.2) { // Minimum threshold
+          maxVisibility = finalScore;
+          activeReference = ref;
+        }
+      }
+    });
+    
+    // Update visual states only when needed
+    referencesInColumn.forEach(ref => {
+      const shouldShow = (ref === activeReference);
+      const currentOpacity = parseFloat(ref.element.style.opacity) || 0;
+      const isCurrentlyActive = ref.noteElement.classList.contains('note-active');
+      
+      if (shouldShow) {
+        // Show reference if not already shown
+        if (currentOpacity < 1) {
+          // Position reference at fixed center position adaptively based on screen size
+          const referencesColumn = document.getElementById('references-column');
+          const columnRect = referencesColumn ? referencesColumn.getBoundingClientRect() : null;
+          const viewportWidth = window.innerWidth;
+          
+          ref.element.style.position = 'fixed';
+          ref.element.style.top = '50vh';
+          ref.element.style.transform = 'translateY(-50%)';
+          ref.element.style.zIndex = '20';
+          ref.element.style.display = 'block';
+          ref.element.style.transition = 'opacity 0.4s ease-in-out';
+          ref.element.style.opacity = '1';
+          
+          // Comprehensive screen detection for multi-monitor setups
+          const screenInfo = {
+            windowInnerWidth: window.innerWidth,
+            windowInnerHeight: window.innerHeight,
+            screenWidth: screen.width,
+            screenHeight: screen.height,
+            screenAvailWidth: screen.availWidth,
+            screenAvailHeight: screen.availHeight,
+            devicePixelRatio: window.devicePixelRatio || 1,
+            windowOuterWidth: window.outerWidth,
+            windowOuterHeight: window.outerHeight
+          };
+          
+          console.log('Screen detection:', screenInfo);
+          
+          // Use the actual browser window width (most reliable for multi-monitor)
+          const effectiveWidth = window.innerWidth;
+          
+          // Calculate proportional sizing based on layout
+          const bookContent = document.querySelector('.book-content');
+          const bookContentRect = bookContent ? bookContent.getBoundingClientRect() : null;
+          
+          if (effectiveWidth >= 1024) {
+            // Desktop/large screens - use proportional sizing
+            if (columnRect) {
+              // Use reference column positioning and make it 90% of column width (since column is now wider)
+              const columnWidth = columnRect.width * 0.9;
+              const leftOffset = columnRect.left + (columnRect.width - columnWidth) / 2;
+              
+              ref.element.style.left = `${leftOffset}px`;
+              ref.element.style.width = `${columnWidth}px`;
+            } else if (bookContentRect) {
+              // Calculate right area based on book content position
+              const bookContentEnd = bookContentRect.right;
+              const rightAreaWidth = effectiveWidth - bookContentEnd;
+              const referenceWidth = Math.max(rightAreaWidth * 0.9, 350); // 90% of right area, minimum 350px
+              const rightMargin = rightAreaWidth * 0.075; // 7.5% margin
+              
+              console.log('Layout calculations:', {
+                effectiveWidth,
+                bookContentEnd,
+                rightAreaWidth,
+                referenceWidth,
+                rightMargin,
+                bookContentPercentage: ((bookContentRect.width / effectiveWidth) * 100).toFixed(1) + '%',
+                rightAreaPercentage: ((rightAreaWidth / effectiveWidth) * 100).toFixed(1) + '%',
+                referencePercentage: ((referenceWidth / effectiveWidth) * 100).toFixed(1) + '%'
+              });
+              
+              ref.element.style.right = `${rightMargin}px`;
+              ref.element.style.width = `${referenceWidth}px`;
+            } else {
+              // Fallback: use larger percentage of viewport width for wide screens
+              const referenceWidth = Math.max(effectiveWidth * 0.25, 380); // 25% of viewport, minimum 380px
+              const margin = effectiveWidth * 0.02; // 2% margin
+              
+              console.log('Fallback calculations:', {
+                effectiveWidth,
+                referenceWidth,
+                margin,
+                referencePercentage: ((referenceWidth / effectiveWidth) * 100).toFixed(1) + '%'
+              });
+              
+              ref.element.style.right = `${margin}px`;
+              ref.element.style.width = `${referenceWidth}px`;
+            }
+          } else {
+            // Mobile/tablet - full width with margins
+            ref.element.style.left = '1rem';
+            ref.element.style.right = '1rem';
+            ref.element.style.width = 'auto';
+          }
+          
+          console.log(`Showing reference ${ref.noteId}:`, {
+            effectiveWidth: `${effectiveWidth}px`,
+            width: ref.element.style.width,
+            position: ref.element.style.left || `right: ${ref.element.style.right}`,
+            bookContent: bookContentRect ? `${bookContentRect.width}px at ${bookContentRect.left}-${bookContentRect.right}` : 'not found',
+            columnRect: columnRect ? `${columnRect.width}px at ${columnRect.left}-${columnRect.right}` : 'not found'
+          });
+        }
+        
+        // Add visual indicator to the note if not already active
+        if (!isCurrentlyActive) {
+          ref.noteElement.classList.add('note-active');
+          
+          // Add connection arrow if it doesn't exist
+          if (!ref.noteElement.querySelector('.note-connection-arrow')) {
+            const arrow = document.createElement('div');
+            arrow.className = 'note-connection-arrow';
+            ref.noteElement.appendChild(arrow);
+          }
+        }
+        
+      } else {
+        // Hide reference if currently shown
+        if (currentOpacity > 0) {
+          ref.element.style.transition = 'opacity 0.4s ease-in-out';
+          ref.element.style.opacity = '0';
+          
+          // Hide after transition
+          setTimeout(() => {
+            if (parseFloat(ref.element.style.opacity) === 0) {
+              ref.element.style.display = 'none';
+            }
+          }, 400);
+          
+          console.log(`Hiding reference ${ref.noteId}`);
+        }
+        
+        // Remove visual indicator from the note if currently active
+        if (isCurrentlyActive) {
+          ref.noteElement.classList.remove('note-active', 'note-highlighted');
+          
+          // Remove connection arrow
+          const existingArrow = ref.noteElement.querySelector('.note-connection-arrow');
+          if (existingArrow) {
+            existingArrow.remove();
+          }
+        }
+      }
+    });
+  }
+  
+  
+  // Initialize positioning
+  document.addEventListener('DOMContentLoaded', () => {
+    if (isInitialized) return;
+    isInitialized = true;
+    
+    // Wait for content to render
+    setTimeout(() => {
+      positionReferences();
+      updateReferenceVisibility();
+      
+      // Also reposition when images load
+      const images = document.querySelectorAll('img');
+      if (images.length === 0) return;
+      
+      let loadedImages = 0;
+      const checkAllLoaded = () => {
+        loadedImages++;
+        if (loadedImages === images.length) {
+          setTimeout(() => {
+            positionReferences();
+            updateReferenceVisibility();
+          }, 100);
+        }
+      };
+      
+      images.forEach(img => {
+        if (img.complete) {
+          checkAllLoaded();
+        } else {
+          img.addEventListener('load', checkAllLoaded);
+          img.addEventListener('error', checkAllLoaded); // Handle broken images
+        }
+      });
+    }, 500); // Increased timeout
+  });
+  
+  // Update visibility on window resize
+  window.addEventListener('resize', () => {
+    setTimeout(() => {
+      if (window.innerWidth >= 1024) {
+        // Reposition and update visibility for desktop sizes
+        updateReferenceVisibility();
+      } else {
+        // On smaller screens, still show references but with mobile positioning
+        updateReferenceVisibility();
+      }
+    }, 100);
+  });
+  
+  // Update reference visibility on scroll
+  let scrollTimeout;
+  let isScrolling = false;
+  let lastScrollTime = 0;
+  
+  window.addEventListener('scroll', () => {
+    const now = Date.now();
+    
+    // Throttle scroll events to improve performance
+    if (now - lastScrollTime < 16) return; // ~60fps
+    lastScrollTime = now;
+    
+    if (!isScrolling) {
+      isScrolling = true;
+      
+      requestAnimationFrame(() => {
+        updateReferenceVisibility();
+        isScrolling = false;
+      });
+    }
+    
+    // Also set a timeout as fallback
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      if (!isScrolling) {
+        updateReferenceVisibility();
+      }
+    }, 100);
+  });
+</script>

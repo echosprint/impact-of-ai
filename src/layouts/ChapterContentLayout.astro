@@ -1,5 +1,10 @@
 ---
 import { getEntry } from 'astro:content';
+import { parseReferenceFile } from '../utils/notes-parser';
+import { processMarkdownContent } from '../utils/markdown-processor';
+import NoteBlock from '../components/NoteBlock.astro';
+import fs from 'fs';
+import path from 'path';
 
 export interface Props {
   chapter?: string;
@@ -14,9 +19,14 @@ let chapterData;
 let title;
 let wordCount = 0;
 let readingTime = 0;
+let references = new Map();
 
 // Function to calculate word count from markdown content
 function calculateWordCount(content: string): number {
+  if (!content || typeof content !== 'string') {
+    return 0;
+  }
+  
   // Remove markdown syntax (headers, links, code blocks, etc.)
   const plainText = content
     .replace(/#{1,6}\s+/g, '') // Remove headers
@@ -62,6 +72,13 @@ function calculateReadingTime(wordCount: number): number {
 }
 
 try {
+  // Load reference file
+  const referenceFilePath = path.join(process.cwd(), 'src/content/reference.md');
+  if (fs.existsSync(referenceFilePath)) {
+    const referenceContent = fs.readFileSync(referenceFilePath, 'utf-8');
+    references = parseReferenceFile(referenceContent);
+  }
+
   // Get the chapter entry from the content collection
   chapterData = await getEntry('chapters', targetChapter);
   
@@ -69,8 +86,7 @@ try {
     title = chapterData.data.title;
     
     // Calculate word count and reading time from the raw content
-    const content = chapterData.body;
-    wordCount = calculateWordCount(content);
+    wordCount = calculateWordCount(chapterData.body);
     readingTime = calculateReadingTime(wordCount);
   } else {
     // Fallback if chapter doesn't exist
@@ -82,8 +98,59 @@ try {
   chapterData = null;
 }
 
-// Render the markdown content
-const { Content } = chapterData ? await chapterData.render() : { Content: null };
+// Extract note blocks and render content in parts
+let contentParts: Array<{type: 'content' | 'note', content?: string, note?: any}> = [];
+
+if (chapterData && chapterData.body) {
+  const rawContent = chapterData.body;
+  
+  // More precise regex to extract note blocks and regular content
+  let processedContent = rawContent;
+  let lastIndex = 0;
+  
+  const noteBlockRegex = /---notes\[([^\]]+)\]([\s\S]*?)---!notes\[\1\]/g;
+  let match;
+  
+  while ((match = noteBlockRegex.exec(rawContent)) !== null) {
+    // Add content before this note block
+    const beforeContent = rawContent.slice(lastIndex, match.index);
+    if (beforeContent.trim()) {
+      try {
+        const processedBeforeContent = await processMarkdownContent(beforeContent.trim());
+        contentParts.push({ type: 'content', content: processedBeforeContent });
+      } catch (error) {
+        console.error('Error processing markdown:', error);
+        contentParts.push({ type: 'content', content: beforeContent.trim() });
+      }
+    }
+    
+    // Add the note block
+    const id = match[1];
+    const content = match[2].trim();
+    const reference = references.get(id);
+    contentParts.push({ 
+      type: 'note', 
+      note: { id, content, referenceText: reference }
+    });
+    
+    lastIndex = match.index + match[0].length;
+  }
+  
+  // Add any remaining content after the last note block
+  const remainingContent = rawContent.slice(lastIndex);
+  if (remainingContent.trim()) {
+    try {
+      const processedRemainingContent = await processMarkdownContent(remainingContent.trim());
+      contentParts.push({ type: 'content', content: processedRemainingContent });
+    } catch (error) {
+      console.error('Error processing markdown:', error);
+      contentParts.push({ type: 'content', content: remainingContent.trim() });
+    }
+  }
+  
+  // Reset regex lastIndex
+  noteBlockRegex.lastIndex = 0;
+}
 ---
 
 <h1 class="text-3xl md:text-4xl font-bold text-center mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{title}</h1>
@@ -101,8 +168,18 @@ const { Content } = chapterData ? await chapterData.render() : { Content: null }
 
 <div class="prose prose-xl prose-slate max-w-none">
   <div class="book-content max-w-4xl mx-auto">
-    {Content ? (
-      <Content />
+    {contentParts.length > 0 ? (
+      contentParts.map((part, index) => (
+        part.type === 'content' ? (
+          <div set:html={part.content} class="mb-6" />
+        ) : (
+          <NoteBlock 
+            noteId={part.note.id}
+            noteContent={encodeURIComponent(part.note.content)}
+            referenceText={part.note.referenceText ? encodeURIComponent(JSON.stringify(part.note.referenceText)) : undefined}
+          />
+        )
+      ))
     ) : (
       <div class="text-center py-12">
         <h1 class="text-3xl font-bold text-red-600 mb-4">Content Not Found</h1>
