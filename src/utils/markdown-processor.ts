@@ -4,9 +4,7 @@ export async function processMarkdownContent(content: string): Promise<string> {
   // Configure marked with similar settings to Astro
   marked.setOptions({
     gfm: true,
-    breaks: false,
-    headerIds: true,
-    mangle: false
+    breaks: false
   });
 
   try {
