@@ -66,19 +66,36 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
                 box-shadow 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
   
-  /* Longer, lighter connection line */
+  /* Connection line */
   .note-inline-content.note-active::before {
     content: '';
     position: absolute;
-    right: -16px;
+    right: -17px;
     top: 50%;
-    width: 16px;
+    width: 8px;
     height: 2px;
     transform: translateY(-50%);
-    background: rgba(139, 69, 19, 0.4);
+    background: rgba(139, 69, 19, 0.6);
     pointer-events: none;
     opacity: 0;
     animation: fadeInLine 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s forwards;
+  }
+  
+  /* Connection circle at end of line */
+  .note-inline-content.note-active::after {
+    content: '';
+    position: absolute;
+    right: -23px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    transform: translateY(-50%);
+    background: transparent;
+    border: 2px solid rgba(139, 69, 19, 0.7);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    animation: fadeInCircle 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s forwards;
   }
   
   @keyframes fadeInLine {
@@ -92,6 +109,17 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     }
   }
   
+  @keyframes fadeInCircle {
+    0% {
+      opacity: 0;
+      transform: translateY(-50%) scale(0.5);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
+  }
+  
   .reference-card {
     /* Enhanced styling for fixed position references */
     background: rgba(250, 248, 242, 0.96);
@@ -101,13 +129,14 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     backdrop-filter: blur(16px);
     border-radius: 16px;
     position: relative;
-    overflow: hidden; /* Changed from visible to enable scrolling */
+    overflow: visible; /* Allow connection elements to show */
     width: 100%; /* Use full assigned width */
     box-sizing: border-box;
     /* Dynamic height constraints */
     max-height: 70vh; /* Maximum 70% of viewport height */
     min-height: 120px; /* Minimum height for readability */
   }
+  
   
   /* Responsive adjustments for reference cards */
   @media (min-width: 1024px) {
@@ -152,19 +181,34 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     }
   }
   
-  /* Connection indicator on reference card */
+  /* Connection line on reference card */
   .reference-card::before {
     content: '';
     position: absolute;
-    left: -6px;
+    left: -10px;
     top: 50%;
+    width: 8px;
+    height: 2px;
     transform: translateY(-50%);
-    width: 4px;
-    height: 24px;
-    background: linear-gradient(180deg, rgba(139, 69, 19, 0.6), rgba(160, 82, 45, 0.4));
-    border-radius: 0 2px 2px 0;
-    box-shadow: 0 0 8px rgba(139, 69, 19, 0.25);
-    opacity: 0.7;
+    background: rgba(139, 69, 19, 0.6);
+    pointer-events: none;
+    z-index: 10;
+  }
+  
+  /* Connection circle on reference card */
+  .reference-card::after {
+    content: '';
+    position: absolute;
+    left: -16px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    transform: translateY(-50%);
+    background: transparent;
+    border: 2px solid rgba(139, 69, 19, 0.7);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10;
   }
   
   .reference-card:hover {
@@ -320,6 +364,7 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
 
   let referencesInColumn: ReferenceItem[] = [];
   let isInitialized: boolean = false;
+  
   
   // Position references in the right column aligned with their notes
   function positionReferences() {
@@ -524,13 +569,6 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
         // Add visual indicator to the note if not already active
         if (!isCurrentlyActive) {
           ref.noteElement.classList.add('note-active');
-          
-          // Add connection arrow if it doesn't exist
-          if (!ref.noteElement.querySelector('.note-connection-arrow')) {
-            const arrow = document.createElement('div');
-            arrow.className = 'note-connection-arrow';
-            ref.noteElement.appendChild(arrow);
-          }
         }
         
       } else {
@@ -552,12 +590,6 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
         // Remove visual indicator from the note if currently active
         if (isCurrentlyActive) {
           ref.noteElement.classList.remove('note-active', 'note-highlighted');
-          
-          // Remove connection arrow
-          const existingArrow = ref.noteElement.querySelector('.note-connection-arrow');
-          if (existingArrow) {
-            existingArrow.remove();
-          }
         }
       }
     });
