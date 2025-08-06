@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import mdx from '@astrojs/mdx';
 
 import tailwindcss from '@tailwindcss/vite';
 
@@ -10,6 +11,12 @@ export default defineConfig({
   site: 'https://echosprint.github.io',
   base: '/impact-of-ai',
   output: 'static',
+  integrations: [
+    mdx({
+      remarkPlugins: [remarkMath],
+      rehypePlugins: [rehypeKatex],
+    }),
+  ],
   vite: {
     plugins: [tailwindcss()]
   },
