@@ -70,9 +70,9 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
   .note-inline-content.note-active::before {
     content: '';
     position: absolute;
-    right: -8px;
+    right: -9px;
     top: 50%;
-    width: 8px;
+    width: 9px;
     height: 2px;
     transform: translateY(-50%);
     background: rgba(139, 69, 19, 0.6);
@@ -85,7 +85,7 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
   .note-inline-content.note-active::after {
     content: '';
     position: absolute;
-    right: -14px;
+    right: -15px;
     top: 50%;
     width: 8px;
     height: 8px;
@@ -105,7 +105,7 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     }
     100% {
       opacity: 1;
-      width: 8px;
+      width: 9px;
     }
   }
   
@@ -215,9 +215,9 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     background: rgba(250, 248, 242, 0.98);
     box-shadow: 0 24px 72px rgba(139, 69, 19, 0.3), 0 12px 32px rgba(0, 0, 0, 0.18);
     border-color: rgba(139, 69, 19, 0.5);
-    transform: translateY(-8px) translateX(-20%) scale(1.05); /* Reduced expansion to stay on screen */
-    width: 130% !important; /* Reduced from 170% to 130% for wider column */
-    max-width: 480px; /* Reduced maximum to prevent overflow */
+    transform: translateY(-8px) translateX(-50%) scale(1.05); /* Expand mostly to the left */
+    width: 160% !important; /* Increased from 130% to 160% */
+    max-width: 640px; /* Increased maximum width */
     z-index: 30 !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
