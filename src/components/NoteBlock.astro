@@ -135,6 +135,9 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     /* Dynamic height constraints */
     max-height: 70vh; /* Maximum 70% of viewport height */
     min-height: 120px; /* Minimum height for readability */
+    /* Ensure hover area is active */
+    cursor: default;
+    pointer-events: auto;
   }
   
   
@@ -211,7 +214,8 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     z-index: 10;
   }
   
-  .reference-card:hover {
+  .reference-card:hover,
+  .reference-card.reference-hovered {
     background: rgba(250, 248, 242, 0.98);
     box-shadow: 0 24px 72px rgba(139, 69, 19, 0.3), 0 12px 32px rgba(0, 0, 0, 0.18);
     border-color: rgba(139, 69, 19, 0.5);
@@ -235,7 +239,8 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     transition: font-size 0.3s ease, line-height 0.3s ease;
   }
   
-  .reference-card:hover :global(p) {
+  .reference-card:hover :global(p),
+  .reference-card.reference-hovered :global(p) {
     font-size: 1rem; /* Even larger on hover */
     line-height: 1.7; /* Even more spacing */
     margin-bottom: 1rem; /* More space between paragraphs */
@@ -245,7 +250,8 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     margin-bottom: 0;
   }
   
-  .reference-card:hover :global(p:last-child) {
+  .reference-card:hover :global(p:last-child),
+  .reference-card.reference-hovered :global(p:last-child) {
     margin-bottom: 0;
   }
   
@@ -313,7 +319,8 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     transition: all 0.3s ease;
   }
   
-  .reference-card:hover .reference-header span {
+  .reference-card:hover .reference-header span,
+  .reference-card.reference-hovered .reference-header span {
     font-size: 0.9375rem; /* Even larger on hover */
     color: #3b82f6; /* Blue on hover */
     font-weight: 600; /* Bold on hover */
@@ -331,12 +338,14 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     font-weight: 450; /* Slightly heavier by default */
   }
   
-  .reference-card:hover div:last-child {
+  .reference-card:hover div:last-child,
+  .reference-card.reference-hovered div:last-child {
     padding-top: 1rem; /* Even more padding on hover */
     font-size: 0.9375rem; /* Even larger on hover */
   }
   
-  .reference-card:hover div:last-child div {
+  .reference-card:hover div:last-child div,
+  .reference-card.reference-hovered div:last-child div {
     color: #374151; /* Darker on hover */
     font-weight: 500; /* Bold on hover */
   }
@@ -400,6 +409,17 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
         clonedReference.classList.remove('hidden');
         clonedReference.style.display = 'none'; // Initially hidden
         clonedReference.style.pointerEvents = 'auto'; // Allow interactions with reference cards
+        
+        // Add reliable hover event handlers
+        const referenceCard = clonedReference.querySelector('.reference-card');
+        if (referenceCard) {
+          referenceCard.addEventListener('mouseenter', () => {
+            referenceCard.classList.add('reference-hovered');
+          });
+          referenceCard.addEventListener('mouseleave', () => {
+            referenceCard.classList.remove('reference-hovered');
+          });
+        }
         
         referencesColumn.appendChild(clonedReference);
         referencesInColumn.push({
