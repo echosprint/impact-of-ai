@@ -335,19 +335,19 @@ body {
   margin-bottom: 0.5rem !important;
 }
 
-/* Academic citation styling for blockquotes */
+/* Better blockquote content alignment */
 .prose blockquote p:last-of-type {
-  margin-top: 1rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid #d1d5db;
-  font-size: 0.85em;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+  font-size: inherit;
   font-style: normal;
-  color: #6b7280;
-  text-align: right;
+  color: inherit;
+  text-align: left;
   font-weight: 400;
-  text-indent: 0 !important;
-  font-family: 'Inter', sans-serif;
-  letter-spacing: 0.025em;
+  text-indent: 1.5em !important;
+  font-family: inherit;
+  letter-spacing: inherit;
 }
 
 /* Special styling for Chinese blockquotes */
@@ -480,12 +480,12 @@ body {
   }
   
   .prose blockquote p:last-of-type {
-    border-top: 0.5pt solid #ccc;
-    padding-top: 4pt;
-    margin-top: 6pt;
-    font-size: 8pt;
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+    font-size: inherit;
     font-style: normal;
-    text-indent: 0 !important;
-    text-align: right;
+    text-indent: 10pt !important;
+    text-align: left;
   }
 }
