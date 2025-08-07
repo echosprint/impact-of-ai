@@ -10,6 +10,19 @@ const { noteId, noteContent, referenceText } = Astro.props;
 // Decode the content
 const decodedNoteContent = decodeURIComponent(noteContent);
 const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) : null;
+
+// Helper function to format reference content with mixed font sizes
+function formatReferenceContent(content: string): string {
+  return content
+    .trim()
+    .split(/\n/) // Split on single newlines for Chinese text
+    .filter(line => line.trim().length > 0) // Remove empty lines
+    .map(paragraph => {
+      // Much simpler approach: wrap entire paragraph and use CSS
+      return `<p class="mixed-text">${paragraph.trim()}</p>`;
+    })
+    .join('');
+}
 ---
 
 <!-- Note content flows inline with main book content -->
@@ -41,7 +54,7 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
       <!-- Scrollable content area -->
       <div class="reference-content overflow-y-auto px-3 py-3" style="max-height: calc(70vh - 80px);">
         <div class="text-gray-700 text-xs leading-relaxed mb-3">
-          <div set:html={reference.content.replace(/\n\n/g, '</p><p>').replace(/^/, '<p>').replace(/$/, '</p>')}></div>
+          <div set:html={formatReferenceContent(reference.content)}></div>
         </div>
         
         {(reference.source || reference.page) && (
@@ -161,15 +174,29 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     .reference-card {
       margin: 0;
       max-width: none;
-      font-size: 0.875rem;
+    }
+    
+    .reference-card :global(p.mixed-text) {
+      font-size: 0.8rem !important;
+    }
+    
+    .reference-card.expanded :global(p.mixed-text) {
+      font-size: 0.9rem !important;
     }
   }
   
   @media (max-width: 640px) {
     .reference-card {
       border-radius: 12px;
-      font-size: 0.8125rem;
       max-height: 60vh; /* Smaller max height on mobile */
+    }
+    
+    .reference-card :global(p.mixed-text) {
+      font-size: 0.75rem !important;
+    }
+    
+    .reference-card.expanded :global(p.mixed-text) {
+      font-size: 0.85rem !important;
     }
     
     .reference-content {
@@ -238,26 +265,27 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
-  .reference-card :global(p) {
+  .reference-card :global(p.mixed-text) {
     margin-bottom: 0.75rem;
     line-height: 1.6;
     color: #374151;
-    font-size: 0.875rem;
-    transition: margin-bottom 0.3s ease; /* Only animate margin, not font size */
+    font-size: 0.85rem;
+    text-indent: 2em !important; /* Chinese paragraph indentation - override prose */
+    transition: margin-bottom 0.3s ease;
   }
   
-  .reference-card.expanded :global(p) {
-    /* Keep same font size to prevent reflow */
-    font-size: 0.875rem;
+  .reference-card.expanded :global(p.mixed-text) {
+    font-size: 1.0rem;
     line-height: 1.6;
     margin-bottom: 1rem; /* More space between paragraphs */
+    text-indent: 2em !important; /* Chinese paragraph indentation - override prose */
   }
   
-  .reference-card :global(p:last-child) {
+  .reference-card :global(p.mixed-text:last-child) {
     margin-bottom: 0;
   }
   
-  .reference-card.expanded :global(p:last-child) {
+  .reference-card.expanded :global(p.mixed-text:last-child) {
     margin-bottom: 0;
   }
   
@@ -742,16 +770,18 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
   });
   
   // Update visibility on window resize
+  let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
+  
   window.addEventListener('resize', () => {
-    setTimeout(() => {
-      if (window.innerWidth >= 1024) {
-        // Reposition and update visibility for desktop sizes
-        updateReferenceVisibility();
-      } else {
-        // On smaller screens, still show references but with mobile positioning
-        updateReferenceVisibility();
-      }
-    }, 100);
+    if (resizeTimeout) {
+      clearTimeout(resizeTimeout);
+    }
+    
+    resizeTimeout = setTimeout(() => {
+      // Force reposition references on resize
+      positionReferences();
+      updateReferenceVisibility();
+    }, 150);
   });
   
   // Update reference visibility on scroll
