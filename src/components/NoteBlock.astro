@@ -25,9 +25,17 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     data-reference-content={JSON.stringify(reference)}
   >
     <div class="reference-card bg-gray-50/80 border border-gray-200/40 rounded-lg text-sm shadow-sm">
-      <!-- Fixed header -->
-      <div class="reference-header px-3 pt-3 pb-2 bg-gradient-to-r from-amber-50/80 to-orange-50/60 border-b border-amber-200/50 sticky top-0 z-10">
+      <!-- Fixed header with expand/collapse icon -->
+      <div class="reference-header px-3 pt-3 pb-2 bg-gradient-to-r from-amber-50/80 to-orange-50/60 border-b border-amber-200/50 sticky top-0 z-10 flex items-center justify-between">
         <span class="text-xs font-medium text-amber-700 uppercase tracking-wide">引用文献 #{noteId}</span>
+        <button class="expand-toggle text-amber-600 hover:text-amber-800 transition-colors duration-200 p-1 rounded-md hover:bg-amber-100/50" aria-label="Expand reference">
+          <svg class="expand-icon w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+          </svg>
+          <svg class="collapse-icon w-4 h-4 hidden transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+          </svg>
+        </button>
       </div>
       
       <!-- Scrollable content area -->
@@ -168,19 +176,19 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
       max-height: calc(60vh - 60px) !important; /* Adjust for mobile header */
     }
     
-    .reference-card:hover {
+    .reference-card.expanded {
       width: 125% !important; /* Reduced from 145% to 125% */
       max-width: 320px; /* Reduced maximum for mobile */
-      transform: translateY(-5px) translateX(-20%) scale(1.03); /* Adjusted mobile hover */
+      transform: translateY(-5px) translateX(-20%); /* Removed scale for mobile */
     }
   }
   
-  /* Tablet hover adjustments */
+  /* Tablet expand adjustments */
   @media (max-width: 1023px) and (min-width: 641px) {
-    .reference-card:hover {
+    .reference-card.expanded {
       width: 135% !important; /* Reduced from 155% to 135% */
       max-width: 400px; /* Reduced maximum for tablet */
-      transform: translateY(-6px) translateX(-26%) scale(1.04); /* Adjusted tablet hover */
+      transform: translateY(-6px) translateX(-26%); /* Removed scale for tablet */
     }
   }
   
@@ -214,12 +222,11 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     z-index: 10;
   }
   
-  .reference-card:hover,
-  .reference-card.reference-hovered {
+  .reference-card.expanded {
     background: rgba(250, 248, 242, 0.98);
     box-shadow: 0 24px 72px rgba(139, 69, 19, 0.3), 0 12px 32px rgba(0, 0, 0, 0.18);
     border-color: rgba(139, 69, 19, 0.5);
-    transform: translateY(-8px) translateX(-50%) scale(1.05); /* Expand mostly to the left */
+    transform: translateY(-8px) translateX(-50%); /* Removed scale to prevent reflow */
     width: 160% !important; /* Increased from 130% to 160% */
     max-width: 640px; /* Increased maximum width */
     z-index: 30 !important;
@@ -232,17 +239,17 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
   }
   
   .reference-card :global(p) {
-    margin-bottom: 0.75rem; /* Increased from old hover state */
-    line-height: 1.6; /* Increased from old hover state */
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
     color: #374151;
-    font-size: 0.875rem; /* Increased from old hover state */
-    transition: font-size 0.3s ease, line-height 0.3s ease;
+    font-size: 0.875rem;
+    transition: margin-bottom 0.3s ease; /* Only animate margin, not font size */
   }
   
-  .reference-card:hover :global(p),
-  .reference-card.reference-hovered :global(p) {
-    font-size: 1rem; /* Even larger on hover */
-    line-height: 1.7; /* Even more spacing */
+  .reference-card.expanded :global(p) {
+    /* Keep same font size to prevent reflow */
+    font-size: 0.875rem;
+    line-height: 1.6;
     margin-bottom: 1rem; /* More space between paragraphs */
   }
   
@@ -250,8 +257,7 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     margin-bottom: 0;
   }
   
-  .reference-card:hover :global(p:last-child),
-  .reference-card.reference-hovered :global(p:last-child) {
+  .reference-card.expanded :global(p:last-child) {
     margin-bottom: 0;
   }
   
@@ -311,43 +317,61 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     z-index: 5;
   }
   
-  /* Enhanced header styling - make default match old hover state */
+  /* Enhanced header styling - consistent size to prevent reflow */
   .reference-header span {
-    font-size: 0.8125rem; /* Increased default size */
-    color: #6b7280; /* Slightly more prominent default color */
-    font-weight: 500; /* Medium weight by default */
-    transition: all 0.3s ease;
+    font-size: 0.8125rem;
+    color: #6b7280;
+    font-weight: 500;
+    transition: color 0.3s ease, font-weight 0.3s ease; /* Only animate color and weight */
   }
   
-  .reference-card:hover .reference-header span,
-  .reference-card.reference-hovered .reference-header span {
-    font-size: 0.9375rem; /* Even larger on hover */
-    color: #3b82f6; /* Blue on hover */
-    font-weight: 600; /* Bold on hover */
+  /* Expand/collapse button styling */
+  .expand-toggle {
+    cursor: pointer;
+    border: none;
+    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
   
-  /* Enhanced metadata styling - make default match old hover state */
+  .expand-toggle:focus {
+    outline: none; /* Remove blue focus outline */
+  }
+  
+  .expand-toggle:focus-visible {
+    outline: 2px solid #d97706; /* Amber outline for keyboard navigation only */
+    outline-offset: 2px;
+  }
+  
+  .reference-card.expanded .reference-header span {
+    font-size: 0.8125rem; /* Keep same size to prevent reflow */
+    color: #6b7280; /* Keep original color when expanded */
+    font-weight: 600; /* Bold when expanded */
+  }
+  
+  /* Enhanced metadata styling - consistent size to prevent reflow */
   .reference-card div:last-child {
-    padding-top: 0.75rem; /* Increased default padding */
-    font-size: 0.8125rem; /* Increased default size */
-    transition: all 0.3s ease;
+    padding-top: 0.75rem;
+    font-size: 0.8125rem;
+    transition: padding-top 0.3s ease; /* Only animate padding */
   }
   
   .reference-card div:last-child div {
-    color: #4b5563; /* More prominent default color */
-    font-weight: 450; /* Slightly heavier by default */
+    color: #4b5563;
+    font-weight: 450;
+    transition: color 0.3s ease, font-weight 0.3s ease; /* Only animate color and weight */
   }
   
-  .reference-card:hover div:last-child,
-  .reference-card.reference-hovered div:last-child {
-    padding-top: 1rem; /* Even more padding on hover */
-    font-size: 0.9375rem; /* Even larger on hover */
+  .reference-card.expanded div:last-child {
+    padding-top: 1rem; /* More padding when expanded */
+    font-size: 0.8125rem; /* Keep same size to prevent reflow */
   }
   
-  .reference-card:hover div:last-child div,
-  .reference-card.reference-hovered div:last-child div {
-    color: #374151; /* Darker on hover */
-    font-weight: 500; /* Bold on hover */
+  .reference-card.expanded div:last-child div {
+    color: #374151; /* Darker when expanded */
+    font-weight: 500; /* Bold when expanded */
   }
   
   
@@ -386,7 +410,7 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
     referencesColumn.style.position = 'relative';
     referencesColumn.style.pointerEvents = 'none'; // Allow clicks to pass through
     
-    // Clear existing references in column
+    // Clear existing references in column and ensure they start collapsed
     referencesColumn.innerHTML = '';
     referencesInColumn = [];
     
@@ -410,15 +434,67 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
         clonedReference.style.display = 'none'; // Initially hidden
         clonedReference.style.pointerEvents = 'auto'; // Allow interactions with reference cards
         
-        // Add reliable hover event handlers
+        // Ensure cloned reference starts in collapsed state
+        const clonedReferenceCard = clonedReference.querySelector('.reference-card');
+        const clonedExpandIcon = clonedReference.querySelector('.expand-icon');
+        const clonedCollapseIcon = clonedReference.querySelector('.collapse-icon');
+        const clonedExpandToggle = clonedReference.querySelector('.expand-toggle');
+        
+        if (clonedReferenceCard && clonedExpandIcon && clonedCollapseIcon && clonedExpandToggle) {
+          clonedReferenceCard.classList.remove('expanded');
+          clonedExpandIcon.classList.remove('hidden');
+          clonedCollapseIcon.classList.add('hidden');
+          clonedExpandToggle.setAttribute('aria-label', 'Expand reference');
+        }
+        
+        // Add click event handlers for expand/collapse
+        const expandToggle = clonedReference.querySelector('.expand-toggle');
         const referenceCard = clonedReference.querySelector('.reference-card');
-        if (referenceCard) {
-          referenceCard.addEventListener('mouseenter', () => {
-            referenceCard.classList.add('reference-hovered');
+        const expandIcon = clonedReference.querySelector('.expand-icon');
+        const collapseIcon = clonedReference.querySelector('.collapse-icon');
+        
+        if (expandToggle && referenceCard && expandIcon && collapseIcon) {
+          const collapseReference = () => {
+            referenceCard.classList.remove('expanded');
+            expandIcon.classList.remove('hidden');
+            collapseIcon.classList.add('hidden');
+            expandToggle.setAttribute('aria-label', 'Expand reference');
+          };
+          
+          const expandReference = () => {
+            referenceCard.classList.add('expanded');
+            expandIcon.classList.add('hidden');
+            collapseIcon.classList.remove('hidden');
+            expandToggle.setAttribute('aria-label', 'Collapse reference');
+          };
+          
+          expandToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent event bubbling
+            
+            const isExpanded = referenceCard.classList.contains('expanded');
+            
+            if (isExpanded) {
+              collapseReference();
+            } else {
+              expandReference();
+            }
           });
-          referenceCard.addEventListener('mouseleave', () => {
-            referenceCard.classList.remove('reference-hovered');
+          
+          // Prevent clicks inside the reference card from bubbling up
+          referenceCard.addEventListener('click', (e) => {
+            e.stopPropagation();
           });
+          
+          // Add global click listener to collapse when clicking outside
+          const handleOutsideClick = (e: Event) => {
+            if (referenceCard.classList.contains('expanded') && !referenceCard.contains(e.target as Node)) {
+              collapseReference();
+            }
+          };
+          
+          // Store reference to the handler so we can clean it up if needed
+          (referenceCard as any)._outsideClickHandler = handleOutsideClick;
+          document.addEventListener('click', handleOutsideClick);
         }
         
         referencesColumn.appendChild(clonedReference);
@@ -491,6 +567,19 @@ const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) 
       if (shouldShow) {
         // Show reference if not already shown
         if (currentOpacity < 1) {
+          // Force collapse when showing reference again
+          const referenceCard = ref.element.querySelector('.reference-card');
+          const expandIcon = ref.element.querySelector('.expand-icon');
+          const collapseIcon = ref.element.querySelector('.collapse-icon');
+          const expandToggle = ref.element.querySelector('.expand-toggle');
+          
+          if (referenceCard && referenceCard.classList.contains('expanded')) {
+            referenceCard.classList.remove('expanded');
+            if (expandIcon) expandIcon.classList.remove('hidden');
+            if (collapseIcon) collapseIcon.classList.add('hidden');
+            if (expandToggle) expandToggle.setAttribute('aria-label', 'Expand reference');
+          }
+          
           // Position reference at fixed center position adaptively based on screen size
           const referencesColumn = document.getElementById('references-column');
           const columnRect = referencesColumn ? referencesColumn.getBoundingClientRect() : null;
