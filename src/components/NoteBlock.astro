@@ -11,6 +11,11 @@ const { noteId, noteContent, referenceText } = Astro.props;
 const decodedNoteContent = decodeURIComponent(noteContent);
 const reference = referenceText ? JSON.parse(decodeURIComponent(referenceText)) : null;
 
+// Helper function to convert markdown links to HTML
+function processMarkdownLinks(text: string): string {
+  return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="reference-link">$1</a>');
+}
+
 // Helper function to format reference content with mixed font sizes
 function formatReferenceContent(content: string): string {
   return content
@@ -23,8 +28,10 @@ function formatReferenceContent(content: string): string {
       if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmedLine)) {
         return '<hr class="reference-separator">';
       }
+      // Convert markdown links to HTML links
+      const processedLine = processMarkdownLinks(trimmedLine);
       // Otherwise treat as regular paragraph
-      return `<p class="mixed-text">${trimmedLine}</p>`;
+      return `<p class="mixed-text">${processedLine}</p>`;
     })
     .join('');
 }
@@ -64,8 +71,8 @@ function formatReferenceContent(content: string): string {
         
         {(reference.source || reference.page) && (
           <div class="text-xs text-amber-700 pt-2 border-t border-amber-200/50 sticky bottom-0 bg-amber-50/95 backdrop-blur-sm mt-3">
-            {reference.source && <div class="py-1">{reference.source}</div>}
-            {reference.page && <div class="py-1">{reference.page}</div>}
+            {reference.source && <div class="py-1" set:html={processMarkdownLinks(reference.source)}></div>}
+            {reference.page && <div class="py-1" set:html={processMarkdownLinks(reference.page)}></div>}
           </div>
         )}
       </div>
@@ -306,6 +313,28 @@ function formatReferenceContent(content: string): string {
   .reference-card.expanded :global(hr.reference-separator) {
     margin: 2rem 1.5rem;
     opacity: 0.6;
+  }
+  
+  /* Reference link styling */
+  .reference-card :global(a.reference-link) {
+    color: #d97706;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s ease;
+  }
+  
+  .reference-card :global(a.reference-link:hover) {
+    color: #b45309;
+    border-bottom-color: #d97706;
+  }
+  
+  .reference-card.expanded :global(a.reference-link) {
+    color: #d97706;
+  }
+  
+  .reference-card.expanded :global(a.reference-link:hover) {
+    color: #92400e;
+    border-bottom-color: #b45309;
   }
   
   /* Scrollable content area styling */
