@@ -5,7 +5,7 @@
 ## 技术奇点相关引用
 
 <!-- ref:vinge1993_singularity -->
-### vinge1993_singularity
+## vinge1993_singularity
 "Within thirty years, we will have the technological means to create superhuman intelligence. Shortly after, the human era will be ended."
 
 "The acceleration of technological progress has been the central feature of this century. I argue in this paper that we are on the edge of a change comparable to the rise of human life on Earth. The precise cause of this change is the imminent creation by technology of entities with greater than human intelligence."
@@ -16,7 +16,7 @@
 <!-- /ref:vinge1993_singularity -->
 
 <!-- ref:harari2014_sapiens -->
-### harari2014_sapiens
+## harari2014_sapiens
 "The three revolutions that turned insignificant apes into the masters of the world: the Cognitive Revolution (70,000 years ago), the Agricultural Revolution (12,000 years ago), and the Scientific Revolution (500 years ago). This book will argue that a fourth revolution is now beginning. Intelligent design is about to become a reality – not due to the actions of some god above the clouds, but due to the actions of clouds of data."
 
 "History began when humans invented gods, and will end when humans become gods."
@@ -29,7 +29,7 @@
 <!-- /ref:harari2014_sapiens -->
 
 <!-- ref:ford2015_robots -->
-### ford2015_robots
+## ford2015_robots
 "This time is different. Information technology has finally begun to advance into areas that had previously been the exclusive domain of human workers, and there is every reason to expect that this trend will accelerate."
 
 "The question is not whether robots and computers will take our jobs; it's how fast they will take them. And the answer to that is: faster than we think."
@@ -42,7 +42,7 @@
 <!-- /ref:ford2015_robots -->
 
 <!-- ref:russell2019_human -->
-### russell2019_human
+## russell2019_human
 "The standard model of AI research takes it for granted that the objective is given to the machine. But what if we cannot specify the objective correctly? In that case, the machine will optimize something other than what we want."
 
 "A system that is optimizing a function of n variables, where the objective depends on a subset of size k<n, will often set the remaining unconstrained variables to extreme values; if one of those unconstrained variables is actually something we care about, the solution found by the system will be highly undesirable."
@@ -55,7 +55,7 @@
 <!-- /ref:russell2019_human -->
 
 <!-- ref:good2023_deepmind -->
-### good2023_deepmind
+## good2023_deepmind
 "The concept of a technological singularity - a point where artificial intelligence surpasses human intelligence and becomes capable of recursive self-improvement - has moved from science fiction to serious academic discourse."
 
 "AlphaGo's victory over Lee Sedol in 2016 marked a watershed moment. It demonstrated that AI could master intuition and creativity, domains previously thought to be uniquely human. This was followed by breakthroughs in protein folding with AlphaFold, showing AI's potential to solve humanity's greatest challenges."
@@ -68,7 +68,7 @@
 <!-- /ref:good2023_deepmind -->
 
 <!-- ref:tegmark2017_life3 -->
-### tegmark2017_life3
+## tegmark2017_life3
 "We're in the midst of the most important conversation in human history about the future of intelligence in our universe. Will we become the proud parents of a beneficial artificial intelligence, or will we design something that goes wrong?"
 
 "Life 1.0 (biological stage): evolves its hardware and software. Life 2.0 (cultural stage): evolves its software but not its hardware. Life 3.0 (technological stage): evolves both its hardware and software."
@@ -85,7 +85,7 @@
 ## 经济理论相关引用
 
 <!-- ref:keynes1936_employment -->
-### keynes1936_employment
+## keynes1936_employment
 "In the long run we are all dead. Economists set themselves too easy, too useless a task if in tempestuous seasons they can only tell us that when the storm is long past the ocean is flat again."
 
 "The difficulty lies, not in the new ideas, but in escaping from the old ones, which ramify, for those brought up as most of us have been, into every corner of our minds."
@@ -96,7 +96,7 @@
 <!-- /ref:keynes1936_employment -->
 
 <!-- ref:schumpeter1942_destruction -->
-### schumpeter1942_destruction
+## schumpeter1942_destruction
 "The opening up of new markets, foreign or domestic, and the organizational development from the craft shop and factory to such concerns as U.S. Steel illustrate the same process of industrial mutation—if I may use that biological term—that incessantly revolutionizes the economic structure from within, incessantly destroying the old one, incessantly creating a new one. This process of Creative Destruction is the essential fact about capitalism."
 
 **Source**: Joseph Schumpeter, "Capitalism, Socialism and Democracy" (1942)
@@ -107,7 +107,7 @@
 
 
 <!-- ref:McAfee2015_second_machine_age -->
-### McAfee2015_second_machine_age
+## McAfee2015_second_machine_age
 让我们回想一些基本的事实和情况。
 考察中产阶层的收入情况（也就是在整个分配体系中处于第50个百分点的劳动者的收入）是个不错的起点。1999年是美国中产家庭真正收入（扣除通货膨胀因素）达到顶峰的一年。那一年它达到了54932美元，但接下来就开始下降。到2011年的时候，差不多下跌了10％，也就是到了50054美元，即使这一年美国的GDP创了新高。尤其是，非技术劳动者的工资水平在美国和其他发达国家都呈现出了下降趋势。
 与此同时，在美国，自从大萧条以来的第一次，超过一半的收入集中在了10％的顶层美国人群中——这一年是2012年。1％的顶层人士获得了整个国家超过22％的收入，这一份额是20世纪80年代初期的两倍还多。在经历了2011年—2012年的收入大增长之后——这一增长超过了1927年—1928年以来的任何一年，1％的顶层美国人之中又有1％的超级人士（在美国仅有几千人）年收入超过了1100万美元，这些人所占的收入份额达到了美国全部收入的5.5％。
@@ -225,7 +225,7 @@
 <!-- /ref:McAfee2015_second_machine_age -->
 
 <!-- ref:ndrc_middle_class -->
-### ndrc_middle_class
+## ndrc_middle_class
 
 [中等收入群体](https://www.ndrc.gov.cn/fggz/jyysr/jysrsbxf/202109/t20210924_1297381_ext.html)
 中国中等收入群体已超4亿 中等收入大军如何“扩群”
