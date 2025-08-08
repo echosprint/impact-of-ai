@@ -17,7 +17,7 @@ export interface ReferenceText {
  */
 export function parseReferenceFile(content: string): Map<string, ReferenceText> {
   const references = new Map<string, ReferenceText>();
-  const textBlockRegex = /---text\[([^\]]+)\]([\s\S]*?)---!text\[\1\]/g;
+  const textBlockRegex = /<!-- ref:([^\s]+) -->([\s\S]*?)<!-- \/ref:\1 -->/g;
   
   let match;
   while ((match = textBlockRegex.exec(content)) !== null) {
