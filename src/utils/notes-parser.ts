@@ -1,9 +1,3 @@
-export interface NoteBlock {
-  id: string;
-  content: string;
-  referenceText?: string;
-}
-
 export interface ReferenceText {
   id: string;
   content: string;
@@ -62,59 +56,4 @@ export function parseReferenceFile(content: string): Map<string, ReferenceText> 
   }
   
   return references;
-}
-
-/**
- * Parse chapter content to extract note blocks
- */
-export function parseNoteBlocks(content: string, references: Map<string, ReferenceText>): string {
-  const noteBlockRegex = /---notes\[([^\]]+)\]([\s\S]*?)---!notes\[\1\]/g;
-  
-  return content.replace(noteBlockRegex, (match, id, noteContent) => {
-    const reference = references.get(id);
-    const noteData = {
-      id,
-      content: noteContent.trim(),
-      referenceText: reference
-    };
-    
-    // Return HTML that will be processed by Astro
-    return `<NoteBlock noteId="${id}" noteContent="${encodeURIComponent(noteContent.trim())}" ${reference ? `referenceText="${encodeURIComponent(JSON.stringify(reference))}"` : ''} />`;
-  });
-}
-
-/**
- * Extract all note IDs from chapter content
- */
-export function extractNoteIds(content: string): string[] {
-  const noteBlockRegex = /---notes\[([^\]]+)\]/g;
-  const ids: string[] = [];
-  
-  let match;
-  while ((match = noteBlockRegex.exec(content)) !== null) {
-    ids.push(match[1]);
-  }
-  
-  return ids;
-}
-
-/**
- * Validate that all note IDs have corresponding reference texts
- */
-export function validateNoteReferences(chapterContent: string, references: Map<string, ReferenceText>): {
-  valid: boolean;
-  missingReferences: string[];
-  unusedReferences: string[];
-} {
-  const noteIds = extractNoteIds(chapterContent);
-  const referenceIds = Array.from(references.keys());
-  
-  const missingReferences = noteIds.filter(id => !references.has(id));
-  const unusedReferences = referenceIds.filter(id => !noteIds.includes(id));
-  
-  return {
-    valid: missingReferences.length === 0,
-    missingReferences,
-    unusedReferences
-  };
 }
