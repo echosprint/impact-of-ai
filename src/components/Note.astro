@@ -1,0 +1,879 @@
+---
+import { parseReferenceFile } from '../utils/notes-parser';
+import fs from 'fs';
+import path from 'path';
+
+export interface Props {
+  ref: string;
+}
+
+const { ref } = Astro.props;
+const slots = await Astro.slots.render('default');
+
+// Load references
+let references = new Map();
+try {
+  const referenceFilePath = path.join(process.cwd(), 'src/content/reference.md');
+  if (fs.existsSync(referenceFilePath)) {
+    const referenceContent = fs.readFileSync(referenceFilePath, 'utf-8');
+    references = parseReferenceFile(referenceContent);
+  }
+} catch (error) {
+  console.error('Error loading references:', error);
+}
+
+const reference = references.get(ref);
+
+// Helper function to convert markdown links to HTML
+function processMarkdownLinks(text: string): string {
+  return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="reference-link">$1</a>');
+}
+
+// Helper function to format reference content with mixed font sizes
+function formatReferenceContent(content: string): string {
+  return content
+    .trim()
+    .split(/\n/) // Split on single newlines for Chinese text
+    .filter(line => line.trim().length > 0) // Remove empty lines
+    .map(line => {
+      const trimmedLine = line.trim();
+      // Check if line is a horizontal rule (3 or more hyphens, asterisks, or underscores)
+      if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmedLine)) {
+        return '<hr class="reference-separator">';
+      }
+      // Convert markdown links to HTML links
+      const processedLine = processMarkdownLinks(trimmedLine);
+      // Otherwise treat as regular paragraph
+      return `<p class="mixed-text">${processedLine}</p>`;
+    })
+    .join('');
+}
+---
+
+<!-- Note content flows inline with main book content -->
+<div class="note-inline-content" data-note-id={ref}>
+  <div set:html={slots}></div>
+</div>
+
+<!-- Reference text for right column positioning -->
+{reference && (
+  <div 
+    class="reference-for-positioning hidden" 
+    data-note-id={ref}
+    data-reference-content={JSON.stringify(reference)}
+  >
+    <div class="reference-card bg-gray-50/80 border border-gray-200/40 rounded-lg text-sm shadow-sm">
+      <!-- Fixed header with expand/collapse icon -->
+      <div class="reference-header px-3 pt-3 pb-2 bg-gradient-to-r from-amber-50/80 to-orange-50/60 border-b border-amber-200/50 sticky top-0 z-10 flex items-center justify-between">
+        <span class="text-xs font-medium text-amber-700 uppercase tracking-wide">引用文献 #{ref}</span>
+        <button class="expand-toggle text-amber-600 hover:text-amber-800 transition-colors duration-200 p-1 rounded-md hover:bg-amber-100/50" aria-label="Expand reference">
+          <svg class="expand-icon w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+          </svg>
+          <svg class="collapse-icon w-4 h-4 hidden transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Scrollable content area -->
+      <div class="reference-content overflow-y-auto px-3 py-3" style="max-height: calc(70vh - 80px);">
+        <div class="text-gray-700 text-xs leading-relaxed mb-3">
+          <div set:html={formatReferenceContent(reference.content)}></div>
+        </div>
+        
+        {(reference.source || reference.page) && (
+          <div class="text-xs text-amber-700 pt-2 border-t border-amber-200/50 sticky bottom-0 bg-amber-50/95 backdrop-blur-sm mt-3">
+            {reference.source && <div class="py-1" set:html={processMarkdownLinks(reference.source)}></div>}
+            {reference.page && <div class="py-1" set:html={processMarkdownLinks(reference.page)}></div>}
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+)}
+
+<style>
+  .note-inline-content {
+    /* Notes flow as normal book content */
+    margin: 0;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Clean paper-like selection for active note - no layout changes */
+  .note-inline-content.note-active {
+    position: relative;
+    background: rgba(255, 251, 235, 0.7);
+    border-radius: 4px;
+    box-shadow: 
+      0 1px 3px rgba(139, 69, 19, 0.06),
+      0 0 0 1px rgba(139, 69, 19, 0.02);
+    transition: background 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                box-shadow 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  
+  /* Connection line */
+  .note-inline-content.note-active::before {
+    content: '';
+    position: absolute;
+    right: -9px;
+    top: 50%;
+    width: 9px;
+    height: 2px;
+    transform: translateY(-50%);
+    background: rgba(139, 69, 19, 0.6);
+    pointer-events: none;
+    opacity: 0;
+    animation: fadeInLine 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s forwards;
+  }
+  
+  /* Connection circle at end of line */
+  .note-inline-content.note-active::after {
+    content: '';
+    position: absolute;
+    right: -15px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    transform: translateY(-50%);
+    background: transparent;
+    border: 2px solid rgba(139, 69, 19, 0.7);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    animation: fadeInCircle 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s forwards;
+  }
+  
+  @keyframes fadeInLine {
+    0% {
+      opacity: 0;
+      width: 4px;
+    }
+    100% {
+      opacity: 1;
+      width: 9px;
+    }
+  }
+  
+  @keyframes fadeInCircle {
+    0% {
+      opacity: 0;
+      transform: translateY(-50%) scale(0.5);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
+  }
+  
+  .reference-card {
+    /* Enhanced styling for fixed position references */
+    background: rgba(250, 248, 242, 0.96);
+    border: 2px solid rgba(139, 69, 19, 0.2);
+    box-shadow: 0 12px 48px rgba(139, 69, 19, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s ease;
+    backdrop-filter: blur(16px);
+    border-radius: 16px;
+    position: relative;
+    overflow: visible; /* Allow connection elements to show */
+    width: 100%; /* Use full assigned width */
+    box-sizing: border-box;
+    /* Dynamic height constraints */
+    max-height: 70vh; /* Maximum 70% of viewport height */
+    min-height: 120px; /* Minimum height for readability */
+    /* Ensure hover area is active */
+    cursor: default;
+    pointer-events: auto;
+  }
+  
+  
+  /* Responsive adjustments for reference cards */
+  @media (min-width: 1024px) {
+    .reference-card {
+      margin: 0;
+      max-width: none;
+    }
+  }
+  
+  @media (max-width: 1023px) {
+    .reference-card {
+      margin: 0;
+      max-width: none;
+    }
+    
+    .reference-card :global(p.mixed-text) {
+      font-size: 0.8rem !important;
+    }
+    
+    .reference-card.expanded :global(p.mixed-text) {
+      font-size: 0.9rem !important;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .reference-card {
+      border-radius: 12px;
+      max-height: 60vh; /* Smaller max height on mobile */
+    }
+    
+    .reference-card :global(p.mixed-text) {
+      font-size: 0.75rem !important;
+    }
+    
+    .reference-card.expanded :global(p.mixed-text) {
+      font-size: 0.85rem !important;
+    }
+    
+    .reference-content {
+      max-height: calc(60vh - 60px) !important; /* Adjust for mobile header */
+    }
+    
+    .reference-card.expanded {
+      width: 125% !important; /* Reduced from 145% to 125% */
+      max-width: 320px; /* Reduced maximum for mobile */
+      transform: translateY(-5px) translateX(-20%); /* Removed scale for mobile */
+    }
+  }
+  
+  /* Tablet expand adjustments */
+  @media (max-width: 1023px) and (min-width: 641px) {
+    .reference-card.expanded {
+      width: 135% !important; /* Reduced from 155% to 135% */
+      max-width: 400px; /* Reduced maximum for tablet */
+      transform: translateY(-6px) translateX(-26%); /* Removed scale for tablet */
+    }
+  }
+  
+  /* Connection line on reference card */
+  .reference-card::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    width: 8px;
+    height: 2px;
+    transform: translateY(-50%);
+    background: rgba(139, 69, 19, 0.6);
+    pointer-events: none;
+    z-index: 10;
+  }
+  
+  /* Connection circle on reference card */
+  .reference-card::after {
+    content: '';
+    position: absolute;
+    left: -16px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    transform: translateY(-50%);
+    background: transparent;
+    border: 2px solid rgba(139, 69, 19, 0.7);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10;
+  }
+  
+  .reference-card.expanded {
+    background: rgba(250, 248, 242, 0.98);
+    box-shadow: 0 24px 72px rgba(139, 69, 19, 0.3), 0 12px 32px rgba(0, 0, 0, 0.18);
+    border-color: rgba(139, 69, 19, 0.5);
+    transform: translateY(-8px) translateX(-50%); /* Removed scale to prevent reflow */
+    width: 160% !important; /* Increased from 130% to 160% */
+    max-width: 640px; /* Increased maximum width */
+    z-index: 30 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Ensure smooth transition for width changes */
+  .reference-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .reference-card :global(p.mixed-text) {
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+    color: #374151;
+    font-size: 0.85rem;
+    text-indent: 2em !important; /* Chinese paragraph indentation - override prose */
+    transition: margin-bottom 0.3s ease;
+  }
+  
+  .reference-card.expanded :global(p.mixed-text) {
+    font-size: 1.0rem;
+    line-height: 1.6;
+    margin-bottom: 1rem; /* More space between paragraphs */
+    text-indent: 2em !important; /* Chinese paragraph indentation - override prose */
+  }
+  
+  .reference-card :global(p.mixed-text:last-child) {
+    margin-bottom: 0;
+  }
+  
+  .reference-card.expanded :global(p.mixed-text:last-child) {
+    margin-bottom: 0;
+  }
+  
+  /* Horizontal separator styling */
+  .reference-card :global(hr.reference-separator) {
+    border: none;
+    height: 1px;
+    background-color: #c4a882;
+    margin: 1.5rem 1rem;
+    opacity: 0.4;
+  }
+  
+  .reference-card.expanded :global(hr.reference-separator) {
+    margin: 2rem 1.5rem;
+    opacity: 0.6;
+  }
+  
+  /* Reference link styling */
+  .reference-card :global(a.reference-link) {
+    color: #d97706;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s ease;
+  }
+  
+  .reference-card :global(a.reference-link:hover) {
+    color: #b45309;
+    border-bottom-color: #d97706;
+  }
+  
+  .reference-card.expanded :global(a.reference-link) {
+    color: #d97706;
+  }
+  
+  .reference-card.expanded :global(a.reference-link:hover) {
+    color: #92400e;
+    border-bottom-color: #b45309;
+  }
+  
+  /* Scrollable content area styling */
+  .reference-content {
+    /* Custom scrollbar for webkit browsers */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 69, 19, 0.3) transparent;
+  }
+  
+  .reference-content::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .reference-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .reference-content::-webkit-scrollbar-thumb {
+    background: rgba(139, 69, 19, 0.3);
+    border-radius: 3px;
+    transition: background 0.3s ease;
+  }
+  
+  .reference-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 69, 19, 0.5);
+  }
+  
+  /* Enhanced header styling for scrollable references */
+  .reference-header {
+    backdrop-filter: blur(8px);
+    border-radius: 16px 16px 0 0;
+  }
+  
+  /* Subtle fade effect for scrollable content - reduced interference */
+  .reference-content::before {
+    content: '';
+    position: sticky;
+    top: 0;
+    display: block;
+    height: 6px;
+    background: linear-gradient(to bottom, rgba(250, 248, 242, 0.4), transparent);
+    margin: -3px -3px -6px -3px;
+    pointer-events: none;
+    z-index: 5;
+  }
+  
+  .reference-content::after {
+    content: '';
+    position: sticky;
+    bottom: 0;
+    display: block;
+    height: 12px;
+    background: linear-gradient(to top, rgba(250, 248, 242, 0.8), transparent);
+    margin: 0 -3px -3px -3px;
+    pointer-events: none;
+    z-index: 5;
+  }
+  
+  /* Enhanced header styling - consistent size to prevent reflow */
+  .reference-header span {
+    font-size: 0.8125rem;
+    color: #6b7280;
+    font-weight: 500;
+    transition: color 0.3s ease, font-weight 0.3s ease; /* Only animate color and weight */
+  }
+  
+  /* Expand/collapse button styling */
+  .expand-toggle {
+    cursor: pointer;
+    border: none;
+    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .expand-toggle:focus {
+    outline: none; /* Remove blue focus outline */
+  }
+  
+  .expand-toggle:focus-visible {
+    outline: 2px solid #d97706; /* Amber outline for keyboard navigation only */
+    outline-offset: 2px;
+  }
+  
+  .reference-card.expanded .reference-header span {
+    font-size: 0.8125rem; /* Keep same size to prevent reflow */
+    color: #6b7280; /* Keep original color when expanded */
+    font-weight: 600; /* Bold when expanded */
+  }
+  
+  /* Enhanced metadata styling - consistent size to prevent reflow */
+  .reference-card div:last-child {
+    padding-top: 0.75rem;
+    font-size: 0.8125rem;
+    transition: padding-top 0.3s ease; /* Only animate padding */
+  }
+  
+  .reference-card div:last-child div {
+    color: #4b5563;
+    font-weight: 450;
+    transition: color 0.3s ease, font-weight 0.3s ease; /* Only animate color and weight */
+  }
+  
+  .reference-card.expanded div:last-child {
+    padding-top: 1rem; /* More padding when expanded */
+    font-size: 0.8125rem; /* Keep same size to prevent reflow */
+  }
+  
+  .reference-card.expanded div:last-child div {
+    color: #374151; /* Darker when expanded */
+    font-weight: 500; /* Bold when expanded */
+  }
+  
+  
+  /* Smooth transitions for all notes */
+  .note-inline-content {
+    position: relative;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Enhanced transition for when note becomes active - no layout changes */
+  .note-inline-content:not(.note-active) {
+    background: transparent;
+    box-shadow: none;
+  }
+</style>
+
+<script>
+  interface ReferenceItem {
+    noteId: string;
+    element: HTMLElement;
+    noteElement: HTMLElement;
+  }
+
+  let referencesInColumn: ReferenceItem[] = [];
+  let isInitialized: boolean = false;
+  
+  
+  // Position references in the right column aligned with their notes
+  function positionReferences() {
+    const referencesColumn = document.getElementById('references-column');
+    if (!referencesColumn || window.innerWidth < 1024) return;
+    
+    console.log('Positioning references...');
+    
+    // Set up references column for fixed positioning
+    referencesColumn.style.position = 'relative';
+    referencesColumn.style.pointerEvents = 'none'; // Allow clicks to pass through
+    
+    // Clear existing references in column and ensure they start collapsed
+    referencesColumn.innerHTML = '';
+    referencesInColumn = [];
+    
+    // Get all note contents and their corresponding references
+    const noteContents = document.querySelectorAll('.note-inline-content[data-note-id]');
+    
+    console.log(`Found ${noteContents.length} note contents`);
+    
+    noteContents.forEach((noteContent, index) => {
+      const noteId = noteContent.getAttribute('data-note-id');
+      if (!noteId) return; // Skip if no noteId
+      
+      const referenceElement = document.querySelector(`.reference-for-positioning[data-note-id="${noteId}"]`);
+      
+      console.log(`Processing note ${noteId}, reference found:`, !!referenceElement);
+      
+      if (referenceElement) {
+        // Clone the reference element
+        const clonedReference = referenceElement.cloneNode(true) as HTMLElement;
+        clonedReference.classList.remove('hidden');
+        clonedReference.style.display = 'none'; // Initially hidden
+        clonedReference.style.pointerEvents = 'auto'; // Allow interactions with reference cards
+        
+        // Ensure cloned reference starts in collapsed state
+        const clonedReferenceCard = clonedReference.querySelector('.reference-card');
+        const clonedExpandIcon = clonedReference.querySelector('.expand-icon');
+        const clonedCollapseIcon = clonedReference.querySelector('.collapse-icon');
+        const clonedExpandToggle = clonedReference.querySelector('.expand-toggle');
+        
+        if (clonedReferenceCard && clonedExpandIcon && clonedCollapseIcon && clonedExpandToggle) {
+          clonedReferenceCard.classList.remove('expanded');
+          clonedExpandIcon.classList.remove('hidden');
+          clonedCollapseIcon.classList.add('hidden');
+          clonedExpandToggle.setAttribute('aria-label', 'Expand reference');
+        }
+        
+        // Add click event handlers for expand/collapse
+        const expandToggle = clonedReference.querySelector('.expand-toggle');
+        const referenceCard = clonedReference.querySelector('.reference-card');
+        const expandIcon = clonedReference.querySelector('.expand-icon');
+        const collapseIcon = clonedReference.querySelector('.collapse-icon');
+        
+        if (expandToggle && referenceCard && expandIcon && collapseIcon) {
+          const collapseReference = () => {
+            referenceCard.classList.remove('expanded');
+            expandIcon.classList.remove('hidden');
+            collapseIcon.classList.add('hidden');
+            expandToggle.setAttribute('aria-label', 'Expand reference');
+          };
+          
+          const expandReference = () => {
+            referenceCard.classList.add('expanded');
+            expandIcon.classList.add('hidden');
+            collapseIcon.classList.remove('hidden');
+            expandToggle.setAttribute('aria-label', 'Collapse reference');
+          };
+          
+          expandToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent event bubbling
+            
+            const isExpanded = referenceCard.classList.contains('expanded');
+            
+            if (isExpanded) {
+              collapseReference();
+            } else {
+              expandReference();
+            }
+          });
+          
+          // Prevent clicks inside the reference card from bubbling up
+          referenceCard.addEventListener('click', (e) => {
+            e.stopPropagation();
+          });
+          
+          // Add global click listener to collapse when clicking outside
+          const handleOutsideClick = (e: Event) => {
+            if (referenceCard.classList.contains('expanded') && !referenceCard.contains(e.target as Node)) {
+              collapseReference();
+            }
+          };
+          
+          // Store reference to the handler so we can clean it up if needed
+          (referenceCard as any)._outsideClickHandler = handleOutsideClick;
+          document.addEventListener('click', handleOutsideClick);
+        }
+        
+        referencesColumn.appendChild(clonedReference);
+        referencesInColumn.push({
+          noteId,
+          element: clonedReference,
+          noteElement: noteContent as HTMLElement
+        });
+      }
+    });
+    
+    console.log(`Added ${referencesInColumn.length} references to column`);
+    
+    // Now update visibility based on viewport
+    updateReferenceVisibility();
+  }
+  
+  function updateReferenceVisibility() {
+    const referencesColumn = document.getElementById('references-column');
+    if (!referencesColumn) return;
+    
+    const viewportHeight = window.innerHeight;
+    const centerY = viewportHeight / 2;
+    const centerTolerance = viewportHeight * 0.4; // 40% of viewport height around center
+    
+    let activeReference: ReferenceItem | null = null;
+    let maxVisibility: number = 0;
+    
+    // Find the most prominent note in the center area
+    referencesInColumn.forEach(ref => {
+      const noteRect = ref.noteElement.getBoundingClientRect();
+      const noteTop = noteRect.top;
+      const noteBottom = noteRect.bottom;
+      const noteCenter = noteTop + noteRect.height / 2;
+      
+      // Check if note is at least partially visible
+      const isVisible = (noteBottom > 0) && (noteTop < viewportHeight);
+      
+      if (isVisible) {
+        // Calculate how much of the note is in the center area
+        const centerStart = centerY - centerTolerance;
+        const centerEnd = centerY + centerTolerance;
+        
+        const visibleStart = Math.max(noteTop, centerStart);
+        const visibleEnd = Math.min(noteBottom, centerEnd);
+        const visibleHeight = Math.max(0, visibleEnd - visibleStart);
+        
+        // Calculate visibility score (how prominent this note is)
+        const totalHeight = noteRect.height;
+        const visibilityScore = visibleHeight / totalHeight;
+        
+        // Boost score for notes closer to center
+        const distanceFromCenter = Math.abs(noteCenter - centerY);
+        const centerBonus = Math.max(0, 1 - (distanceFromCenter / centerTolerance));
+        const finalScore = visibilityScore * (1 + centerBonus);
+        
+        if (finalScore > maxVisibility && finalScore > 0.2) { // Minimum threshold
+          maxVisibility = finalScore;
+          activeReference = ref;
+        }
+      }
+    });
+    
+    // Update visual states only when needed
+    referencesInColumn.forEach(ref => {
+      const shouldShow = (ref === activeReference);
+      const currentOpacity = parseFloat(ref.element.style.opacity) || 0;
+      const isCurrentlyActive = ref.noteElement.classList.contains('note-active');
+      
+      if (shouldShow) {
+        // Show reference if not already shown
+        if (currentOpacity < 1) {
+          // Force collapse when showing reference again
+          const referenceCard = ref.element.querySelector('.reference-card');
+          const expandIcon = ref.element.querySelector('.expand-icon');
+          const collapseIcon = ref.element.querySelector('.collapse-icon');
+          const expandToggle = ref.element.querySelector('.expand-toggle');
+          
+          if (referenceCard && referenceCard.classList.contains('expanded')) {
+            referenceCard.classList.remove('expanded');
+            if (expandIcon) expandIcon.classList.remove('hidden');
+            if (collapseIcon) collapseIcon.classList.add('hidden');
+            if (expandToggle) expandToggle.setAttribute('aria-label', 'Expand reference');
+          }
+          
+          // Position reference at fixed center position adaptively based on screen size
+          const referencesColumn = document.getElementById('references-column');
+          const columnRect = referencesColumn ? referencesColumn.getBoundingClientRect() : null;
+          const viewportWidth = window.innerWidth;
+          
+          ref.element.style.position = 'fixed';
+          ref.element.style.top = '50vh';
+          ref.element.style.transform = 'translateY(-50%)';
+          ref.element.style.zIndex = '20';
+          ref.element.style.display = 'block';
+          ref.element.style.transition = 'opacity 0.4s ease-in-out';
+          ref.element.style.opacity = '1';
+          
+          // Comprehensive screen detection for multi-monitor setups
+          const screenInfo = {
+            windowInnerWidth: window.innerWidth,
+            windowInnerHeight: window.innerHeight,
+            screenWidth: screen.width,
+            screenHeight: screen.height,
+            screenAvailWidth: screen.availWidth,
+            screenAvailHeight: screen.availHeight,
+            devicePixelRatio: window.devicePixelRatio || 1,
+            windowOuterWidth: window.outerWidth,
+            windowOuterHeight: window.outerHeight
+          };
+          
+          console.log('Screen detection:', screenInfo);
+          
+          // Use the actual browser window width (most reliable for multi-monitor)
+          const effectiveWidth = window.innerWidth;
+          
+          // Calculate proportional sizing based on layout
+          const bookContent = document.querySelector('.book-content');
+          const bookContentRect = bookContent ? bookContent.getBoundingClientRect() : null;
+          
+          if (effectiveWidth >= 1024) {
+            // Desktop/large screens - use proportional sizing
+            if (columnRect) {
+              // Use reference column positioning and make it 90% of column width (since column is now wider)
+              const columnWidth = columnRect.width * 0.9;
+              const leftOffset = columnRect.left + (columnRect.width - columnWidth) / 2;
+              
+              ref.element.style.left = `${leftOffset}px`;
+              ref.element.style.width = `${columnWidth}px`;
+            } else if (bookContentRect) {
+              // Calculate right area based on book content position
+              const bookContentEnd = bookContentRect.right;
+              const rightAreaWidth = effectiveWidth - bookContentEnd;
+              const referenceWidth = Math.max(rightAreaWidth * 0.9, 350); // 90% of right area, minimum 350px
+              const rightMargin = rightAreaWidth * 0.075; // 7.5% margin
+              
+              console.log('Layout calculations:', {
+                effectiveWidth,
+                bookContentEnd,
+                rightAreaWidth,
+                referenceWidth,
+                rightMargin,
+                bookContentPercentage: ((bookContentRect.width / effectiveWidth) * 100).toFixed(1) + '%',
+                rightAreaPercentage: ((rightAreaWidth / effectiveWidth) * 100).toFixed(1) + '%',
+                referencePercentage: ((referenceWidth / effectiveWidth) * 100).toFixed(1) + '%'
+              });
+              
+              ref.element.style.right = `${rightMargin}px`;
+              ref.element.style.width = `${referenceWidth}px`;
+            } else {
+              // Fallback: use larger percentage of viewport width for wide screens
+              const referenceWidth = Math.max(effectiveWidth * 0.25, 380); // 25% of viewport, minimum 380px
+              const margin = effectiveWidth * 0.02; // 2% margin
+              
+              console.log('Fallback calculations:', {
+                effectiveWidth,
+                referenceWidth,
+                margin,
+                referencePercentage: ((referenceWidth / effectiveWidth) * 100).toFixed(1) + '%'
+              });
+              
+              ref.element.style.right = `${margin}px`;
+              ref.element.style.width = `${referenceWidth}px`;
+            }
+          } else {
+            // Mobile/tablet - full width with margins
+            ref.element.style.left = '1rem';
+            ref.element.style.right = '1rem';
+            ref.element.style.width = 'auto';
+          }
+          
+          console.log(`Showing reference ${ref.noteId}:`, {
+            effectiveWidth: `${effectiveWidth}px`,
+            width: ref.element.style.width,
+            position: ref.element.style.left || `right: ${ref.element.style.right}`,
+            bookContent: bookContentRect ? `${bookContentRect.width}px at ${bookContentRect.left}-${bookContentRect.right}` : 'not found',
+            columnRect: columnRect ? `${columnRect.width}px at ${columnRect.left}-${columnRect.right}` : 'not found'
+          });
+        }
+        
+        // Add visual indicator to the note if not already active
+        if (!isCurrentlyActive) {
+          ref.noteElement.classList.add('note-active');
+        }
+        
+      } else {
+        // Hide reference if currently shown
+        if (currentOpacity > 0) {
+          ref.element.style.transition = 'opacity 0.4s ease-in-out';
+          ref.element.style.opacity = '0';
+          
+          // Hide after transition
+          setTimeout(() => {
+            if (parseFloat(ref.element.style.opacity) === 0) {
+              ref.element.style.display = 'none';
+            }
+          }, 400);
+          
+          console.log(`Hiding reference ${ref.noteId}`);
+        }
+        
+        // Remove visual indicator from the note if currently active
+        if (isCurrentlyActive) {
+          ref.noteElement.classList.remove('note-active', 'note-highlighted');
+        }
+      }
+    });
+  }
+  
+  
+  // Initialize positioning
+  document.addEventListener('DOMContentLoaded', () => {
+    if (isInitialized) return;
+    isInitialized = true;
+    
+    // Wait for content to render
+    setTimeout(() => {
+      positionReferences();
+      updateReferenceVisibility();
+      
+      // Also reposition when images load
+      const images = document.querySelectorAll('img');
+      if (images.length === 0) return;
+      
+      let loadedImages = 0;
+      const checkAllLoaded = () => {
+        loadedImages++;
+        if (loadedImages === images.length) {
+          setTimeout(() => {
+            positionReferences();
+            updateReferenceVisibility();
+          }, 100);
+        }
+      };
+      
+      images.forEach(img => {
+        if (img.complete) {
+          checkAllLoaded();
+        } else {
+          img.addEventListener('load', checkAllLoaded);
+          img.addEventListener('error', checkAllLoaded); // Handle broken images
+        }
+      });
+    }, 500); // Increased timeout
+  });
+  
+  // Update visibility on window resize
+  let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
+  
+  window.addEventListener('resize', () => {
+    if (resizeTimeout) {
+      clearTimeout(resizeTimeout);
+    }
+    
+    resizeTimeout = setTimeout(() => {
+      // Force reposition references on resize
+      positionReferences();
+      updateReferenceVisibility();
+    }, 150);
+  });
+  
+  // Update reference visibility on scroll
+  let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+  let isScrolling: boolean = false;
+  let lastScrollTime: number = 0;
+  
+  window.addEventListener('scroll', () => {
+    const now = Date.now();
+    
+    // Throttle scroll events to improve performance
+    if (now - lastScrollTime < 16) return; // ~60fps
+    lastScrollTime = now;
+    
+    if (!isScrolling) {
+      isScrolling = true;
+      
+      requestAnimationFrame(() => {
+        updateReferenceVisibility();
+        isScrolling = false;
+      });
+    }
+    
+    // Also set a timeout as fallback
+    if (scrollTimeout) {
+      clearTimeout(scrollTimeout);
+    }
+    scrollTimeout = setTimeout(() => {
+      if (!isScrolling) {
+        updateReferenceVisibility();
+      }
+    }, 100);
+  });
+</script>
