@@ -17,9 +17,14 @@ function formatReferenceContent(content: string): string {
     .trim()
     .split(/\n/) // Split on single newlines for Chinese text
     .filter(line => line.trim().length > 0) // Remove empty lines
-    .map(paragraph => {
-      // Much simpler approach: wrap entire paragraph and use CSS
-      return `<p class="mixed-text">${paragraph.trim()}</p>`;
+    .map(line => {
+      const trimmedLine = line.trim();
+      // Check if line is a horizontal rule (3 or more hyphens, asterisks, or underscores)
+      if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmedLine)) {
+        return '<hr class="reference-separator">';
+      }
+      // Otherwise treat as regular paragraph
+      return `<p class="mixed-text">${trimmedLine}</p>`;
     })
     .join('');
 }
@@ -287,6 +292,20 @@ function formatReferenceContent(content: string): string {
   
   .reference-card.expanded :global(p.mixed-text:last-child) {
     margin-bottom: 0;
+  }
+  
+  /* Horizontal separator styling */
+  .reference-card :global(hr.reference-separator) {
+    border: none;
+    height: 1px;
+    background-color: #c4a882;
+    margin: 1.5rem 1rem;
+    opacity: 0.4;
+  }
+  
+  .reference-card.expanded :global(hr.reference-separator) {
+    margin: 2rem 1.5rem;
+    opacity: 0.6;
   }
   
   /* Scrollable content area styling */
