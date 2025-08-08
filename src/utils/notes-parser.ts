@@ -33,6 +33,11 @@ export function parseReferenceFile(content: string): Map<string, ReferenceText> 
     
     let inMetadata = false;
     for (const line of lines) {
+      // Skip ## header lines that match the ref id
+      if (line.startsWith('## ') && line.substring(3).trim() === id) {
+        continue;
+      }
+      
       if (line.startsWith('**Source**:')) {
         source = line.replace('**Source**:', '').trim();
         inMetadata = true;
