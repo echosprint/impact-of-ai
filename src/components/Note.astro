@@ -51,8 +51,14 @@ function formatReferenceContent(content: string): string {
 ---
 
 <!-- Note content flows inline with main book content -->
-<div class="note-inline-content" data-note-id={ref}>
+<div class="note-inline-content" data-note-id={ref} data-has-reference={reference ? 'true' : 'false'}>
   <div set:html={slots}></div>
+  {reference && (
+    <>
+      <span class="connection-line"></span>
+      <span class="connection-circle"></span>
+    </>
+  )}
 </div>
 
 <!-- Reference text for right column positioning -->
@@ -98,6 +104,83 @@ function formatReferenceContent(content: string): string {
     /* Notes flow as normal book content */
     margin: 0;
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Inactive notes with references - show subtle clickable indicators */
+  .note-inline-content[data-has-reference="true"]:not(.note-active) {
+    position: relative;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .note-inline-content[data-has-reference="true"]:not(.note-active):hover {
+    background: rgba(255, 251, 235, 0.3);
+    box-shadow: 0 1px 3px rgba(139, 69, 19, 0.1);
+    position: relative;
+  }
+  
+  
+  /* Connection indicators for inactive notes with references - using span elements */
+  .connection-line {
+    position: absolute;
+    right: -9px;
+    top: 50%;
+    width: 9px;
+    height: 1px;
+    transform: translateY(-50%);
+    background: repeating-linear-gradient(
+      to right,
+      rgba(139, 69, 19, 0.3) 0px,
+      rgba(139, 69, 19, 0.3) 2px,
+      transparent 2px,
+      transparent 4px
+    );
+    pointer-events: none;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+  }
+  
+  .connection-circle {
+    position: absolute;
+    right: -15px;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    transform: translateY(-50%);
+    background: transparent;
+    border: 1px solid rgba(139, 69, 19, 0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.6;
+    transition: opacity 0.3s ease, border-color 0.3s ease, width 0.3s ease, height 0.3s ease;
+  }
+  
+  /* Enhanced indicators on hover for inactive notes */
+  .note-inline-content[data-has-reference="true"]:not(.note-active):hover .connection-line {
+    opacity: 1;
+    background: repeating-linear-gradient(
+      to right,
+      rgba(139, 69, 19, 0.6) 0px,
+      rgba(139, 69, 19, 0.6) 2px,
+      transparent 2px,
+      transparent 4px
+    );
+  }
+  
+  .note-inline-content[data-has-reference="true"]:not(.note-active):hover .connection-circle {
+    opacity: 1;
+    border-color: rgba(139, 69, 19, 0.7);
+    border-width: 2px;
+    width: 8px;
+    height: 8px;
+    right: -16px;
+  }
+  
+  /* Hide connection indicators for active notes (they use the ::before/::after from the active styles) */
+  .note-inline-content.note-active .connection-line,
+  .note-inline-content.note-active .connection-circle {
+    display: none;
   }
   
   /* Clean paper-like selection for active note - no layout changes */
@@ -791,8 +874,105 @@ function formatReferenceContent(content: string): string {
         }
       }
     });
+    
+    // Update click handlers after visibility changes
+    addClickHandlers();
   }
   
+  
+  // Add click handlers for inactive notes
+  function addClickHandlers() {
+    const inactiveNotes = document.querySelectorAll('.note-inline-content[data-has-reference="true"]:not(.note-active)');
+    
+    inactiveNotes.forEach(noteElement => {
+      // Remove existing click handler if any
+      noteElement.removeEventListener('click', handleNoteClick);
+      // Add new click handler
+      noteElement.addEventListener('click', handleNoteClick);
+    });
+  }
+  
+  function handleNoteClick(event) {
+    const noteElement = event.currentTarget;
+    const noteId = noteElement.getAttribute('data-note-id');
+    
+    if (!noteId) return;
+    
+    // Find the corresponding reference item
+    const referenceItem = referencesInColumn.find(ref => ref.noteId === noteId);
+    if (!referenceItem) return;
+    
+    // Clear all active states
+    referencesInColumn.forEach(ref => {
+      ref.noteElement.classList.remove('note-active');
+      if (ref.element.style.opacity > 0) {
+        ref.element.style.transition = 'opacity 0.4s ease-in-out';
+        ref.element.style.opacity = '0';
+        setTimeout(() => {
+          if (parseFloat(ref.element.style.opacity) === 0) {
+            ref.element.style.display = 'none';
+          }
+        }, 400);
+      }
+    });
+    
+    // Activate the clicked note
+    setTimeout(() => {
+      showReference(referenceItem);
+      noteElement.classList.add('note-active');
+      // Update click handlers after state change
+      setTimeout(addClickHandlers, 100);
+    }, 450);
+  }
+  
+  function showReference(referenceItem) {
+    const ref = referenceItem;
+    
+    // Force collapse when showing reference
+    const referenceCard = ref.element.querySelector('.reference-card');
+    const expandIcon = ref.element.querySelector('.expand-icon');
+    const collapseIcon = ref.element.querySelector('.collapse-icon');
+    const expandToggle = ref.element.querySelector('.expand-toggle');
+    
+    if (referenceCard && referenceCard.classList.contains('expanded')) {
+      referenceCard.classList.remove('expanded');
+      if (expandIcon) expandIcon.classList.remove('hidden');
+      if (collapseIcon) collapseIcon.classList.add('hidden');
+      if (expandToggle) expandToggle.setAttribute('aria-label', 'Expand reference');
+    }
+    
+    // Position reference at fixed center position
+    const referencesColumn = document.getElementById('references-column');
+    const columnRect = referencesColumn ? referencesColumn.getBoundingClientRect() : null;
+    const effectiveWidth = window.innerWidth;
+    
+    ref.element.style.position = 'fixed';
+    ref.element.style.top = '50vh';
+    ref.element.style.transform = 'translateY(-50%)';
+    ref.element.style.zIndex = '20';
+    ref.element.style.display = 'block';
+    ref.element.style.transition = 'opacity 0.4s ease-in-out';
+    ref.element.style.opacity = '1';
+    
+    // Position based on screen size
+    if (effectiveWidth >= 1024) {
+      if (columnRect) {
+        const columnWidth = columnRect.width * 0.9;
+        const leftOffset = columnRect.left + (columnRect.width - columnWidth) / 2;
+        ref.element.style.left = `${leftOffset}px`;
+        ref.element.style.width = `${columnWidth}px`;
+      } else {
+        const referenceWidth = Math.max(effectiveWidth * 0.25, 380);
+        const margin = effectiveWidth * 0.02;
+        ref.element.style.right = `${margin}px`;
+        ref.element.style.width = `${referenceWidth}px`;
+      }
+    } else {
+      ref.element.style.left = '1rem';
+      ref.element.style.right = '1rem';
+      ref.element.style.width = 'auto';
+    }
+  }
   
   // Initialize positioning
   document.addEventListener('DOMContentLoaded', () => {
@@ -803,6 +983,7 @@ function formatReferenceContent(content: string): string {
     setTimeout(() => {
       positionReferences();
       updateReferenceVisibility();
+      addClickHandlers(); // Add click handlers after initial setup
       
       // Also reposition when images load
       const images = document.querySelectorAll('img');
@@ -815,6 +996,7 @@ function formatReferenceContent(content: string): string {
           setTimeout(() => {
             positionReferences();
             updateReferenceVisibility();
+            addClickHandlers(); // Update click handlers after repositioning
           }, 100);
         }
       };
@@ -842,6 +1024,7 @@ function formatReferenceContent(content: string): string {
       // Force reposition references on resize
       positionReferences();
       updateReferenceVisibility();
+      addClickHandlers(); // Update click handlers after resize
     }, 150);
   });
   
