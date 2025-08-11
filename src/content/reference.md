@@ -322,3 +322,12 @@
 
 
 
+<!-- ref:acemoglu_macro_economics_ai_2024 -->
+
+## acemoglu_macro_economics_ai_2024
+dd
+
+**Source**: Acemoglu, D. (2024). The simple macroeconomics of AI. National Bureau of Economic Research Working Paper No. 32432. https://doi.org/10.3386/w32432
+**Page**: 
+**Notes**: 
+<!-- /ref:acemoglu_macro_economics_ai_2024 -->
