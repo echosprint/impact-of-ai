@@ -386,7 +386,7 @@ Wage inequality has risen sharply in the US and other industrialized economies o
 
 ---
 
-
+This paper proposes a new approach for thinking about wage inequality. In our theory, shifts against less skilled workers result from technologies that automate and thus displace workers from the tasks they used to perform. Our main contribution is to develop a general version of this theory and show how it can be applied to document and quantify the effects of automation on wages and inequality. Based on this approach, we document that between 50% and 70% of the overall changes in US wage structure are driven by automation. For example, low-education workers specialized in tasks that can be automated in industries undergoing rapid automation (e.g., those working in blue-collar jobs in manufacturing industries that introduced numerically-controlled machinery and industrial robots, or those in clerical tasks in industries that experienced software-based automation) had stagnant or even declining real wages. In contrast, worker groups that were not displaced from their tasks, such as those with a post-graduate degree or women with a college degree, enjoyed real wage gains.
 
 **Source**: Acemoglu, D., & Restrepo, P. (2022, February 15). *Tasks, automation, and the rise in US wage inequality*. Massachusetts Institute of Technology; Boston University. https://pascual.scripts.mit.edu/research/taskdisplacement/task_displacement.pdf  
 **Page**:  
