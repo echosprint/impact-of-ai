@@ -325,7 +325,22 @@
 <!-- ref:acemoglu_macro_economics_ai_2024 -->
 
 ## acemoglu_macro_economics_ai_2024
-dd
+This paper uses the framework from Acemoglu and Restrepo (2018, 2019b, 2022) to provide some insights for these debates, especially relevant for the medium-term (about 10-year) macroeconomic effects of Al. I build a task-based model, where the production of a unique final good requires a series of tasks to be performed, and these tasks can be allocated to either capital or labor, which have different comparative advantages. Automation corresponds to the expansion of the set of tasks that are produced by capital (including digital tools and algorithms). In this framework, Al-based productivity gains measured either as growth of average output per worker or as total factor productivity (TFP) growth-can come from a number of distinct channels (see Acemoglu and Restrepo, 2019a):
+
+- ﻿﻿Automation (or more precisely extensive-margin automation) involves Al models taking over and reducing costs in certain tasks. In the case of generative Al, various mid-level clerical functions, text summary, data classification, advanced pattern recog-nition, and computer vision tasks are among those that can be profitably automated.
+- ﻿﻿Task complementarity can increase the productivity in tasks that are not fully automated and may even raise the marginal product of labor. For example, workers performing certain tasks may have better information or access to other complementary inputs. Alternately, Al may automate some subtasks, while at the same time enabling workers to specialize and raise their productivity in other aspects of their job.
+- ﻿﻿Deepening of automation can take place, increasing the productivity of capital in tasks that have already been automated. For example, an already-automated IT security task may be performed more successfully by generative AI.
+- ﻿﻿New tasks may be created thanks to AI and these tasks may impact the productivityof the whole production process.
+
+The propagation matrix represents the full "ripple effects" - the impact of the displacement of one demographic group on others, as they leave the tasks they were previously performing and compete with other groups to be employed in other tasks. Such reallocations are the key channel via which direct productivity gains for a group may end up harming it (as my example in the previous section illustrated). They are also the mechanism via which the displacement of a demographic group may end up being more damaging to another demographic group.
+
+
+
+----
+
+The ripple effects estimated in Acemoglu and Restrepo (2022) may be context-specific— meaning that the magnitudes of these effects could be quite different for the tasks impacted by Al and automation technologies that my previous work focuses on. Nevertheless, since it is impossible to estimate these ripple effects for the future impact of generative Al technologies,
+
+I will use these existing estimates.
 
 **Source**: Acemoglu, D. (2024). The simple macroeconomics of AI. National Bureau of Economic Research Working Paper No. 32432. https://doi.org/10.3386/w32432
 **Page**: 
@@ -360,3 +375,20 @@ dd
 **Page**:  
 **Notes**:  
 <!-- /ref:qiushi_2025_involution -->
+
+<!-- ref:acemoglu_wage_inequality_2022 -->
+
+## acemoglu_wage_inequality_2022
+
+[Tasks, Automation, and the Rise in US Wage Inequality](https://pascual.scripts.mit.edu/research/taskdisplacement/task_displacement.pdf)
+
+Wage inequality has risen sharply in the US and other industrialized economies over the last four decades.' Figure 1 depicts some of the most salient changes in the US wage structure since 1980: while the real wages of workers with a post-graduate degree rose, the real wages of low-education workers fell or remained stagnant. The real earnings of men without a high-school degree are now 15% lower than they were in 1980.
+
+---
+
+
+
+**Source**: Acemoglu, D., & Restrepo, P. (2022, February 15). *Tasks, automation, and the rise in US wage inequality*. Massachusetts Institute of Technology; Boston University. https://pascual.scripts.mit.edu/research/taskdisplacement/task_displacement.pdf  
+**Page**:  
+**Notes**:  
+<!-- /ref:acemoglu_wage_inequality_2022 -->
