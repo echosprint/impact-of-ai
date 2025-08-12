@@ -24,9 +24,15 @@ try {
 
 const reference = references.get(ref);
 
-// Helper function to convert markdown links to HTML
+// Helper function to convert markdown links and standalone URLs to HTML
 function processMarkdownLinks(text: string): string {
-  return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="reference-link">$1</a>');
+  // First, convert markdown links
+  let processed = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="reference-link">$1</a>');
+  
+  // Then, convert standalone URLs (not already inside links)
+  processed = processed.replace(/(^|[^"'>])(https?:\/\/[^\s<]+)/g, '$1<a href="$2" target="_blank" rel="noopener noreferrer" class="reference-link">$2</a>');
+  
+  return processed;
 }
 
 // Helper function to format reference content with mixed font sizes
@@ -417,6 +423,9 @@ function formatReferenceContent(content: string): string {
     text-decoration: none;
     border-bottom: 1px solid transparent;
     transition: all 0.2s ease;
+    word-break: break-all;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
   
   .reference-card :global(a.reference-link:hover) {
