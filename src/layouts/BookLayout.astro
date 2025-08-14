@@ -1,7 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import TableOfContents from '../components/TableOfContents.astro';
-import ChapterContent from '../components/ChapterContent.astro';
+import ChapterContentLayout from './ChapterContentLayout.astro';
 
 export interface Props {
   currentChapter?: string;
@@ -46,7 +46,7 @@ const { currentChapter, bookTitle } = Astro.props;
         <div class="flex-1 order-1 lg:order-2 lg:max-w-4xl lg:mx-auto">
           <div class="bg-white shadow-lg rounded-2xl overflow-hidden border border-slate-200/30">
             <div class="px-6 md:px-12 lg:px-16 xl:px-20 py-8 md:py-12 lg:py-16">
-              <ChapterContent chapter={currentChapter} />
+              <ChapterContentLayout chapter={currentChapter} />
             </div>
           </div>
         </div>

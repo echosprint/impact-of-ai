@@ -28,7 +28,7 @@ const reference = references.get(ref);
 ---
 
 <NoteContent noteId={ref} hasReference={!!reference}>
-  <Fragment set:html={slots} />
+  <div set:html={slots}></div>
 </NoteContent>
 
 <!-- Reference text for right column positioning -->

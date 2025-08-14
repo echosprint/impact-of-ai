@@ -21,8 +21,6 @@ let title;
 let wordCount = 0;
 let readingTime = 0;
 
-import { calculateWordCount, calculateReadingTime } from '../utils/markdown';
-
 try {
   // Get the chapter entry from the content collection
   chapterData = await getEntry('chapters', targetChapter);
