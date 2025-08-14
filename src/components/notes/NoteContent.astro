@@ -1,0 +1,29 @@
+---
+export interface Props {
+  noteId: string;
+  hasReference: boolean;
+  children?: any;
+}
+
+const { noteId, hasReference } = Astro.props;
+const slots = await Astro.slots.render('default');
+---
+
+<!-- Note content flows inline with main book content -->
+<div 
+  class="note-inline-content" 
+  data-note-id={noteId} 
+  data-has-reference={hasReference ? 'true' : 'false'}
+>
+  <div set:html={slots}></div>
+  {hasReference && (
+    <>
+      <span class="connection-line"></span>
+      <span class="connection-circle"></span>
+    </>
+  )}
+</div>
+
+<style>
+  @import '../../styles/components/note-content.css';
+</style>

@@ -1,0 +1,48 @@
+---
+import type { ReferenceText } from '../../types/references';
+import { formatReferenceContent, processMarkdownLinks } from '../../utils/markdown';
+
+export interface Props {
+  reference: ReferenceText;
+  noteId: string;
+}
+
+const { reference, noteId } = Astro.props;
+---
+
+<div class="reference-wrapper">
+  <div class="reference-card bg-gray-50/80 border border-gray-200/40 rounded-lg text-sm shadow-sm">
+    <!-- Fixed header with expand/collapse icon -->
+    <div class="reference-header px-3 pt-3 pb-2 bg-gradient-to-r from-amber-50/80 to-orange-50/60 border-b border-amber-200/50 sticky top-0 z-10 flex items-center justify-between">
+      <span class="text-xs font-medium text-amber-700 uppercase tracking-wide flex-1 truncate pr-2">引用文献 #{noteId}</span>
+      <button class="expand-toggle text-amber-600 hover:text-amber-800 transition-colors duration-200 p-1 rounded-md hover:bg-amber-100/50 flex-shrink-0" aria-label="Expand reference">
+        <svg class="expand-icon w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+        </svg>
+        <svg class="collapse-icon w-4 h-4 hidden transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Scrollable content area -->
+    <div class="reference-content overflow-y-auto px-3 py-3" style="max-height: calc(70vh - 80px);">
+      <div class="text-gray-700 text-xs leading-relaxed mb-3">
+        <div set:html={formatReferenceContent(reference.content)}></div>
+      </div>
+      
+      {(reference.source || reference.page) && (
+        <div class="text-xs text-amber-700 pt-2 border-t border-amber-200/50 sticky bottom-0 bg-amber-50/95 backdrop-blur-sm mt-3">
+          {reference.source && <div class="py-1" set:html={processMarkdownLinks(reference.source)}></div>}
+          {reference.page && <div class="py-1" set:html={processMarkdownLinks(reference.page)}></div>}
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+
+<style>
+  @import '../../styles/components/reference-card.css';
+  @import '../../styles/components/reference-header.css';
+  @import '../../styles/components/reference-content.css';
+</style>

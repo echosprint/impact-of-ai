@@ -1,0 +1,66 @@
+/**
+ * Reference header component styles
+ */
+
+/* Enhanced header styling for scrollable references */
+.reference-header {
+  backdrop-filter: blur(8px);
+  border-radius: 16px 16px 0 0;
+}
+
+/* Enhanced header styling - consistent size to prevent reflow */
+.reference-header span {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  font-weight: 500;
+  transition: color 0.3s ease, font-weight 0.3s ease; /* Only animate color and weight */
+}
+
+/* Expand/collapse button styling */
+.expand-toggle {
+  cursor: pointer;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.expand-toggle:focus {
+  outline: none; /* Remove blue focus outline */
+}
+
+.expand-toggle:focus-visible {
+  outline: 2px solid #d97706; /* Amber outline for keyboard navigation only */
+  outline-offset: 2px;
+}
+
+.reference-card.expanded .reference-header span {
+  font-size: 0.8125rem; /* Keep same size to prevent reflow */
+  color: #6b7280; /* Keep original color when expanded */
+  font-weight: 600; /* Bold when expanded */
+}
+
+/* Enhanced metadata styling - consistent size to prevent reflow */
+.reference-card div:last-child {
+  padding-top: 0.75rem;
+  font-size: 0.8125rem;
+  transition: padding-top 0.3s ease; /* Only animate padding */
+}
+
+.reference-card div:last-child div {
+  color: #4b5563;
+  font-weight: 450;
+  transition: color 0.3s ease, font-weight 0.3s ease; /* Only animate color and weight */
+}
+
+.reference-card.expanded div:last-child {
+  padding-top: 1rem; /* More padding when expanded */
+  font-size: 0.8125rem; /* Keep same size to prevent reflow */
+}
+
+.reference-card.expanded div:last-child div {
+  color: #374151; /* Darker when expanded */
+  font-weight: 500; /* Bold when expanded */
+}
