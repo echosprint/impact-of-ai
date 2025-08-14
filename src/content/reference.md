@@ -388,7 +388,63 @@ Wage inequality has risen sharply in the US and other industrialized economies o
 
 This paper proposes a new approach for thinking about wage inequality. In our theory, shifts against less skilled workers result from technologies that automate and thus displace workers from the tasks they used to perform. Our main contribution is to develop a general version of this theory and show how it can be applied to document and quantify the effects of automation on wages and inequality. Based on this approach, we document that between 50% and 70% of the overall changes in US wage structure are driven by automation. For example, low-education workers specialized in tasks that can be automated in industries undergoing rapid automation (e.g., those working in blue-collar jobs in manufacturing industries that introduced numerically-controlled machinery and industrial robots, or those in clerical tasks in industries that experienced software-based automation) had stagnant or even declining real wages. In contrast, worker groups that were not displaced from their tasks, such as those with a post-graduate degree or women with a college degree, enjoyed real wage gains.
 
+---
+
+our reduced-form evidence focuses on the direct impacts of task displacement, but does not account for ripple effects, which result from displaced workers competing against others for non-automated tasks, bidding down wages and spreading automation’s effects more broadly in the population.
+
+---
+
+Most notably, we documented that 50-70% of the changes in the US wage structure between 1980 and 2016 are accounted for by the relative wage declines of worker groups specialized in routine tasks in industries experiencing rapid automation.
+
 **Source**: Acemoglu, D., & Restrepo, P. (2022, February 15). *Tasks, automation, and the rise in US wage inequality*. Massachusetts Institute of Technology; Boston University. https://pascual.scripts.mit.edu/research/taskdisplacement/task_displacement.pdf  
 **Page**:  
 **Notes**:  
 <!-- /ref:acemoglu_wage_inequality_2022 -->
+
+<!-- ref:personal_consumption_loan_fiscal_subsidy_2025 -->
+
+## personal_consumption_loan_fiscal_subsidy_2025
+
+
+
+[个人消费贷款、服务业经营主体贷款可享财政贴息 年贴息比例为1个百分点](https://www.gov.cn/lianbo/bumen/202508/content_7036241.htm)
+
+为更好发挥财政资金对提振消费的支持引导作用，降低居民消费信贷成本，助力释放居民消费潜力，财政部、中国人民银行、金融监管总局近日联合印发[《个人消费贷款财政贴息政策实施方案》](https://www.gov.cn/zhengce/zhengceku/202508/content_7036209.htm)，明确对个人消费贷款进行财政贴息。
+
+根据方案，2025年9月1日至2026年8月31日期间，居民个人使用贷款经办机构发放的个人消费贷款（不含信用卡业务）中实际用于消费，且贷款经办机构可通过贷款发放账户等识别借款人相关消费交易信息的部分，可按规定享受贴息政策。贴息范围包括单笔5万元以下消费，以及单笔5万元及以上的家用汽车、养老生育、教育培训、文化旅游、家居家装、电子产品、健康医疗等重点领域消费。对于单笔5万元以上的消费，以5万元消费额度为上限进行贴息。政策到期后，可视实施效果研究延长政策期限、扩大支持范围。
+
+对于贴息标准，方案明确，年贴息比例为1个百分点，且最高不超过贷款合同利率的50%，中央财政、省级财政分别承担贴息资金的90%、10%。贷款合同利率需要符合相应利率自律约定。政策执行期内，每名借款人在一家贷款经办机构可享受的全部个人消费贷款累计贴息上限为3000元（对应符合条件的累计消费金额30万元），其中在一家贷款经办机构可享受单笔5万元以下的个人消费贷款累计贴息上限为1000元（对应符合条件的累计消费金额10万元）。
+
+根据方案，6家国有大型商业银行、12家全国性股份制商业银行和5家其他个人消费贷款发放机构可经办贴息贷款。鼓励地方财政部门结合实际情况对其他经营个人消费贷款业务的金融机构给予财政贴息支持，扩大政策覆盖面。
+
+方案要求相关部门强化监督约束，确保贴息资金专款专用。经审核发现存在违法违规行为的，财政部门将追回相关贴息资金，并依法依规严肃处理。对于贷款经办机构违法违规行为，由相关部门依法依规追究相应责任。对于借款人违法违规套取贴息资金的情况，由贷款经办机构纳入个人征信记录。
+
+
+
+为充分发挥财政政策引导带动作用，推动降低服务业经营主体融资成本，助力激发消费市场活力，以高质量供给创造有效需求，财政部等九部门近日联合印发[《服务业经营主体贷款贴息政策实施方案》](https://www.gov.cn/zhengce/zhengceku/202508/content_7036204.htm)，明确对符合条件的消费领域服务业经营主体贷款给予财政贴息。
+
+根据方案，同时符合以下条件的贷款可享受贴息政策：一是由经办银行向餐饮住宿、健康、养老、托育、家政、文化娱乐、旅游、体育8类消费领域服务业经营主体发放。二是在《提振消费专项行动方案》公开发布之日（2025年3月16日）至2025年12月31日期间签订贷款合同且相关贷款资金发放至经营主体。三是贷款资金合规用于改善消费基础设施和提升服务供给能力。民办非企业法人的养老服务机构同等享受贷款贴息政策。政策到期后，可根据实施效果研究延长政策期限、扩大支持范围。
+
+根据方案，中央财政给予贴息的服务业经营主体贷款经办银行为21家全国性银行。对于经办银行向服务业经营主体发放的贷款，财政部门按照贷款本金对经营主体进行贴息，贴息期限不超过1年，年贴息比例为1个百分点，中央财政、省级财政分别承担贴息资金的90%、10%。单户享受贴息的贷款规模最高可达100万元。相关贷款包括用于改善消费基础设施的固定资产贷款以及用于提升服务供给能力的流动资金贷款。同一笔贷款不得重复享受中央财政其他贴息政策；已享受地方财政相关贴息政策的，此次贴息不得超出扣除已有贴息后的实际利率水平。
+
+方案要求严控资金流向。经营主体要确保将贷款资金用于开展合规经营活动、提升服务供给能力、改善消费基础设施，严禁虚报、冒领、套取、截留、挤占、挪用贷款资金，严禁将贷款资金用于房地产开发或投资、理财等套利活动。严禁经办银行和经营主体套取贴息资金。
+
+<!-- /ref:personal_consumption_loan_fiscal_subsidy_2025 -->
+
+<!-- ref:wangyueche_market_saturation_2024 -->
+
+## wangyueche_market_saturation_2024
+
+[运力饱和、行业内卷——2024年网约车行业驶向何处？](https://news.cctv.com/2024/01/18/ARTIj0z2EiyOugpSA0hzmPfx240118.shtml)
+
+2023年网约车行业订单量回升明显，截至11月达8.25亿单，同比增长62.4%，资本市场活跃，平台格局多元化。聚合平台订单占比约30%，不再一家独大。与此同时，运力快速扩张，全国网约车驾驶员证和车辆运输证数量同比增长均超28%，部分城市如三亚、上海暂停新增发证。重庆数据显示，参与接单车辆仅占总数53%，供给明显过剩。
+
+竞争加剧导致司机收入下降，北京、佛山、上海等地司机普遍延长工作时间但收入减少。重庆2023年三季度日均营收337.3元，较上半年下降11.4%，调研显示半数司机每小时流水仅30–45元。监管方面，合规率显著提升，订单量前十的平台中已有5家合规率达90%。2023年，交通运输部等部门多次发布政策与约谈，要求规范聚合平台管理、降低抽成、保障司机权益。预计未来合规率将继续上升，但不合规运力因成本优势仍存在。
+
+<!-- /ref:wangyueche_market_saturation_2024 -->
+
+<!-- ref:acemoglu_technology_principles_policies -->
+
+Drawing on the lessons of history, the authors propose in their concluding chapter three pillars for shared prosperity in the digital age: "altering the narrative, building countervailing powers and developing technical, regulatory and policy solutions to tackle specific aspects of technology's social bias." They argue that "rather than machine intelligence, what we need is 'machine usefulness,' which emphasizes the ability of computers to augment human capabilities. This would be a much more fruitful direction for increasing productivity. By empowering workers and reinforcing human decision making in the production process, it also would strengthen social forces that can stand up to big tech companies." Their policy recommendations include "breaking up of Big Tech to incentivize 'greater diversity of innovation'"; "equalizing the tax rates on labour and capital to remove the bias towards automation by reducing payroll taxes, raising corporate taxes, and closing tax loopholes"; "'digital advertising tax' that would discourage 'ad-based business models'"; and "privacy regulation on data ownership that would limit Big Tech from collecting big data." Acemoglu's research on AI estimates that "Using existing estimates on exposure to AI and productivity improvements at the task level, these macroeconomic effects appear nontrivial but modest—no more than a 0.66% increase in total factor productivity (TFP) over 10 years." He argues that "My argument is that we currently have the wrong direction for AI. We're using it too much for automation and not enough for providing expertise and information to workers." This contrasts with Milton Friedman's 1970 doctrine that "There is one and only one social responsibility of business—to use its resources and engage in activities designed to increase its profits so long as it stays within the rules of the game, which is to say, engages in open and free competition without deception or fraud." **Source**: Acemoglu, Daron, and Simon Johnson. Power and Progress: Our Thousand-Year Struggle Over Technology and Prosperity. New York: PublicAffairs, 2023; Acemoglu, Daron. "The Simple Macroeconomics of AI." NBER Working Paper 32487, May 2024; Friedman, Milton. "The Social Responsibility of Business Is to Increase Its Profits." The New York Times Magazine, September 13, 1970. **Page**: Various **Notes**: Comprehensive framework covering Acemoglu's three principles, machine usefulness concept, policy recommendations, AI productivity estimates, and contrast with Friedman doctrine
+
+<!-- /ref:acemoglu_technology_principles_policies -->
