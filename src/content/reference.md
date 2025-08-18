@@ -449,12 +449,91 @@ Drawing on the lessons of history, the authors propose in their concluding chapt
 
 <!-- /ref:acemoglu_technology_principles_policies -->
 
-<!-- ref:acemoglue_power_and_progress_2023 -->
+<!-- ref:acemoglu_power_and_progress_2023 -->
 
-## acemoglue_power_and_progress_2023
+## acemoglu_power_and_progress_2023
 
 Our key message over the past year to labor activists, business leaders, tech workers, university audiences, and anyone who shows up at independent bookstores is this: you can’t stop technological change, but you can shape it. That shaping involves pushing technology companies and politicians to think more clearly about how to organize production and how to deliver new products and services in ways that actually help people. Stop focusing on destroying jobs, invading privacy, and manipulating the minds of young people. Start emphasizing the importance of boosting human knowledge, expertise, and capabilities. Find ways to ensure that AI is truly pro-worker, creating new tasks and boosting pay for all, irrespective of their level of education.
 
+---
+
+· Advances in European ship design from the late Middle Ages enabled transoceanic trade and created massive fortunes for some Europeans. But the same kinds of ships also transported millions of enslaved people from Africa to the New World and made it possible to build systems of oppression that lasted for generations and created awful legacies persisting today.
+
+• Textile factories of the early British industrial revolution generated great wealth for a few but did not raise worker incomes for almost a hundred years. On the contrary, as the textile workers themselves keenly understood, work hours lengthened and conditions were horrible, both in the factory and in crowded cities. 
+
+• The cotton gin was a revolutionary innovation, greatly raising the productivity of cotton cultivation and turning the United States into the largest cotton exporter in the world. The same invention intensified the savagery of slavery as cotton plantations expanded across the American South. 
+
+• At the end of the nineteenth century, German chemist Fritz Haber developed artificial fertilizers that boosted agricultural yields. Subsequently, Haber and other scientists used the same ideas to design chemical weapons that killed and maimed hundreds of thousands on World War I battlefields.
+
+----
+
+Yes, we are greatly better off than our ancestors. Even the poor in Western societies enjoy much higher living standards today than three centuries ago, and we live much healthier, longer lives, with comforts that those alive a few hundred years ago could not have even imagined. And, of course, scientific and technological progress is a vital part of that story and will have to be the bedrock of any future process of shared gains. But the broad-based prosperity of the past was not the result of any automatic, guaranteed gains of technological progress. Rather, shared prosperity emerged because, and only when, the direction of technological advances and society’s approach to dividing the gains were pushed away from arrangements that primarily served a narrow elite.
+
+---
+
+Most people around the globe today are better off than our ancestors because citizens and workers in early industrial societies organized, challenged elite-dominated choices about technology and work conditions, and forced ways of sharing the gains from technical improvements more equitably.
+
+
+
+---
+
+There were lingering concerns about “technological unemployment,” a term coined by the economist John Maynard Keynes in 1930 to capture the possibility that new production methods could reduce the need for human labor and contribute to mass unemployment. Keynes understood that industrial techniques would continue to improve rapidly but also argued, “This means unemployment due to our discovery of means of economising the use of labour outrunning the pace at which we can find new uses for labour.” 
+
+Keynes was not the first to voice such fears. David Ricardo, another founder of modern economics, was initially optimistic about technology, maintaining that it would steadily increase workers’ living standards, and in 1819 he told the House of Commons that “machinery did not lessen the demand for labour.” But for the third edition of his seminal Principles of Political Economy and Taxation in 1821, Ricardo added a new chapter, “On Machinery,” in which he wrote, “It is more incumbent on me to declare my opinion on this question, because they have, on further reflection, undergone a considerable change.” As he explained in a private letter that year, “If machinery could do all the work that labour now does, there would be no demand for labour.”
+
+---
+
+In the 1960s, only about 6 percent of American men between the ages of 25 and 54 were out of the labor market, meaning they were long-term unemployed or not seeking a job. Today that number is around 12 percent, primarily because men without a college degree are finding it increasingly difficult to get well-paid jobs.
+
+---
+
+No longer. New digital technologies are everywhere and have made vast fortunes for entrepreneurs, executives, and some investors, yet real wages for most workers have scarcely increased. People without college education have seen their real earnings decline, on average, since 1980, and even workers with a college degree but no postgraduate education have seen only limited gains.
+
+---
+
+In fact, a thousand years of history and contemporary evidence make one thing abundantly clear: there is nothing automatic about new technologies bringing widespread prosperity. Whether they do or not is an economic, social, and political choice.
+
+---
+
+Acemoglu, Daron; Johnson, Simon. Power and Progress: Our Thousand-Year Struggle Over Technology and Prosperity (p. 18). (Function). Kindle Edition. 
+
+---
+
+
+
 **Source**:Acemoglu, Daron; Johnson, Simon. Power and Progress: Our Thousand-Year Struggle Over Technology and Prosperity (p. 9). (Function). Kindle Edition. 
 
-<!-- /ref:acemoglue_power_and_progress_2023 -->
+<!-- /ref:acemoglu_power_and_progress_2023 -->
+
+<!-- ref:greene_until_the_end_of_time_2020 -->
+
+理解世界有很多种方式。在科学的传统架构中，物理学管的是基本粒子及其各种组合，化学管的是原子和分子，生物学则是生命。这种分类法提供了一个用尺度来划分科学的方式，尽管粗疏但还算合理，今天仍然有人这样做，但在我上学的时候这种方式比现在更是明显得多。但最近，研究者们探究得越深，就越认识到理解各学科间的交叉内容必不可少。各门科学不是独立王国。如果把关注点从生命转到智慧生命，那么其他交叉领域——语言、文学、哲学、历史、艺术、神话、宗教、心理等等——就会成为年代叙事的中心。就算是最顽固的还原论者也承认，从分子运动角度来解释棒球轨迹是滑天下之大稽，援引这样的微观视角来解释击球手面对投手挥臂投球、观众欢声雷动、快球迅速逼近时的感觉，更是只能贻笑大方；反而是用人类思考这一层面的语言讲述的更高层次的故事，提供了好得多的见解。但是，这种更合适的人类层面的故事必须跟还原论阐释相容，这也是关键所在。我们是有物理之身的生灵，要服从物理学定律。因此，无论是物理学家大声疾呼只有他们的解释框架才最为根本，还是人文主义者对还原论肆无忌惮的自高自大嗤之以鼻，都没什么好处。
+
+---
+
+宇宙学家考虑过的一种情景是，假设早期宇宙处于狂暴、混沌的环境中，这样一来，整个空间中暴胀子场的取值就会剧烈波动，有点儿像沸水的表面。要产生反引力并引发大爆炸，我们需要一小块区域，在其中暴胀子场的值处处一致（考虑到量子振动，也可以说非常接近一致）。但要在混沌的此起彼伏中找到这么一块均一的区域，就好像烧开一大锅水，然后在翻腾不止的水面上找一块突然变平了的区域一样。你绝没见过这种事。不是因为不可能，而是因为可能性极低。要让这锅随机咕嘟的水中有一块表面区域在同一时刻都符合同一高度，产生一个平坦、有序、均一、低熵的组态，需要惊人的巧合。与此类似，要让剧烈波动的暴胀子场在一小块空间区域中取值一样从而引爆暴胀，也需要惊人的巧合才行。如果无法解释这种特殊、有序、低熵、均一的组态是怎么来的，物理学家会如芒在背。[8]
+为了减轻这种不适，有些研究者转而去依赖一个简单的结论：只要等待的时间够久，就连最不可能的事也会发生。把100枚硬币摇晃足够多的次数，最后总会有全都正面朝上的时候。你可别屏住呼吸等待这个时刻来临，但它终会出现。与此类似，我们可以说在混沌的环境中，虽然暴胀子场的取值剧烈波动，但迟早——完全出于偶然——会有一块微小的区域，其中让暴胀子场的取值这里高一点那里低一点的随机变动会互相对齐，让这个区域的暴胀子场取值处处相同。这需要统计上的机缘巧合，形成更有序因此熵也更低的状态，但它偶尔确会发生，虽然不常发生。但根据这种看法，也不用干等着。既然所有这些情节都发生在史前的某个时期，在我们称之为大爆炸的空间快速膨胀期之前，那也就没有谁在那儿逛荡，抱着双臂，脚打拍子，等着暴胀的引爆。所以，让这场暴胀前的预演爱持续多久就持续多久好了。只有等到统计上的巧合恰好发生，出现一块均匀的暴胀子场之后，情况才终会起变化：大爆炸引发了，空间暴胀，宇宙表演开始。
+虽然所有这些解释都没有解决最根本的起源问题（空间、时间、场或数学等等的起源），但还是展现了混沌的环境如何能产生暴胀所需的特殊、有序、低熵的条件。当一块微小空间终于实现了统计上不太可能的向低熵的跃迁时，反引力就会开动，推动这块空间变成快速膨胀的宇宙：发生大爆炸。
+
+---
+
+我上四年级的时候，有一天放学回家，打算热一块冰箱里的剩比萨饼。我把烤箱调到400华氏度（约204摄氏度），把比萨饼放到中间层烤架上，然后等着。过了大概10分钟，我想看看烤得怎么样了，结果吃惊地发现这块比萨饼就跟我刚拿出来的时候一样冷。然后我才恍然大悟，虽然我打开了煤气，但忘了点燃烤箱（我们的烤箱简朴得很，是那个年代的典型产品，没有内置点火器，所以每次用都得手动点燃）。这个程序我看着爸妈操作过几百次，于是就有样学样地把身子探进烤箱，划了根火柴，想把火柴伸到烤箱小小的引火孔里去。这时烤箱内膛里已经积累了大量煤气，所以我一划着火柴就爆炸了。一道火墙向我扑来。大火扑到我脸上时，我紧紧闭上了眼睛，但还是被烧焦了眉毛和睫毛，面部和耳朵受了二到三度的烧伤。最直接的生活教训，不但由父母大人耳提面命，也在接下来几个月里的痛苦愈合过程中不断加强，那就是该如何正确使用厨房设备（我最后还是重整旗鼓继续了烹饪事业，现在大部分时候都是我做饭——虽说在我的孩子们自己启动烤箱准备饭菜时，我确实会紧张那么一下下）。但在科学上更重要的一点是，熵增的道路上确实可能存在路障，只有借助催化作用才能跨过。我的意思如下：
+天然气（主要成分是碳氢化合物甲烷）能跟空气中的氧气和平共处，两种气体的分子可以相安无事地混在一起。然而，随着这些分子扩散开来混为一体，就很可能出现另一种截然不同且熵高得多的组态。但这种组态不会仅仅因分子继续大面积散开就能达到。高熵组态需要有化学反应才行。不用操心细节，但我还是简单说一下好了。一个天然气分子可以跟两个氧气分子结合，形成一个二氧化碳分子和两个水分子，最重要的是还会爆出一股能量。这就是天然气燃烧在分子层面的意义。这些气体分子是依靠牢固的化学键把原子连接在一起而成的，而化学反应则会将禁闭在化学键中的能量释放出来，有点儿像一束绷紧的橡皮筋突然绷断了那样。在我的烤箱历险记一例中，剧烈爆发出的能量——高度激发、快速运动的分子——灼伤了我的脸。所有这一切都告诉我们，释放储存在有序化学键中的能量，并将这些能量转化为快速、混乱的分子运动，这样的化学反应会令熵陡增。
+虽然对一个孩子让人遗憾的不幸遭遇来说这些细节非常特别，但这个插曲展现了一个广泛适用的物理学原理。通往熵增的道路上可能有减速带：天然气和氧气如果就那么自己混在那儿，并不会发生反应，不会燃烧起来，也不会达到可能范围内的更高熵组态。只有在能启动化学反应的催化作用的帮助下，这些化学组分才能清除熵增的障碍。在我的例子中，起催化作用的就是一根划燃的火柴。四年级的我划燃的这一点小火苗引发了多米诺骨牌效应，火苗中的能量打破了部分天然气分子中让原子紧密连接的化学键，使新解放出的碳原子和氢原子得以跟周围的氧原子结合，放出更多能量，破坏更多天然气分子内的化学键，这样推动反应一直进行下去。化学键的快速重连产生的能量一泻千里，就形成了爆炸。
+
+---
+
+你在早上握住一杯咖啡，然后发现这杯咖啡比刚倒出来的时候还热，这种事儿从来没有过。这是因为热只会从高温流向低温，因此你那杯热咖啡会把一部分的热传递到温度更低的环境中，让这杯咖啡的温度下降。[12]对我们这团巨大的气体云团来说也一样，热会从炽热的中心流向冰冷的壳层。现在，如果你觉得这样的热流动会让中心变冷外壳变热，让内外的温度彼此变得更接近，就像热量从你的咖啡传递到空气中，让热马克杯的温度与室温更接近了一样，我也不能怪你。但是——这非同寻常，也非同小可——在万有引力主导这场表演时，结论恰好相反。随着热从中心流出，中心会变得更热，而壳层会变得更冷。
+这当然很反直觉，但要理解这一点，也只须把我们已经强调过的几点连起来看。壳层在吸收中心所放的热时，这份额外的能量会让云团胀得更厉害。向外运动的分子仍然会受万有引力向内拉的作用，因此速度会进一步放慢。[13]总的结果是，膨胀的壳层温度会下降，而非上升。反过来，中心部分随着放热，会因能量降低而被进一步压缩。向内运动的分子跟万有引力施加的拉力是同一个方向，因此一边落下去又一边加速，这样被压缩的中心温度就会上升，而非下降。
+要是你的咖啡也这么玩儿，我肯定要建议你快点喝。你等得越久，这杯咖啡往周围空气中散发的热量会越多，本身也会变得越热。这对咖啡来说是天方夜谭，但对于大到足以让万有引力发挥主导作用的气体云团来说，情况正是如此。
+花点时间好好想想这个结论，你会意识到我们碰到的是一个自我放大的过程，跟信用卡债很像：你欠的越多，找你收的利息就越多，债务就会滚雪球似的越滚越大。对气体云团来说，其中心在一边收缩一边温度上升的同时，还会向较冷的壳层释放更多热量，并让中心进一步收缩，温度进一步上升。与此同时，壳层吸收的热会让壳层进一步膨胀，温度也进一步降低。中心和壳层间越来越大的温差会让热流动得更加剧烈，驱动这个滚雪球似的循环。
+
+---
+
+在过去几个世纪，物理学自身的嵌套故事集已经日臻完善，这些故事各自按与自身相关的不同距离尺度组织起来。我们物理学家不遗余力地想刻进学生心中的方法，其核心就是这样一套故事集。要了解被棒球巨星迈克·特劳特猛挥球棒击得瞬间变形的棒球如何回弹为原来的球形，需要分析棒球的分子结构。无数微观物理作用力正是在分子结构层面让变形复原，并让棒球进入轨道。但要理解棒球的轨迹，这种分子视角就没用了。当棒球旋转着急速飞出左外野围栏时，追踪上亿亿亿个分子的运动所需的海量数据会变得完全无法理解。碰到轨迹问题时，你得从分子杂草中抽身而出，去考察棒球整体的运动。你得讲述一个相关但并不相同的层次更高的故事。
+这个例子说明了一个简单但关涉广泛的认识：是我们问的问题，决定了讲什么故事能带来最有用的答案。是叙事结构，为大自然最偶然的一种性质赋予了价值。在每种尺度上，宇宙都要有条有理。牛顿对夸克和电子一无所知，但如果你告诉他棒球离开迈克·特劳特的球棒时的速度和方向，他睡着觉都能算出来这颗棒球的轨迹。从牛顿的时代至今，物理学有了很大进步，现在我们可以探测更细微的结构层次，这也极大丰富了我们的理解。但每个尺度上的描述本身也都有意义。假使并非如此——就比如说，理解棒球的运动需要理解其粒子的量子行为——那就很难看出来，我们怎么才能有所进步。长久以来，分而治之都是物理学的战斗口号，这个战略也赢得了激动人心的胜利。
+还有项同样重要的任务是把这些个别的故事综合起来，变成无缝衔接的叙述。肯尼斯·威尔逊就把对粒子物理学和场物理学的这种综合推向了最精细的形式，并因此获得了1982年的诺贝尔奖。[7]这位威尔逊创建了一种数学手段，可以在一系列不同尺度下分析物理系统——从特别小的、比如说比大型强子对撞机能探测的还要小得多的尺度，到一个多世纪以来一直都能达到的比前者大得多的原子尺度——然后系统地将这些故事衔接起来，从而清晰阐释了随着尺度迁移到自身的特定领域之外，每种故事是如何将叙事重担移交到下一个尺度的。这种方法叫“重正化群”，是现代物理学的核心内容。这种方法展现出了，当我们把关注转去另一种尺度时，用来在原尺度上分析物理现象的语言、概念框架和方程需要作何改变。物理学家们利用这种方法发展出了不同叙述嵌套的集合，并勾勒出了每种叙述如何将信息传达给相邻的叙述，并从中得到了已获大量实验和观测证实的细节翔实的预测。
+
+**Source**:  Greene, B. (2020). *Until the end of time: Mind, matter, and our search for meaning in an evolving universe*. Alfred A. Knopf.
+
+<!-- /ref:greene_until_the_end_of_time_2020 -->
