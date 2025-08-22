@@ -5,8 +5,13 @@ import type { ReferenceText } from '../types/references';
 
 // Parse rendered slot content and split on /// separators
 const renderedSlots = await Astro.slots.render('default');
-const parts = renderedSlots.split('///').map(part => part.trim()).filter(part => part.length > 0);
-
+// Handle both raw /// and HTML-wrapped <p>///</p> separators
+const parts = renderedSlots
+  .split(/<p>\s*\/\/\/\s*<\/p>/)
+  .flatMap(part => part.split('///'))
+  .map(part => part.trim())
+  .filter(part => part.length > 0);
+  
 let noteText = '';
 let referenceText = '';
 let source = '';
