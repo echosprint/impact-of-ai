@@ -7,8 +7,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "chapter": "node scripts/create-chapter.js",
-    "reference": "node scripts/add-reference.js"
+    "chapter": "node scripts/create-chapter.js"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.3",

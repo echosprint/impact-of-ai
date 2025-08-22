@@ -17,7 +17,7 @@
 ## ✨ Features
 
 - 📱 **Responsive Design** - Optimized for desktop, tablet, and mobile reading
-- 🔍 **Interactive References** - Hover and click citations for detailed source information  
+- 🔍 **Interactive References** - Self-contained citations with embedded reference content  
 - 📑 **Smart Navigation** - Sticky table of contents with progress tracking
 - 🎨 **Beautiful Typography** - Optimized Chinese text rendering with proper spacing
 - ⚡ **Fast Loading** - Static site generation with optimal performance
@@ -84,7 +84,6 @@ Visit `http://localhost:4321` to start reading!
 | `pnpm build` | Build production site to `./dist/` |
 | `pnpm preview` | Preview build locally |
 | `pnpm chapter` | Create a new chapter (interactive) |
-| `pnpm reference` | Add a new reference (interactive) |
 
 ## 📖 Content Management
 
@@ -100,19 +99,22 @@ Or manually create files in `src/content/chapters/` following the existing struc
 
 ### Managing References
 
-Add citations using the reference tool:
-
-```bash
-pnpm reference
-```
-
-References are stored in `src/content/reference.md` and can be linked from any chapter using:
+References are now embedded directly within Note components using triple-slash separators:
 
 ```markdown
-<Note ref="reference-id">
-Your note content here.
+<Note>
+Your citation text that appears inline
+///
+Detailed reference explanation with **markdown formatting**
+///
+Source: Author Name, "Book Title", Publisher, 2024, pp. 123-145
 </Note>
 ```
+
+**Benefits:**
+- Self-contained citations (no external reference file needed)
+- GitHub-friendly formatting (separators are plain text)
+- Flexible per-note reference content
 
 ### Content Structure
 

@@ -1,44 +1,54 @@
 ---
-import { parseReferenceFile } from '../utils/notes-parser';
-import { processMarkdownLinks, formatReferenceContent } from '../utils/markdown';
 import NoteContent from './notes/NoteContent.astro';
 import ReferenceCard from './references/ReferenceCard.astro';
-import fs from 'fs';
-import path from 'path';
-import type { ComponentProps, ReferenceText } from '../types/references';
+import type { ReferenceText } from '../types/references';
 
-export interface Props extends ComponentProps {}
+// Parse rendered slot content and split on /// separators
+const renderedSlots = await Astro.slots.render('default');
+const parts = renderedSlots.split('///').map(part => part.trim()).filter(part => part.length > 0);
 
-const { ref } = Astro.props;
-const slots = await Astro.slots.render('default');
+let noteText = '';
+let referenceText = '';
+let source = '';
+let reference: ReferenceText | null = null;
 
-// Load references
-let references = new Map<string, ReferenceText>();
-try {
-  const referenceFilePath = path.join(process.cwd(), 'src/content/reference.md');
-  if (fs.existsSync(referenceFilePath)) {
-    const referenceContent = fs.readFileSync(referenceFilePath, 'utf-8');
-    references = parseReferenceFile(referenceContent);
-  }
-} catch (error) {
-  console.error('Error loading references:', error);
+if (parts.length >= 1) {
+  noteText = parts[0];
+}
+if (parts.length >= 2) {
+  referenceText = parts[1];
+}
+if (parts.length >= 3) {
+  source = parts[2];
 }
 
-const reference = references.get(ref);
+// Create reference object if we have reference text
+if (referenceText) {
+  reference = {
+    text: referenceText,
+    source: source || '',
+    url: '',
+    date: '',
+    title: ''
+  };
+}
+
+// Generate a unique note ID based on content
+const noteId = `note-${Math.random().toString(36).slice(2, 11)}`;
 ---
 
-<NoteContent noteId={ref} hasReference={!!reference}>
-  <div set:html={slots}></div>
+<NoteContent noteId={noteId} hasReference={!!reference}>
+  <div set:html={noteText}></div>
 </NoteContent>
 
 <!-- Reference text for right column positioning -->
 {reference && (
   <div 
     class="reference-for-positioning hidden" 
-    data-note-id={ref}
+    data-note-id={noteId}
     data-reference-content={JSON.stringify(reference)}
   >
-    <ReferenceCard reference={reference} noteId={ref} />
+    <ReferenceCard reference={reference} noteId={noteId} />
   </div>
 )}
 

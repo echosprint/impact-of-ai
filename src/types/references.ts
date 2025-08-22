@@ -3,11 +3,11 @@
  */
 
 export interface ReferenceText {
-  id: string;
-  content: string;
+  text: string;
   source?: string;
-  page?: string;
-  note?: string;
+  url?: string;
+  date?: string;
+  title?: string;
 }
 
 export interface ReferenceItem {
@@ -76,7 +76,6 @@ export interface ElementRefs {
 }
 
 export interface ComponentProps {
-  ref: string;
   noteId?: string;
   noteContent?: string;
   referenceText?: string;
