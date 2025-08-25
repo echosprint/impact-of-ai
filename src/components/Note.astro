@@ -24,7 +24,7 @@ if (parts.length >= 2) {
   referenceText = parts[1];
 }
 if (parts.length >= 3) {
-  source = parts[2];
+  source = parts[2].replace(/^<p>|<\/p>$/g, '');
 }
 
 // Create reference object if we have reference text
