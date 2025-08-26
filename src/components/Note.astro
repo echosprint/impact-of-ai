@@ -234,62 +234,7 @@ const noteId = `note-${Math.random().toString(36).slice(2, 11)}`;
   }
   
   
-  /* Responsive adjustments for reference cards */
-  @media (min-width: 1024px) {
-    .reference-card {
-      margin: 0;
-      max-width: none;
-    }
-  }
-  
-  @media (max-width: 1023px) {
-    .reference-card {
-      margin: 0;
-      max-width: none;
-    }
-    
-    .reference-card :global(p.mixed-text) {
-      font-size: 0.8rem !important;
-    }
-    
-    .reference-card.expanded :global(p.mixed-text) {
-      font-size: 0.9rem !important;
-    }
-  }
-  
-  @media (max-width: 640px) {
-    .reference-card {
-      border-radius: 12px;
-      max-height: 60vh; /* Smaller max height on mobile */
-    }
-    
-    .reference-card :global(p.mixed-text) {
-      font-size: 0.75rem !important;
-    }
-    
-    .reference-card.expanded :global(p.mixed-text) {
-      font-size: 0.85rem !important;
-    }
-    
-    .reference-content {
-      max-height: calc(60vh - 60px) !important; /* Adjust for mobile header */
-    }
-    
-    .reference-card.expanded {
-      width: 125% !important; /* Reduced from 145% to 125% */
-      max-width: 320px; /* Reduced maximum for mobile */
-      transform: translateY(-5px) translateX(-20%); /* Removed scale for mobile */
-    }
-  }
-  
-  /* Tablet expand adjustments */
-  @media (max-width: 1023px) and (min-width: 641px) {
-    .reference-card.expanded {
-      width: 135% !important; /* Reduced from 155% to 135% */
-      max-width: 400px; /* Reduced maximum for tablet */
-      transform: translateY(-6px) translateX(-26%); /* Removed scale for tablet */
-    }
-  }
+  /* Responsive adjustments are now handled in dedicated CSS files */
   
   /* Connection line on reference wrapper - positioned outside card */
   .reference-wrapper::before {
@@ -321,84 +266,9 @@ const noteId = `note-${Math.random().toString(36).slice(2, 11)}`;
     z-index: 10;
   }
   
-  .reference-card.expanded {
-    background: rgba(250, 248, 242, 0.98);
-    box-shadow: 0 24px 72px rgba(139, 69, 19, 0.3), 0 12px 32px rgba(0, 0, 0, 0.18);
-    border-color: rgba(139, 69, 19, 0.5);
-    transform: translateY(-8px) translateX(-50%); /* Removed scale to prevent reflow */
-    width: 160% !important; /* Increased from 130% to 160% */
-    max-width: 640px; /* Increased maximum width */
-    z-index: 30 !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
+  /* Reference card expanded state handled in dedicated CSS files */
   
-  /* Ensure smooth transition for width changes */
-  .reference-card {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .reference-card :global(p.mixed-text) {
-    margin-bottom: 0.75rem;
-    line-height: 1.6;
-    color: #374151;
-    font-size: 0.85rem;
-    text-indent: 2em !important; /* Chinese paragraph indentation - override prose */
-    transition: margin-bottom 0.3s ease;
-  }
-  
-  .reference-card.expanded :global(p.mixed-text) {
-    font-size: 1.0rem;
-    line-height: 1.6;
-    margin-bottom: 1rem; /* More space between paragraphs */
-    text-indent: 2em !important; /* Chinese paragraph indentation - override prose */
-  }
-  
-  .reference-card :global(p.mixed-text:last-child) {
-    margin-bottom: 0;
-  }
-  
-  .reference-card.expanded :global(p.mixed-text:last-child) {
-    margin-bottom: 0;
-  }
-  
-  /* Horizontal separator styling */
-  .reference-card :global(hr.reference-separator) {
-    border: none;
-    height: 1px;
-    background-color: #c4a882;
-    margin: 1.5rem 1rem;
-    opacity: 0.4;
-  }
-  
-  .reference-card.expanded :global(hr.reference-separator) {
-    margin: 2rem 1.5rem;
-    opacity: 0.6;
-  }
-  
-  /* Reference link styling */
-  .reference-card :global(a.reference-link) {
-    color: #d97706;
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: all 0.2s ease;
-    word-break: break-all;
-    overflow-wrap: break-word;
-    hyphens: auto;
-  }
-  
-  .reference-card :global(a.reference-link:hover) {
-    color: #b45309;
-    border-bottom-color: #d97706;
-  }
-  
-  .reference-card.expanded :global(a.reference-link) {
-    color: #d97706;
-  }
-  
-  .reference-card.expanded :global(a.reference-link:hover) {
-    color: #92400e;
-    border-bottom-color: #b45309;
-  }
+  /* Reference card styles are now centralized in dedicated CSS files */
   
   /* Scrollable content area styling */
   .reference-content {
@@ -456,62 +326,7 @@ const noteId = `note-${Math.random().toString(36).slice(2, 11)}`;
     z-index: 5;
   }
   
-  /* Enhanced header styling - consistent size to prevent reflow */
-  .reference-header span {
-    font-size: 0.8125rem;
-    color: #6b7280;
-    font-weight: 500;
-    transition: color 0.3s ease, font-weight 0.3s ease; /* Only animate color and weight */
-  }
-  
-  /* Expand/collapse button styling */
-  .expand-toggle {
-    cursor: pointer;
-    border: none;
-    background: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  
-  .expand-toggle:focus {
-    outline: none; /* Remove blue focus outline */
-  }
-  
-  .expand-toggle:focus-visible {
-    outline: 2px solid #d97706; /* Amber outline for keyboard navigation only */
-    outline-offset: 2px;
-  }
-  
-  .reference-card.expanded .reference-header span {
-    font-size: 0.8125rem; /* Keep same size to prevent reflow */
-    color: #6b7280; /* Keep original color when expanded */
-    font-weight: 600; /* Bold when expanded */
-  }
-  
-  /* Enhanced metadata styling - consistent size to prevent reflow */
-  .reference-card div:last-child {
-    padding-top: 0.75rem;
-    font-size: 0.8125rem;
-    transition: padding-top 0.3s ease; /* Only animate padding */
-  }
-  
-  .reference-card div:last-child div {
-    color: #4b5563;
-    font-weight: 450;
-    transition: color 0.3s ease, font-weight 0.3s ease; /* Only animate color and weight */
-  }
-  
-  .reference-card.expanded div:last-child {
-    padding-top: 1rem; /* More padding when expanded */
-    font-size: 0.8125rem; /* Keep same size to prevent reflow */
-  }
-  
-  .reference-card.expanded div:last-child div {
-    color: #374151; /* Darker when expanded */
-    font-weight: 500; /* Bold when expanded */
-  }
+  /* Header and metadata styling handled in dedicated CSS files */
   
   
   /* Smooth transitions for all notes */

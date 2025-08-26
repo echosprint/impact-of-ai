@@ -104,12 +104,20 @@ class ReferenceManager {
   private cloneReferenceElement(referenceElement: HTMLElement, noteId: string): HTMLElement {
     const clonedReference = referenceElement.cloneNode(true) as HTMLElement;
     clonedReference.classList.remove('hidden');
+    
+    // Ensure consistent initial state for all cloned references
     clonedReference.style.display = 'none';
+    clonedReference.style.opacity = '0';
     clonedReference.style.pointerEvents = 'auto';
     
     // Ensure reference starts in collapsed state
     const refs = this.getElementRefs(clonedReference);
     this.collapseReference(refs);
+    
+    // Explicitly ensure reference card is in collapsed state
+    if (refs.referenceCard) {
+      refs.referenceCard.classList.remove('expanded');
+    }
     
     // Set up event handlers
     this.setupReferenceEventHandlers(clonedReference, refs);
@@ -225,11 +233,11 @@ class ReferenceManager {
    * Show a reference element
    */
   private showReference(ref: ReferenceItem, needsPositioning: boolean): void {
+    // Always ensure consistent baseline state for all references
+    const refs = this.getElementRefs(ref.element);
+    this.collapseReference(refs);
+    
     if (needsPositioning) {
-      // Force collapse when showing reference
-      const refs = this.getElementRefs(ref.element);
-      this.collapseReference(refs);
-      
       // Calculate and apply positioning
       const referencesColumn = document.getElementById('references-column');
       const columnRect = referencesColumn?.getBoundingClientRect() || null;
@@ -247,6 +255,12 @@ class ReferenceManager {
         position: config.left || `right: ${config.right}`,
         layout
       });
+    } else {
+      // Even if positioning isn't needed, ensure consistent display and opacity
+      ref.element.style.display = 'block';
+      ref.element.style.opacity = '1';
+      
+      console.log(`Showing reference ${ref.noteId} (no positioning needed)`);
     }
   }
 
