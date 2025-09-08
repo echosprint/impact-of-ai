@@ -16,9 +16,10 @@ async function handleRequest(req, res) {
   const { pathname } = parse(req.url, true);
   const method = req.method;
   
-  // Log all requests (except OPTIONS for cleaner logs)
-  if (method !== 'OPTIONS') {
-    console.log(`📨 ${method} ${pathname}`);
+  // Log requests (except OPTIONS and GET /api/files for cleaner logs)
+  if (method !== 'OPTIONS' && !(method === 'GET' && pathname === '/api/files')) {
+    const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
+    console.log(`${timestamp} ${method} ${pathname}`);
   }
 
   // Handle preflight CORS requests
@@ -56,7 +57,8 @@ async function handleRequest(req, res) {
         lastModified: filesWithStats.length > 0 ? filesWithStats[0].name : null
       }));
     } catch (error) {
-      console.error(`❌ Error reading chapters directory:`, error);
+      const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
+      console.error(`${timestamp} [error] reading chapters directory:`, error);
       res.writeHead(500, CORS_HEADERS);
       res.end(JSON.stringify({ 
         error: 'Failed to read chapters directory',
@@ -100,9 +102,8 @@ async function handleRequest(req, res) {
         await fs.appendFile(safePath, appendContent, 'utf8');
 
         // Log the successful append operation
-        const timestamp = new Date().toISOString();
-        const contentPreview = content.length > 50 ? content.substring(0, 50) + '...' : content;
-        console.log(`✅ [${timestamp}] Appended to "${filename}": ${contentPreview}`);
+        const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
+        console.log(`${timestamp} [append] src/content/chapters/${filename}`);
 
         res.writeHead(200, CORS_HEADERS);
         res.end(JSON.stringify({ 
@@ -110,7 +111,8 @@ async function handleRequest(req, res) {
           message: `Content appended to ${filename}` 
         }));
       } catch (error) {
-        console.error(`❌ Error appending to ${filename}:`, error);
+        const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
+        console.error(`${timestamp} [error] appending to ${filename}:`, error);
         res.writeHead(500, CORS_HEADERS);
         res.end(JSON.stringify({ 
           error: 'Failed to append content',
@@ -129,13 +131,13 @@ async function handleRequest(req, res) {
 const server = createServer(handleRequest);
 
 server.listen(PORT, () => {
-  console.log(`📝 API Server running on http://localhost:${PORT}`);
-  console.log(`📁 Serving chapters from: ${join(process.cwd(), 'src', 'content', 'chapters')}`);
+  console.log(`API Server running on http://localhost:${PORT}`);
+  console.log(`Serving chapters from: ${join(process.cwd(), 'src', 'content', 'chapters')}`);
 });
 
 // Graceful shutdown
 process.on('SIGINT', () => {
-  console.log('\n🛑 Shutting down API server...');
+  console.log('\nShutting down API server...');
   server.close(() => {
     process.exit(0);
   });
