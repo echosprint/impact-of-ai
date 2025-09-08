@@ -1,0 +1,11 @@
+{
+  "name": "impact-of-ai-api",
+  "version": "1.0.0",
+  "description": "Standalone API server for development",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  }
+}

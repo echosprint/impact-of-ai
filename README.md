@@ -80,10 +80,20 @@ Visit `http://localhost:4321` to start reading!
 | Command | Action |
 |---------|--------|
 | `pnpm install` | Install dependencies |
-| `pnpm dev` | Start local dev server at `localhost:4321` |
+| `pnpm dev` | Start both Astro and API servers for full development experience |
+| `pnpm dev:astro` | Start only the Astro dev server |
+| `pnpm dev:api` | Start only the API server |
 | `pnpm build` | Build production site to `./dist/` |
 | `pnpm preview` | Preview build locally |
 | `pnpm chapter` | Create a new chapter (interactive) |
+
+### Development Setup
+
+The `pnpm dev` command starts two servers concurrently:
+- **Astro Server**: Main site at `http://localhost:4321` (or next available port)
+- **API Server**: Development API at `http://localhost:3001`
+
+The API server provides file management capabilities for the `/editor` page during development.
 
 ## 📖 Content Management
 
