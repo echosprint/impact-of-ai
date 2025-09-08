@@ -5,6 +5,14 @@ import path from 'path';
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
+  // Only work in development
+  if (import.meta.env.PROD) {
+    return new Response(JSON.stringify({ error: 'Not available in production' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   try {
     const body = await request.json();
     const { filename, content } = body;
