@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-export const prerender = false;
+export const prerender = true;
 
 export const GET: APIRoute = async () => {
   // Only work in development
