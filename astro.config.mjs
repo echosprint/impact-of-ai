@@ -5,26 +5,6 @@ import rehypeKatex from 'rehype-katex';
 import mdx from '@astrojs/mdx';
 import tailwindcss from '@tailwindcss/vite';
 
-// Custom integration to exclude dev-only API routes in production
-function excludeDevAPIRoutes() {
-  return {
-    name: 'exclude-dev-api',
-    hooks: {
-      // @ts-ignore
-      'astro:build:setup': ({ pages }) => {
-        if (process.env.NODE_ENV === 'production') {
-          // Filter out API routes during production build
-          // @ts-ignore
-          const filteredPages = pages.filter(page => 
-            !page.pathname?.includes('/api/append') && 
-            !page.pathname?.includes('/api/files')
-          );
-          pages.splice(0, pages.length, ...filteredPages);
-        }
-      }
-    }
-  };
-}
 
 // https://astro.build/config
 export default defineConfig({
@@ -36,7 +16,6 @@ export default defineConfig({
       remarkPlugins: [remarkMath],
       rehypePlugins: [rehypeKatex],
     }),
-    excludeDevAPIRoutes(),
   ],
   vite: {
     plugins: [tailwindcss()]
