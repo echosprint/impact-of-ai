@@ -2,8 +2,7 @@ import type { APIRoute } from 'astro';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-export const prerender = process.env.NODE_ENV === 'production';
-console.log(prerender)
+export const prerender = false;
 export const POST: APIRoute = async ({ request }) => {
   // Only work in development
   if (import.meta.env.PROD) {
