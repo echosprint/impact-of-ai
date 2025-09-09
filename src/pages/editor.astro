@@ -29,9 +29,9 @@ if (import.meta.env.PROD) {
         <button 
           type="submit" 
           form="editorForm"
-          class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-full transition-colors"
+          class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md font-normal transition-colors"
         >
-          Publish
+          Commit
         </button>
       </div>
     </div>
@@ -39,8 +39,8 @@ if (import.meta.env.PROD) {
 
   <!-- Writing area -->
   <main class="pt-20 min-h-screen bg-white">
-    <div class="max-w-7xl mx-auto px-6 py-12">
-      <form id="editorForm" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="max-w-3xl mx-auto px-6 py-12">
+      <form id="editorForm" class="flex flex-col gap-6">
         <!-- Writing Section -->
         <div>
           <textarea 
@@ -133,7 +133,7 @@ if (import.meta.env.PROD) {
       // Comprehensive bibliography format patterns
       const sourcePatterns = [
         // Explicit source indicators
-        /^(Source|来源|出处|作者)[：:]\s*.+/i,
+        /^(Source|source|来源|出处|作者)[：:]\s*.+/i,
         
         // APA Format
         /^[A-Z][a-zA-Z\s,.-]+\(\d{4}\)\./,                    // Author, A. (2024). Title
@@ -311,7 +311,7 @@ if (import.meta.env.PROD) {
       // Disable submit button temporarily
       const submitBtn = document.querySelector('button[type="submit"]') as HTMLButtonElement;
       const originalText = submitBtn.textContent;
-      submitBtn.textContent = 'Publishing...';
+      submitBtn.textContent = 'Committing...';
       submitBtn.disabled = true;
 
       try {
@@ -326,13 +326,13 @@ if (import.meta.env.PROD) {
         const result = await response.json();
         
         if (result.success) {
-          showMessage('Content published successfully', 'success');
+          showMessage('Content committed successfully', 'success');
           contentArea.value = '';
           referenceArea.value = '';
           autoResize(contentArea);
           autoResize(referenceArea);
         } else {
-          showMessage(result.error || 'Failed to publish', 'error');
+          showMessage(result.error || 'Failed to commit', 'error');
         }
       } catch (error) {
         showMessage('Network error, please try again', 'error');
@@ -352,6 +352,15 @@ if (import.meta.env.PROD) {
       const textarea = e.target as HTMLTextAreaElement;
       autoResize(textarea);
       updateSourceIndicator(textarea.value);
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Ctrl+Enter or Cmd+Enter to commit
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('editorForm')!.dispatchEvent(new Event('submit'));
+      }
     });
 
     // Focus content textarea and initialize on load
