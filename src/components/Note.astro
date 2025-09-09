@@ -38,8 +38,9 @@ if (referenceText) {
   };
 }
 
-// Generate a unique note ID based on content
-const noteId = `note-${Math.random().toString(36).slice(2, 11)}`;
+// Use only the provided ID from the Note component attributes
+const { id } = Astro.props;
+const noteId = id || '';
 ---
 
 <NoteContent noteId={noteId} hasReference={!!reference}>

@@ -26,5 +26,8 @@ export default defineConfig({
     },
     remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeKatex],
-  }
+  },
+  devToolbar: {
+    enabled: false
+  },
 });

@@ -18,8 +18,7 @@ if (import.meta.env.PROD) {
         <select 
           id="fileSelect" 
           name="filename" 
-          class="text-sm border-none bg-transparent focus:outline-none text-gray-600"
-          required
+          class="text-xs border-none bg-transparent focus:outline-none text-gray-400 hover:text-gray-600 transition-colors appearance-none cursor-pointer"
         >
           <option value="">Select chapter...</option>
         </select>
@@ -29,9 +28,10 @@ if (import.meta.env.PROD) {
         <button 
           type="submit" 
           form="editorForm"
-          class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md font-normal transition-colors"
+          class="bg-gray-50 hover:bg-gray-100 text-gray-300 hover:text-gray-500 text-xs px-3 py-1.5 rounded border border-gray-100 font-light transition-colors"
+          title="Use Ctrl+Enter or Cmd+Enter instead"
         >
-          Commit
+          ⌘↵
         </button>
       </div>
     </div>
@@ -46,9 +46,8 @@ if (import.meta.env.PROD) {
           <textarea 
             id="contentArea" 
             name="content" 
-            class="w-full min-h-[200px] resize-none border border-gray-200 rounded-lg p-4 outline-none text-lg leading-relaxed placeholder-gray-400 focus:border-green-500 focus:ring-1 focus:ring-green-500"
+            class="w-full min-h-[200px] resize-none border border-gray-200 rounded-lg p-4 outline-none text-lg leading-relaxed placeholder-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500"
             placeholder="Write notes..."
-            required
             style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif; overflow: hidden;"
           ></textarea>
         </div>
@@ -58,7 +57,7 @@ if (import.meta.env.PROD) {
           <textarea 
             id="referenceArea" 
             name="reference" 
-            class="w-full min-h-[200px] resize-none border border-gray-200 rounded-lg p-4 outline-none text-base leading-relaxed placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            class="w-full min-h-[200px] resize-none border border-gray-200 rounded-lg p-4 outline-none text-base leading-relaxed placeholder-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             placeholder="Quotes..."
             style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif; background-color: #fafafa; overflow: hidden;"
           ></textarea>
@@ -102,10 +101,10 @@ if (import.meta.env.PROD) {
     // Show toast message
     function showMessage(text: string, type: 'success' | 'error') {
       const messageEl = document.getElementById('message')!;
-      messageEl.className = `fixed bottom-6 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-full shadow-lg transition-all duration-300 text-sm ${
+      messageEl.className = `fixed bottom-6 left-1/2 transform -translate-x-1/2 px-3 py-1.5 rounded-full shadow-md transition-all duration-300 text-xs ${
         type === 'success' 
           ? 'bg-green-600 text-white' 
-          : 'bg-red-600 text-white'
+          : 'bg-orange-100 text-orange-800 border border-orange-200'
       }`;
       messageEl.textContent = text;
       messageEl.style.opacity = '1';
@@ -278,10 +277,33 @@ if (import.meta.env.PROD) {
       const content = contentArea.value;
       const reference = referenceArea.value;
       
-      if (!filename || !content.trim()) {
-        showMessage('Please select a file and enter content', 'error');
+      if (!filename) {
+        showMessage('Please select a chapter', 'error');
         return;
       }
+      
+      if (!content.trim()) {
+        showMessage('empty notes', 'error');
+        return;
+      }
+
+      // Generate noteId using content + reference + timestamp, then hash to 5 chars
+      function generateNoteId(content: string, reference: string): string {
+        const timestamp = Date.now().toString();
+        const combined = content.trim() + '|' + reference.trim() + '|' + timestamp;
+        
+        // Better hash function (FNV-1a variant)
+        let hash = 2166136261;
+        for (let i = 0; i < combined.length; i++) {
+          hash ^= combined.charCodeAt(i);
+          hash = (hash * 16777619) >>> 0; // Keep as 32-bit unsigned
+        }
+        
+        // Convert to hex and take first 5 chars
+        return hash.toString(16).substring(0, 5);
+      }
+      
+      const noteId = generateNoteId(content.trim(), reference.trim());
 
       // Format as Note component with smart source detection
       let finalContent;
@@ -295,17 +317,17 @@ if (import.meta.env.PROD) {
           const referenceContent = referenceLines.slice(0, -1).join('\n').trim();
           
           if (referenceContent) {
-            finalContent = `<Note>\n${content.trim()}\n///\n${referenceContent}\n///\n${source}\n</Note>`;
+            finalContent = `<Note id="${noteId}">\n${content.trim()}\n///\n${referenceContent}\n///\n${source}\n</Note>`;
           } else {
             // Only source, no reference content
-            finalContent = `<Note>\n${content.trim()}\n///\n\n///\n${source}\n</Note>`;
+            finalContent = `<Note id="${noteId}">\n${content.trim()}\n///\n\n///\n${source}\n</Note>`;
           }
         } else {
           // No source detected, treat entire reference as reference content
-          finalContent = `<Note>\n${content.trim()}\n///\n${reference.trim()}\n///\nSource: [Please add source information]\n</Note>`;
+          finalContent = `<Note id="${noteId}">\n${content.trim()}\n///\n${reference.trim()}\n///\nSource: [Please add source information]\n</Note>`;
         }
       } else {
-        finalContent = `<Note>\n${content.trim()}\n</Note>`;
+        finalContent = `<Note id="${noteId}">\n${content.trim()}\n</Note>`;
       }
 
       // Disable submit button temporarily
