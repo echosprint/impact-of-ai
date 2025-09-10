@@ -55,9 +55,9 @@ if (import.meta.env.PROD) {
           <textarea 
             id="contentArea" 
             name="content" 
-            class="w-full min-h-[200px] resize-none border border-gray-200 rounded-lg p-4 outline-none text-lg leading-relaxed placeholder-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500"
+            class="w-full min-h-[200px] resize-none border border-gray-200 rounded-lg p-4 outline-none text-base placeholder-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500"
             placeholder="Write notes..."
-            style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif; overflow: hidden;"
+            style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif; word-spacing: -0.05em; letter-spacing: -0.01em; line-height: 1.6; overflow: hidden;"
           ></textarea>
         </div>
 
@@ -66,9 +66,9 @@ if (import.meta.env.PROD) {
           <textarea 
             id="referenceArea" 
             name="reference" 
-            class="w-full min-h-[200px] resize-none border border-gray-200 rounded-lg p-4 outline-none text-base leading-relaxed placeholder-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            class="w-full min-h-[200px] resize-none border border-gray-200 rounded-lg p-4 outline-none text-sm placeholder-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             placeholder="Quotes..."
-            style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif; background-color: #fafafa; overflow: hidden;"
+            style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif; word-spacing: -0.05em; letter-spacing: -0.01em; line-height: 1.6; background-color: #fafafa; overflow-y: auto;"
           ></textarea>
           <div id="sourceIndicator" class="absolute bottom-3 right-3 px-2 py-1 text-xs rounded-md transition-all duration-300 opacity-0 pointer-events-none">
           </div>
@@ -126,10 +126,25 @@ if (import.meta.env.PROD) {
       }, 3000);
     }
 
-    // Auto-resize textarea
-    function autoResize(textarea: HTMLTextAreaElement) {
+    // Auto-resize textarea while preserving scroll position
+    function autoResize(textarea: HTMLTextAreaElement, preserveScroll: boolean = true) {
+      // Save current state
+      const scrollTop = preserveScroll ? textarea.scrollTop : 0;
+      const maxScrollTop = textarea.scrollHeight - textarea.clientHeight;
+      
+      // Reset height to get accurate scrollHeight
       textarea.style.height = 'auto';
-      textarea.style.height = Math.max(textarea.scrollHeight, 200) + 'px';
+      
+      // Calculate new height with some padding
+      const newHeight = Math.max(textarea.scrollHeight + 10, 200);
+      textarea.style.height = newHeight + 'px';
+      
+      // Restore scroll position if preserving
+      if (preserveScroll && scrollTop > 0) {
+        // Ensure scroll position is valid for new height
+        const newMaxScroll = textarea.scrollHeight - textarea.clientHeight;
+        textarea.scrollTop = Math.min(scrollTop, Math.max(0, newMaxScroll));
+      }
     }
 
     // Detect potential source in reference text
@@ -450,6 +465,59 @@ if (import.meta.env.PROD) {
       const textarea = e.target as HTMLTextAreaElement;
       autoResize(textarea);
       updateSourceIndicator(textarea.value);
+    });
+
+    // Handle paste events specifically to prevent unwanted scrolling
+    document.getElementById('referenceArea')!.addEventListener('paste', (e) => {
+      const textarea = e.target as HTMLTextAreaElement;
+      
+      // Get paste data
+      const clipboardData = e.clipboardData || (window as any).clipboardData;
+      const pastedData = clipboardData?.getData('Text') || '';
+      
+      // If it's a large paste, handle it specially
+      if (pastedData.length > 100) {
+        e.preventDefault(); // Prevent default paste behavior
+        
+        // Get current cursor position
+        const cursorStart = textarea.selectionStart;
+        
+        // Insert the text manually
+        const before = textarea.value.substring(0, cursorStart);
+        const after = textarea.value.substring(textarea.selectionEnd);
+        textarea.value = before + pastedData + after;
+        
+        // Set cursor position after pasted text
+        const newCursorPos = cursorStart + pastedData.length;
+        
+        // Resize without changing scroll position initially
+        autoResize(textarea, true);
+        
+        // Calculate where to scroll to show the pasted content
+        const textBeforeCursor = textarea.value.substring(0, newCursorPos);
+        const linesBeforeCursor = textBeforeCursor.split('\n').length;
+        const lineHeight = parseInt(getComputedStyle(textarea).lineHeight) || 22;
+        const visibleLines = Math.floor(textarea.clientHeight / lineHeight);
+        
+        // Position cursor
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+        
+        // Smart scroll: show some context above the cursor
+        const targetScrollTop = Math.max(0, (linesBeforeCursor - Math.floor(visibleLines * 0.7)) * lineHeight);
+        textarea.scrollTop = targetScrollTop;
+        
+        // Update source indicator
+        updateSourceIndicator(textarea.value);
+        
+        // Trigger input event for any other listeners
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+      } else {
+        // For small pastes, use normal handling with slight delay
+        setTimeout(() => {
+          autoResize(textarea, true);
+          updateSourceIndicator(textarea.value);
+        }, 10);
+      }
     });
 
     // Keyboard shortcuts
