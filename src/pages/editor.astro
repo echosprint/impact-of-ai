@@ -108,9 +108,17 @@ if (import.meta.env.PROD) {
       }
     }
 
+    // Track if message is currently showing to prevent duplicate submissions
+    let isMessageShowing = false;
+
     // Show toast message
-    function showMessage(text: string, type: 'success' | 'error') {
+    function showMessage(text: string, type: 'success' | 'error', callback?: () => void) {
       const messageEl = document.getElementById('message')!;
+      const submitBtn = document.querySelector('button[type="submit"]') as HTMLButtonElement;
+      
+      // Set message showing state
+      isMessageShowing = true;
+      
       messageEl.className = `fixed bottom-6 left-1/2 transform -translate-x-1/2 px-3 py-1.5 rounded-full shadow-md transition-all duration-300 text-xs ${
         type === 'success' 
           ? 'bg-green-600 text-white' 
@@ -120,10 +128,27 @@ if (import.meta.env.PROD) {
       messageEl.style.opacity = '1';
       messageEl.style.pointerEvents = 'auto';
       
+      // Show message for at least 1 second, then fade out over 2 seconds  
+      const displayDuration = Math.max(1000, text.length * 50); // Minimum 1 second, longer for longer messages
+      
       setTimeout(() => {
         messageEl.style.opacity = '0';
         messageEl.style.pointerEvents = 'none';
-      }, 3000);
+        
+        // Execute callback after message disappears
+        if (callback) {
+          setTimeout(() => {
+            callback();
+            // Re-enable submissions after cleanup is complete
+            isMessageShowing = false;
+          }, 300); // Wait for fade transition to complete
+        } else {
+          // Re-enable submissions if no callback
+          setTimeout(() => {
+            isMessageShowing = false;
+          }, 300);
+        }
+      }, displayDuration);
     }
 
     // Auto-resize textarea while preserving scroll position
@@ -295,6 +320,12 @@ if (import.meta.env.PROD) {
       e.preventDefault();
       console.log('Form submit triggered');
       
+      // Prevent submission if message is currently showing
+      if (isMessageShowing) {
+        console.log('Form submission blocked - message is showing');
+        return;
+      }
+      
       const select = document.getElementById('fileSelect') as HTMLSelectElement;
       const contentArea = document.getElementById('contentArea') as HTMLTextAreaElement;
       const referenceArea = document.getElementById('referenceArea') as HTMLTextAreaElement;
@@ -436,13 +467,32 @@ if (import.meta.env.PROD) {
         
         if (result.success) {
           if (isEditMode) {
-            showMessage(`Note #${selectedNoteId} updated successfully`, 'success');
+            showMessage(`Note #${selectedNoteId} updated successfully`, 'success', () => {
+              // Clear input areas and reset to append mode after message disappears
+              contentArea.value = '';
+              referenceArea.value = '';
+              autoResize(contentArea);
+              autoResize(referenceArea);
+              updateSourceIndicator(''); // Clear source indicator
+              
+              // Reset note selection to append mode
+              const noteIdSelect = document.getElementById('noteIdSelect') as HTMLSelectElement;
+              noteIdSelect.value = '';
+              
+              // Re-enable reference area for new content
+              referenceArea.disabled = false;
+              referenceArea.style.backgroundColor = '#fafafa';
+              referenceArea.style.color = '';
+            });
           } else {
-            showMessage('Content committed successfully', 'success');
-            contentArea.value = '';
-            referenceArea.value = '';
-            autoResize(contentArea);
-            autoResize(referenceArea);
+            showMessage('Content committed successfully', 'success', () => {
+              // Clear input areas after message disappears
+              contentArea.value = '';
+              referenceArea.value = '';
+              autoResize(contentArea);
+              autoResize(referenceArea);
+              updateSourceIndicator(''); // Clear source indicator
+            });
           }
         } else {
           showMessage(result.error || (isEditMode ? 'Failed to update' : 'Failed to commit'), 'error');
