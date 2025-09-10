@@ -22,6 +22,15 @@ if (import.meta.env.PROD) {
         >
           <option value="">Select chapter...</option>
         </select>
+        
+        <select 
+          id="noteIdSelect" 
+          name="noteId" 
+          class="text-xs border-none bg-transparent focus:outline-none text-gray-400 hover:text-gray-600 transition-colors appearance-none cursor-pointer"
+          disabled
+        >
+          <option value="">Select note...</option>
+        </select>
       </div>
       
       <div class="flex items-center gap-3">
@@ -92,6 +101,7 @@ if (import.meta.env.PROD) {
         // Auto-select the most recently modified file
         if (data.lastModified) {
           select.value = data.lastModified;
+          loadNotesForChapter(data.lastModified);
         }
       } catch (error) {
         showMessage('Failed to load files', 'error');
@@ -268,6 +278,7 @@ if (import.meta.env.PROD) {
     // Handle form submission
     document.getElementById('editorForm')!.addEventListener('submit', async (e) => {
       e.preventDefault();
+      console.log('Form submit triggered');
       
       const select = document.getElementById('fileSelect') as HTMLSelectElement;
       const contentArea = document.getElementById('contentArea') as HTMLTextAreaElement;
@@ -276,6 +287,8 @@ if (import.meta.env.PROD) {
       const filename = select.value;
       const content = contentArea.value;
       const reference = referenceArea.value;
+      
+      console.log('Form data:', { filename, content: content.substring(0, 50), reference: reference.substring(0, 50) });
       
       if (!filename) {
         showMessage('Please select a chapter', 'error');
@@ -303,58 +316,90 @@ if (import.meta.env.PROD) {
         return hash.toString(16).substring(0, 5);
       }
       
+      // Check if we're in edit mode by looking at selected noteId
+      const noteIdSelect = document.getElementById('noteIdSelect') as HTMLSelectElement;
+      const selectedNoteId = noteIdSelect.value;
+      const isEditMode = !!selectedNoteId;
+      
+      // In edit mode, use original reference content to preserve quotes/source
+      const finalReference = isEditMode ? originalReference : reference;
+      
       const noteId = generateNoteId(content.trim(), reference.trim());
 
-      // Format as Note component with smart source detection
+      // Use same logic for both edit and append modes
+      const currentNoteId = isEditMode ? selectedNoteId : noteId;
+      
+      // Format as Note component with smart source detection (same logic for both modes)
       let finalContent;
-      if (reference.trim()) {
-        const detection = detectSource(reference.trim());
+      if (finalReference.trim()) {
+        const detection = detectSource(finalReference.trim());
         
         if (detection.isSource && detection.confidence > 0.5) {
           // Auto-split detected source from reference content
-          const referenceLines = reference.trim().split('\n').filter(line => line.trim());
+          const referenceLines = finalReference.trim().split('\n').filter(line => line.trim());
           const source = referenceLines[referenceLines.length - 1];
           const referenceContent = referenceLines.slice(0, -1).join('\n').trim();
           
           if (referenceContent) {
-            finalContent = `<Note id="${noteId}">\n${content.trim()}\n///\n${referenceContent}\n///\n${source}\n</Note>`;
+            finalContent = `<Note id="${currentNoteId}">\n${content.trim()}\n///\n${referenceContent}\n///\n${source}\n</Note>`;
           } else {
             // Only source, no reference content
-            finalContent = `<Note id="${noteId}">\n${content.trim()}\n///\n\n///\n${source}\n</Note>`;
+            finalContent = `<Note id="${currentNoteId}">\n${content.trim()}\n///\n\n///\n${source}\n</Note>`;
           }
         } else {
           // No source detected, treat entire reference as reference content
-          finalContent = `<Note id="${noteId}">\n${content.trim()}\n///\n${reference.trim()}\n///\nSource: [Please add source information]\n</Note>`;
+          finalContent = `<Note id="${currentNoteId}">\n${content.trim()}\n///\n${finalReference.trim()}\n///\nSource: [Please add source information]\n</Note>`;
         }
       } else {
-        finalContent = `<Note id="${noteId}">\n${content.trim()}\n</Note>`;
+        finalContent = `<Note id="${currentNoteId}">\n${content.trim()}\n</Note>`;
       }
 
       // Disable submit button temporarily
       const submitBtn = document.querySelector('button[type="submit"]') as HTMLButtonElement;
       const originalText = submitBtn.textContent;
-      submitBtn.textContent = 'Committing...';
+      submitBtn.textContent = isEditMode ? 'Saving...' : 'Committing...';
       submitBtn.disabled = true;
 
       try {
-        const response = await fetch('http://localhost:3001/api/append', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ filename, content: finalContent })
-        });
+        let response;
+        if (isEditMode) {
+          // Update existing note
+          response = await fetch(`http://localhost:3001/api/note/${selectedNoteId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+              filename, 
+              content: finalContent,
+              noteId: selectedNoteId
+            })
+          });
+        } else {
+          // Append new note
+          response = await fetch('http://localhost:3001/api/append', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ filename, content: finalContent })
+          });
+        }
 
         const result = await response.json();
         
         if (result.success) {
-          showMessage('Content committed successfully', 'success');
-          contentArea.value = '';
-          referenceArea.value = '';
-          autoResize(contentArea);
-          autoResize(referenceArea);
+          if (isEditMode) {
+            showMessage(`Note #${selectedNoteId} updated successfully`, 'success');
+          } else {
+            showMessage('Content committed successfully', 'success');
+            contentArea.value = '';
+            referenceArea.value = '';
+            autoResize(contentArea);
+            autoResize(referenceArea);
+          }
         } else {
-          showMessage(result.error || 'Failed to commit', 'error');
+          showMessage(result.error || (isEditMode ? 'Failed to update' : 'Failed to commit'), 'error');
         }
       } catch (error) {
         showMessage('Network error, please try again', 'error');
@@ -382,6 +427,130 @@ if (import.meta.env.PROD) {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
         document.getElementById('editorForm')!.dispatchEvent(new Event('submit'));
+      }
+    });
+
+    // Load notes for selected chapter
+    async function loadNotesForChapter(filename: string) {
+      console.log('loadNotesForChapter called with:', filename);
+      
+      if (!filename) {
+        const noteIdSelect = document.getElementById('noteIdSelect') as HTMLSelectElement;
+        noteIdSelect.innerHTML = '<option value="">NoteId</option>';
+        noteIdSelect.disabled = true;
+        return;
+      }
+
+      try {
+        console.log('Fetching notes from:', `http://localhost:3001/api/notes/${filename}`);
+        const response = await fetch(`http://localhost:3001/api/notes/${filename}`);
+        console.log('Response status:', response.status);
+        
+        const data = await response.json();
+        console.log('Response data:', data);
+        
+        const noteIdSelect = document.getElementById('noteIdSelect') as HTMLSelectElement;
+        noteIdSelect.innerHTML = '<option value="">Note</option>';
+        
+        if (data.notes && data.notes.length > 0) {
+          console.log('Found', data.notes.length, 'notes');
+          data.notes.forEach((note: any) => {
+            const option = document.createElement('option');
+            option.value = note.id;
+            const optionText = note.preview ? `#${note.id} - ${note.preview}` : `#${note.id}`;
+            option.textContent = optionText;
+            noteIdSelect.appendChild(option);
+            console.log('Added option:', note.id, 'preview:', note.preview, 'text:', optionText);
+          });
+          noteIdSelect.disabled = false;
+        } else {
+          console.log('No notes found or invalid data structure');
+          noteIdSelect.disabled = true;
+        }
+      } catch (error) {
+        console.error('Failed to load notes for chapter:', error);
+        const noteIdSelect = document.getElementById('noteIdSelect') as HTMLSelectElement;
+        noteIdSelect.disabled = true;
+      }
+    }
+
+    // Handle chapter selection change
+    document.getElementById('fileSelect')!.addEventListener('change', (e) => {
+      const select = e.target as HTMLSelectElement;
+      console.log('Chapter selected:', select.value);
+      loadNotesForChapter(select.value);
+      
+      // Clear content and reset to append mode when changing chapters
+      const contentArea = document.getElementById('contentArea') as HTMLTextAreaElement;
+      const referenceArea = document.getElementById('referenceArea') as HTMLTextAreaElement;
+      contentArea.value = '';
+      referenceArea.value = '';
+      referenceArea.disabled = false;
+      referenceArea.style.backgroundColor = '#fafafa';
+      referenceArea.style.color = '';
+      autoResize(contentArea);
+      autoResize(referenceArea);
+    });
+
+    // Store original reference content for edit mode
+    let originalReference = '';
+
+    // Load note by ID
+    async function loadNoteById(noteId: string) {
+      try {
+        const response = await fetch(`http://localhost:3001/api/note/${noteId}`);
+        if (!response.ok) {
+          throw new Error('Note not found');
+        }
+        
+        const data = await response.json();
+        
+        // Populate the form
+        const fileSelect = document.getElementById('fileSelect') as HTMLSelectElement;
+        const contentArea = document.getElementById('contentArea') as HTMLTextAreaElement;
+        const referenceArea = document.getElementById('referenceArea') as HTMLTextAreaElement;
+        
+        fileSelect.value = data.filename;
+        contentArea.value = data.content;
+        referenceArea.value = data.reference;
+        
+        // Store original reference for edit mode
+        originalReference = data.reference || '';
+        
+        // Auto-resize textareas
+        autoResize(contentArea);
+        autoResize(referenceArea);
+        updateSourceIndicator(referenceArea.value);
+        
+        showMessage(`Loaded note #${noteId}`, 'success');
+        
+      } catch (error) {
+        showMessage(`Failed to load note #${noteId}`, 'error');
+      }
+    }
+
+    // Handle note selection change
+    document.getElementById('noteIdSelect')!.addEventListener('change', (e) => {
+      const select = e.target as HTMLSelectElement;
+      const noteId = select.value;
+      const referenceArea = document.getElementById('referenceArea') as HTMLTextAreaElement;
+      
+      if (noteId) {
+        // Edit mode: load note and disable reference area
+        loadNoteById(noteId);
+        referenceArea.disabled = true;
+        referenceArea.style.backgroundColor = '#f9f9f9';
+        referenceArea.style.color = '#999';
+      } else {
+        // Append mode: clear content and enable reference area
+        const contentArea = document.getElementById('contentArea') as HTMLTextAreaElement;
+        contentArea.value = '';
+        referenceArea.value = '';
+        referenceArea.disabled = false;
+        referenceArea.style.backgroundColor = '#fafafa';
+        referenceArea.style.color = '';
+        autoResize(contentArea);
+        autoResize(referenceArea);
       }
     });
 
