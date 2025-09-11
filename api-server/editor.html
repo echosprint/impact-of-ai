@@ -142,7 +142,7 @@
       messageEl.style.pointerEvents = 'auto';
       
       // Use provided duration or calculate based on text length
-      const displayDuration = duration ?? Math.max(2000, text.length * 80); // Minimum 2 seconds, longer for longer messages
+      const displayDuration = duration ?? Math.max(1000, text.length * 80); // Minimum 2 seconds, longer for longer messages
       
       console.log(`Showing message for ${displayDuration}ms: "${text}"`);
       
@@ -419,6 +419,11 @@
       
       if (!content.trim()) {
         await showMessage('empty notes', 'error');
+        // Reload chapters and notes to refresh the interface
+        await loadFiles();
+        if (filename) {
+          await loadNotesForChapter(filename);
+        }
         return;
       }
 
@@ -500,10 +505,10 @@
         
         if (result.success) {
           if (isEditMode) {
-            await showMessage(`Note #${selectedNoteId} updated successfully`, 'success', 5000);
+            await showMessage(`Note #${selectedNoteId} updated successfully`, 'success');
             clearEditorAndReset(true);
           } else {
-            await showMessage('Content committed successfully', 'success', 5000);
+            await showMessage('Content committed successfully', 'success');
             clearEditorAndReset(false);
           }
         } else {

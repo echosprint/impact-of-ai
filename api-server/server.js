@@ -5,345 +5,341 @@ import { join } from 'path';
 import { parse } from 'url';
 
 const PORT = 3001;
+const CHAPTERS_DIR = join(process.cwd(), 'src', 'content', 'chapters');
+const EDITOR_PATH = join(process.cwd(), 'api-server', 'editor.html');
+
+// =============================================================================
+// UTILITY FUNCTIONS
+// =============================================================================
+
+function log(level, message, ...args) {
+  const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
+  const levelStr = level === 'error' ? '[error]' : level === 'update' ? '[update]' : level === 'append' ? '[append]' : '';
+  console.log(`${timestamp} ${levelStr} ${message}`, ...args);
+}
+
+function sendJson(res, statusCode, data) {
+  res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(data));
+}
+
+function sendHtml(res, content) {
+  res.writeHead(200, { 'Content-Type': 'text/html' });
+  res.end(content);
+}
+
+function sendError(res, statusCode, message, details = null) {
+  const error = { error: message };
+  if (details) error.details = details;
+  sendJson(res, statusCode, error);
+}
+
+async function parseBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', chunk => body += chunk.toString());
+    req.on('end', () => {
+      try {
+        resolve(JSON.parse(body));
+      } catch (error) {
+        reject(new Error('Invalid JSON'));
+      }
+    });
+    req.on('error', reject);
+  });
+}
+
+async function validateFile(filename) {
+  const safePath = join(CHAPTERS_DIR, filename);
+  try {
+    await fs.access(safePath);
+    return safePath;
+  } catch {
+    throw new Error('File not found');
+  }
+}
+
+function extractNotes(content) {
+  const noteRegex = /<Note id="([^"]+)"[^>]*>([\s\S]*?)<\/Note>/g;
+  const notes = [];
+  let match;
+  
+  while ((match = noteRegex.exec(content)) !== null) {
+    const noteId = match[1];
+    const noteContent = match[2].trim();
+    
+    // Extract first line for preview (up to 10 chars)
+    const lines = noteContent.split('\n').filter(line => line.trim().length > 0);
+    const firstLine = lines.length > 0 ? lines[0].trim() : '';
+    const preview = firstLine.length > 10 ? firstLine.substring(0, 10) + '...' : firstLine;
+    
+    notes.push({ id: noteId, preview });
+  }
+  
+  return notes;
+}
+
+// =============================================================================
+// ROUTE HANDLERS
+// =============================================================================
+
+async function handleEditor(req, res) {
+  try {
+    const editorContent = await fs.readFile(EDITOR_PATH, 'utf8');
+    sendHtml(res, editorContent);
+  } catch (error) {
+    log('error', 'Error loading editor:', error);
+    res.writeHead(500, { 'Content-Type': 'text/plain' });
+    res.end('Error loading editor');
+  }
+}
+
+async function handleGetFiles(req, res) {
+  try {
+    const files = await fs.readdir(CHAPTERS_DIR);
+    const mdFiles = files.filter(file => file.endsWith('.md') || file.endsWith('.mdx'));
+    
+    // Get file stats and sort by modification time
+    const filesWithStats = await Promise.all(
+      mdFiles.map(async (file) => {
+        const filePath = join(CHAPTERS_DIR, file);
+        const stats = await fs.stat(filePath);
+        return { name: file, mtime: stats.mtime.getTime() };
+      })
+    );
+    
+    filesWithStats.sort((a, b) => b.mtime - a.mtime);
+    
+    sendJson(res, 200, {
+      files: filesWithStats.map(f => f.name),
+      lastModified: filesWithStats.length > 0 ? filesWithStats[0].name : null
+    });
+  } catch (error) {
+    log('error', 'Error reading chapters directory:', error);
+    sendError(res, 500, 'Failed to read chapters directory', error.message);
+  }
+}
+
+async function handleAppendContent(req, res) {
+  try {
+    const { filename, content } = await parseBody(req);
+    
+    if (!filename || !content) {
+      return sendError(res, 400, 'Missing filename or content');
+    }
+
+    const safePath = await validateFile(filename);
+    
+    // Append content with newlines
+    const appendContent = `\n\n${content}`;
+    await fs.appendFile(safePath, appendContent, 'utf8');
+
+    log('append', `src/content/chapters/${filename}`);
+    sendJson(res, 200, { success: true, message: `Content appended to ${filename}` });
+  } catch (error) {
+    if (error.message === 'File not found') {
+      return sendError(res, 404, 'File not found');
+    }
+    log('error', 'Error appending content:', error);
+    sendError(res, 500, 'Failed to append content', error.message);
+  }
+}
+
+async function handleGetNotes(req, res, filename) {
+  try {
+    const safePath = await validateFile(filename);
+    const content = await fs.readFile(safePath, 'utf8');
+    const notes = extractNotes(content);
+    
+    sendJson(res, 200, { success: true, filename, notes });
+  } catch (error) {
+    if (error.message === 'File not found') {
+      return sendError(res, 404, 'File not found');
+    }
+    log('error', `Error loading notes from ${filename}:`, error);
+    sendError(res, 500, 'Failed to load notes', error.message);
+  }
+}
+
+async function handleGetNote(req, res, noteId) {
+  try {
+    const files = await fs.readdir(CHAPTERS_DIR);
+    const mdFiles = files.filter(file => file.endsWith('.md') || file.endsWith('.mdx'));
+    
+    let foundNote = null;
+    let foundFilename = null;
+    
+    // Search for note ID in all files
+    for (const file of mdFiles) {
+      const filePath = join(CHAPTERS_DIR, file);
+      const content = await fs.readFile(filePath, 'utf8');
+      
+      // Find note with matching ID
+      const noteRegex = new RegExp(`<Note id="${noteId}"[^>]*>([\\s\\S]*?)<\\/Note>`, 'g');
+      const match = noteRegex.exec(content);
+      
+      if (match) {
+        const noteContent = match[1].trim();
+        
+        // Parse note content (content /// reference /// source)
+        const parts = noteContent.split('///').map(part => part.trim());
+        
+        let reference = '';
+        if (parts.length >= 2) {
+          // Combine reference and source without /// separators for editing
+          reference = parts.slice(1).join('\n\n').trim();
+        }
+        
+        foundNote = {
+          content: parts[0] || '',
+          reference: reference
+        };
+        foundFilename = file;
+        break;
+      }
+    }
+    
+    if (foundNote) {
+      sendJson(res, 200, {
+        success: true,
+        noteId,
+        filename: foundFilename,
+        content: foundNote.content,
+        reference: foundNote.reference
+      });
+    } else {
+      sendError(res, 404, `Note #${noteId} not found`);
+    }
+  } catch (error) {
+    log('error', `Error loading note ${noteId}:`, error);
+    sendError(res, 500, 'Failed to load note', error.message);
+  }
+}
+
+async function handleUpdateNote(req, res, noteId) {
+  try {
+    const { filename, content } = await parseBody(req);
+    
+    if (!filename || !content || !noteId) {
+      return sendError(res, 400, 'Missing filename, content, or noteId');
+    }
+
+    const safePath = await validateFile(filename);
+    
+    // Read the file
+    const fileContent = await fs.readFile(safePath, 'utf8');
+
+    // Find and replace the specific note using manual position detection
+    const noteStartPattern = `<Note id="${noteId}"`;
+    const noteStart = fileContent.indexOf(noteStartPattern);
+    
+    if (noteStart === -1) {
+      return sendError(res, 404, `Note #${noteId} not found in ${filename}`);
+    }
+    
+    // Find the opening tag end
+    const openTagEnd = fileContent.indexOf('>', noteStart);
+    if (openTagEnd === -1) {
+      return sendError(res, 500, 'Malformed Note tag');
+    }
+    
+    // Find the closing tag
+    const noteEnd = fileContent.indexOf('</Note>', openTagEnd);
+    if (noteEnd === -1) {
+      return sendError(res, 500, 'Note closing tag not found');
+    }
+    
+    // Replace the note content
+    const beforeNote = fileContent.substring(0, noteStart);
+    const afterNote = fileContent.substring(noteEnd + 7); // +7 for '</Note>'
+    const updatedContent = beforeNote + content + afterNote;
+
+    // Write the updated content back
+    await fs.writeFile(safePath, updatedContent, 'utf8');
+
+    log('update', `Note #${noteId} in src/content/chapters/${filename}`);
+    sendJson(res, 200, { success: true, message: `Note #${noteId} updated in ${filename}` });
+  } catch (error) {
+    if (error.message === 'File not found') {
+      return sendError(res, 404, 'File not found');
+    }
+    log('error', `Error updating note ${noteId}:`, error);
+    sendError(res, 500, 'Failed to update note', error.message);
+  }
+}
+
+// =============================================================================
+// ROUTING
+// =============================================================================
+
+const routes = [
+  { method: 'GET', pattern: '/editor', handler: handleEditor },
+  { method: 'GET', pattern: '/api/files', handler: handleGetFiles },
+  { method: 'POST', pattern: '/api/append', handler: handleAppendContent },
+  {
+    method: 'GET',
+    pattern: '/api/notes/',
+    handler: (req, res, pathname) => {
+      const filename = decodeURIComponent(pathname.split('/api/notes/')[1]);
+      return handleGetNotes(req, res, filename);
+    }
+  },
+  {
+    method: 'GET',
+    pattern: '/api/note/',
+    handler: (req, res, pathname) => {
+      const noteId = decodeURIComponent(pathname.split('/api/note/')[1]);
+      return handleGetNote(req, res, noteId);
+    }
+  },
+  {
+    method: 'PUT',
+    pattern: '/api/note/',
+    handler: (req, res, pathname) => {
+      const noteId = decodeURIComponent(pathname.split('/api/note/')[1]);
+      return handleUpdateNote(req, res, noteId);
+    }
+  }
+];
 
 async function handleRequest(req, res) {
   const { pathname } = parse(req.url, true);
   const method = req.method;
   
-  // Log requests (except GET requests for cleaner logs)
+  // Log non-GET requests
   if (method !== 'GET') {
-    const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
-    console.log(`${timestamp} ${method} ${pathname}`);
+    log('info', `${method} ${pathname}`);
   }
-
-  // GET /editor - Serve the standalone editor
-  if (pathname === '/editor' && method === 'GET') {
-    try {
-      const editorPath = join(process.cwd(), 'api-server', 'editor.html');
-      const editorContent = await fs.readFile(editorPath, 'utf8');
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(editorContent);
-      return;
-    } catch (error) {
-      res.writeHead(500, { 'Content-Type': 'text/plain' });
-      res.end('Error loading editor');
-      return;
-    }
-  }
-
-  // GET /api/files - List chapter files
-  if (pathname === '/api/files' && method === 'GET') {
-    try {
-      const chaptersDir = join(process.cwd(), 'src', 'content', 'chapters');
-      const files = await fs.readdir(chaptersDir);
-      
-      const mdFiles = files.filter(file => file.endsWith('.md') || file.endsWith('.mdx'));
-      
-      // Get file stats and sort by modification time
-      const filesWithStats = await Promise.all(
-        mdFiles.map(async (file) => {
-          const filePath = join(chaptersDir, file);
-          const stats = await fs.stat(filePath);
-          return {
-            name: file,
-            mtime: stats.mtime.getTime()
-          };
-        })
-      );
-      
-      filesWithStats.sort((a, b) => b.mtime - a.mtime);
-      
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ 
-        files: filesWithStats.map(f => f.name),
-        lastModified: filesWithStats.length > 0 ? filesWithStats[0].name : null
-      }));
-    } catch (error) {
-      const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
-      console.error(`${timestamp} [error] reading chapters directory:`, error);
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ 
-        error: 'Failed to read chapters directory',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      }));
-    }
-    return;
-  }
-
-  // POST /api/append - Append content to chapter file
-  if (pathname === '/api/append' && method === 'POST') {
-    let body = '';
-    
-    req.on('data', (chunk) => {
-      body += chunk.toString();
-    });
-    
-    req.on('end', async () => {
-      try {
-        const { filename, content } = JSON.parse(body);
-        
-        if (!filename || !content) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Missing filename or content' }));
-          return;
-        }
-
-        const safePath = join(process.cwd(), 'src', 'content', 'chapters', filename);
-        
-        // Verify the file exists
+  
+  // Find matching route
+  for (const route of routes) {
+    if (route.method === method) {
+      if (route.pattern === pathname || pathname.startsWith(route.pattern)) {
         try {
-          await fs.access(safePath);
-        } catch {
-          res.writeHead(404, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'File not found' }));
+          await route.handler(req, res, pathname);
+          return;
+        } catch (error) {
+          log('error', 'Route handler error:', error);
+          sendError(res, 500, 'Internal server error');
           return;
         }
-
-        // Append content with newlines
-        const appendContent = `\n\n${content}`;
-        await fs.appendFile(safePath, appendContent, 'utf8');
-
-        // Log the successful append operation
-        const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
-        console.log(`${timestamp} [append] src/content/chapters/${filename}`);
-
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ 
-          success: true, 
-          message: `Content appended to ${filename}` 
-        }));
-      } catch (error) {
-        const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
-        console.error(`${timestamp} [error] appending to ${filename}:`, error);
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ 
-          error: 'Failed to append content',
-          details: error instanceof Error ? error.message : 'Unknown error'
-        }));
       }
-    });
-    return;
-  }
-
-  // GET /api/notes/:filename - Get all noteIds from a specific chapter
-  if (pathname.startsWith('/api/notes/') && method === 'GET') {
-    const filename = decodeURIComponent(pathname.split('/api/notes/')[1]);
-    
-    try {
-      const safePath = join(process.cwd(), 'src', 'content', 'chapters', filename);
-      
-      try {
-        await fs.access(safePath);
-      } catch {
-        res.writeHead(404, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'File not found' }));
-        return;
-      }
-
-      const content = await fs.readFile(safePath, 'utf8');
-      
-      // Find all Note components with IDs
-      const noteRegex = /<Note id="([^"]+)"[^>]*>([\s\S]*?)<\/Note>/g;
-      const notes = [];
-      let match;
-      
-      while ((match = noteRegex.exec(content)) !== null) {
-        const noteId = match[1];
-        const noteContent = match[2].trim();
-        
-        // Extract first line for preview (up to 10 chars)
-        const lines = noteContent.split('\n').filter(line => line.trim().length > 0);
-        const firstLine = lines.length > 0 ? lines[0].trim() : '';
-        const preview = firstLine.length > 10 ? firstLine.substring(0, 10) + '...' : firstLine;
-        
-        notes.push({
-          id: noteId,
-          preview: preview
-        });
-      }
-      
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ 
-        success: true,
-        filename,
-        notes
-      }));
-    } catch (error) {
-      const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
-      console.error(`${timestamp} [error] loading notes from ${filename}:`, error);
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ 
-        error: 'Failed to load notes',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      }));
     }
-    return;
   }
-
-  // GET /api/note/:id - Load note by ID
-  if (pathname.startsWith('/api/note/') && method === 'GET') {
-    const noteId = decodeURIComponent(pathname.split('/api/note/')[1]);
-    
-    try {
-      const chaptersDir = join(process.cwd(), 'src', 'content', 'chapters');
-      const files = await fs.readdir(chaptersDir);
-      const mdFiles = files.filter(file => file.endsWith('.md') || file.endsWith('.mdx'));
-      
-      let foundNote = null;
-      let foundFilename = null;
-      
-      // Search for note ID in all files
-      for (const file of mdFiles) {
-        const filePath = join(chaptersDir, file);
-        const content = await fs.readFile(filePath, 'utf8');
-        
-        // Find note with matching ID
-        const noteRegex = new RegExp(`<Note id="${noteId}"[^>]*>([\\s\\S]*?)<\\/Note>`, 'g');
-        const match = noteRegex.exec(content);
-        
-        if (match) {
-          const noteContent = match[1].trim();
-          
-          // Parse note content (content /// reference /// source)
-          const parts = noteContent.split('///').map(part => part.trim());
-          
-          let reference = '';
-          if (parts.length >= 2) {
-            // Combine reference and source without /// separators for editing
-            reference = parts.slice(1).join('\n\n').trim();
-          }
-          
-          foundNote = {
-            content: parts[0] || '',
-            reference: reference
-          };
-          foundFilename = file;
-          break;
-        }
-      }
-      
-      if (foundNote) {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          success: true,
-          noteId,
-          filename: foundFilename,
-          content: foundNote.content,
-          reference: foundNote.reference
-        }));
-      } else {
-        res.writeHead(404, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: `Note #${noteId} not found` }));
-      }
-    } catch (error) {
-      const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
-      console.error(`${timestamp} [error] loading note ${noteId}:`, error);
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ 
-        error: 'Failed to load note',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      }));
-    }
-    return;
-  }
-
-  // PUT /api/note/:id - Update note by ID
-  if (pathname.startsWith('/api/note/') && method === 'PUT') {
-    const noteId = decodeURIComponent(pathname.split('/api/note/')[1]);
-    let body = '';
-    
-    req.on('data', (chunk) => {
-      body += chunk.toString();
-    });
-    
-    req.on('end', async () => {
-      try {
-        const { filename, content } = JSON.parse(body);
-        
-        if (!filename || !content || !noteId) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Missing filename, content, or noteId' }));
-          return;
-        }
-
-        const safePath = join(process.cwd(), 'src', 'content', 'chapters', filename);
-        
-        // Read the file
-        let fileContent;
-        try {
-          fileContent = await fs.readFile(safePath, 'utf8');
-        } catch {
-          res.writeHead(404, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'File not found' }));
-          return;
-        }
-
-        // Find and replace the specific note using manual position detection
-        const noteStartPattern = `<Note id="${noteId}"`;
-        const noteStart = fileContent.indexOf(noteStartPattern);
-        
-        if (noteStart === -1) {
-          res.writeHead(404, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: `Note #${noteId} not found in ${filename}` }));
-          return;
-        }
-        
-        // Find the opening tag end
-        const openTagEnd = fileContent.indexOf('>', noteStart);
-        if (openTagEnd === -1) {
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Malformed Note tag' }));
-          return;
-        }
-        
-        // Find the closing tag
-        const noteEnd = fileContent.indexOf('</Note>', openTagEnd);
-        if (noteEnd === -1) {
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Note closing tag not found' }));
-          return;
-        }
-        
-        // Replace the note content
-        const beforeNote = fileContent.substring(0, noteStart);
-        const afterNote = fileContent.substring(noteEnd + 7); // +7 for '</Note>'
-        const updatedContent = beforeNote + content + afterNote;
-
-        // Write the updated content back
-        await fs.writeFile(safePath, updatedContent, 'utf8');
-
-        // Log the successful update operation
-        const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
-        console.log(`${timestamp} [update] Note #${noteId} in src/content/chapters/${filename}`);
-
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ 
-          success: true, 
-          message: `Note #${noteId} updated in ${filename}` 
-        }));
-      } catch (error) {
-        const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
-        console.error(`${timestamp} [error] updating note ${noteId}:`, error);
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ 
-          error: 'Failed to update note',
-          details: error instanceof Error ? error.message : 'Unknown error'
-        }));
-      }
-    });
-    return;
-  }
-
-  // 404 for other routes
-  res.writeHead(404, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ error: 'Not found' }));
+  
+  // 404 for unmatched routes
+  sendError(res, 404, 'Not found');
 }
+
+// =============================================================================
+// SERVER SETUP
+// =============================================================================
 
 const server = createServer(handleRequest);
 
 server.listen(PORT, () => {
   console.log(`API Server running on http://localhost:${PORT}`);
-  console.log(`Serving chapters from: ${join(process.cwd(), 'src', 'content', 'chapters')}`);
+  console.log(`Serving chapters from: ${CHAPTERS_DIR}`);
 });
 
 // Graceful shutdown
