@@ -5,28 +5,30 @@ import { join } from 'path';
 import { parse } from 'url';
 
 const PORT = 3001;
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Content-Type': 'application/json'
-};
 
 async function handleRequest(req, res) {
   const { pathname } = parse(req.url, true);
   const method = req.method;
   
-  // Log requests (except OPTIONS and GET requests for cleaner logs)
-  if (method !== 'OPTIONS' && method !== 'GET') {
+  // Log requests (except GET requests for cleaner logs)
+  if (method !== 'GET') {
     const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
     console.log(`${timestamp} ${method} ${pathname}`);
   }
 
-  // Handle preflight CORS requests
-  if (method === 'OPTIONS') {
-    res.writeHead(200, CORS_HEADERS);
-    res.end();
-    return;
+  // GET /editor - Serve the standalone editor
+  if (pathname === '/editor' && method === 'GET') {
+    try {
+      const editorPath = join(process.cwd(), 'api-server', 'editor.html');
+      const editorContent = await fs.readFile(editorPath, 'utf8');
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(editorContent);
+      return;
+    } catch (error) {
+      res.writeHead(500, { 'Content-Type': 'text/plain' });
+      res.end('Error loading editor');
+      return;
+    }
   }
 
   // GET /api/files - List chapter files
@@ -51,7 +53,7 @@ async function handleRequest(req, res) {
       
       filesWithStats.sort((a, b) => b.mtime - a.mtime);
       
-      res.writeHead(200, CORS_HEADERS);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ 
         files: filesWithStats.map(f => f.name),
         lastModified: filesWithStats.length > 0 ? filesWithStats[0].name : null
@@ -59,7 +61,7 @@ async function handleRequest(req, res) {
     } catch (error) {
       const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
       console.error(`${timestamp} [error] reading chapters directory:`, error);
-      res.writeHead(500, CORS_HEADERS);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ 
         error: 'Failed to read chapters directory',
         details: error instanceof Error ? error.message : 'Unknown error'
@@ -81,7 +83,7 @@ async function handleRequest(req, res) {
         const { filename, content } = JSON.parse(body);
         
         if (!filename || !content) {
-          res.writeHead(400, CORS_HEADERS);
+          res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'Missing filename or content' }));
           return;
         }
@@ -92,7 +94,7 @@ async function handleRequest(req, res) {
         try {
           await fs.access(safePath);
         } catch {
-          res.writeHead(404, CORS_HEADERS);
+          res.writeHead(404, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'File not found' }));
           return;
         }
@@ -105,7 +107,7 @@ async function handleRequest(req, res) {
         const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
         console.log(`${timestamp} [append] src/content/chapters/${filename}`);
 
-        res.writeHead(200, CORS_HEADERS);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ 
           success: true, 
           message: `Content appended to ${filename}` 
@@ -113,7 +115,7 @@ async function handleRequest(req, res) {
       } catch (error) {
         const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
         console.error(`${timestamp} [error] appending to ${filename}:`, error);
-        res.writeHead(500, CORS_HEADERS);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ 
           error: 'Failed to append content',
           details: error instanceof Error ? error.message : 'Unknown error'
@@ -133,7 +135,7 @@ async function handleRequest(req, res) {
       try {
         await fs.access(safePath);
       } catch {
-        res.writeHead(404, CORS_HEADERS);
+        res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'File not found' }));
         return;
       }
@@ -160,7 +162,7 @@ async function handleRequest(req, res) {
         });
       }
       
-      res.writeHead(200, CORS_HEADERS);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ 
         success: true,
         filename,
@@ -169,7 +171,7 @@ async function handleRequest(req, res) {
     } catch (error) {
       const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
       console.error(`${timestamp} [error] loading notes from ${filename}:`, error);
-      res.writeHead(500, CORS_HEADERS);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ 
         error: 'Failed to load notes',
         details: error instanceof Error ? error.message : 'Unknown error'
@@ -221,7 +223,7 @@ async function handleRequest(req, res) {
       }
       
       if (foundNote) {
-        res.writeHead(200, CORS_HEADERS);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
           success: true,
           noteId,
@@ -230,13 +232,13 @@ async function handleRequest(req, res) {
           reference: foundNote.reference
         }));
       } else {
-        res.writeHead(404, CORS_HEADERS);
+        res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: `Note #${noteId} not found` }));
       }
     } catch (error) {
       const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
       console.error(`${timestamp} [error] loading note ${noteId}:`, error);
-      res.writeHead(500, CORS_HEADERS);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ 
         error: 'Failed to load note',
         details: error instanceof Error ? error.message : 'Unknown error'
@@ -259,7 +261,7 @@ async function handleRequest(req, res) {
         const { filename, content } = JSON.parse(body);
         
         if (!filename || !content || !noteId) {
-          res.writeHead(400, CORS_HEADERS);
+          res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'Missing filename, content, or noteId' }));
           return;
         }
@@ -271,7 +273,7 @@ async function handleRequest(req, res) {
         try {
           fileContent = await fs.readFile(safePath, 'utf8');
         } catch {
-          res.writeHead(404, CORS_HEADERS);
+          res.writeHead(404, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'File not found' }));
           return;
         }
@@ -281,7 +283,7 @@ async function handleRequest(req, res) {
         const noteStart = fileContent.indexOf(noteStartPattern);
         
         if (noteStart === -1) {
-          res.writeHead(404, CORS_HEADERS);
+          res.writeHead(404, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: `Note #${noteId} not found in ${filename}` }));
           return;
         }
@@ -289,7 +291,7 @@ async function handleRequest(req, res) {
         // Find the opening tag end
         const openTagEnd = fileContent.indexOf('>', noteStart);
         if (openTagEnd === -1) {
-          res.writeHead(500, CORS_HEADERS);
+          res.writeHead(500, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'Malformed Note tag' }));
           return;
         }
@@ -297,7 +299,7 @@ async function handleRequest(req, res) {
         // Find the closing tag
         const noteEnd = fileContent.indexOf('</Note>', openTagEnd);
         if (noteEnd === -1) {
-          res.writeHead(500, CORS_HEADERS);
+          res.writeHead(500, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'Note closing tag not found' }));
           return;
         }
@@ -314,7 +316,7 @@ async function handleRequest(req, res) {
         const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
         console.log(`${timestamp} [update] Note #${noteId} in src/content/chapters/${filename}`);
 
-        res.writeHead(200, CORS_HEADERS);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ 
           success: true, 
           message: `Note #${noteId} updated in ${filename}` 
@@ -322,7 +324,7 @@ async function handleRequest(req, res) {
       } catch (error) {
         const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
         console.error(`${timestamp} [error] updating note ${noteId}:`, error);
-        res.writeHead(500, CORS_HEADERS);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ 
           error: 'Failed to update note',
           details: error instanceof Error ? error.message : 'Unknown error'
@@ -333,7 +335,7 @@ async function handleRequest(req, res) {
   }
 
   // 404 for other routes
-  res.writeHead(404, CORS_HEADERS);
+  res.writeHead(404, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ error: 'Not found' }));
 }
 

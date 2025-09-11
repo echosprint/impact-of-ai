@@ -1,16 +1,21 @@
----
-import BaseLayout from '../layouts/BaseLayout.astro';
-
-// Only render in development
-if (import.meta.env.PROD) {
-  return new Response(null, { status: 404 });
-}
----
-
-<BaseLayout 
-  title="Writer"
-  description="Simple writing editor for book chapters"
->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Writer</title>
+  <meta name="description" content="Simple writing editor for book chapters">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-white">
   <!-- Fixed header -->
   <header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-b border-gray-200 z-10">
     <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -88,10 +93,10 @@ if (import.meta.env.PROD) {
         const response = await fetch('http://localhost:3001/api/files');
         const data = await response.json();
         
-        const select = document.getElementById('fileSelect') as HTMLSelectElement;
+        const select = document.getElementById('fileSelect');
         select.innerHTML = '<option value="">Select chapter...</option>';
         
-        data.files.forEach((file: string) => {
+        data.files.forEach((file) => {
           const option = document.createElement('option');
           option.value = file;
           option.textContent = file.replace(/\.(md|mdx)$/, '');
@@ -112,8 +117,8 @@ if (import.meta.env.PROD) {
     let isMessageShowing = false;
 
     // Show toast message
-    async function showMessage(text: string, type: 'success' | 'error', duration?: number) {
-      const messageEl = document.getElementById('message')!;
+    async function showMessage(text, type, duration) {
+      const messageEl = document.getElementById('message');
       
       // Prevent multiple simultaneous messages
       if (isMessageShowing) {
@@ -156,9 +161,9 @@ if (import.meta.env.PROD) {
     }
 
     // Clear input areas and reset editor state
-    function clearEditorAndReset(isEditMode: boolean) {
-      const contentArea = document.getElementById('contentArea') as HTMLTextAreaElement;
-      const referenceArea = document.getElementById('referenceArea') as HTMLTextAreaElement;
+    function clearEditorAndReset(isEditMode) {
+      const contentArea = document.getElementById('contentArea');
+      const referenceArea = document.getElementById('referenceArea');
       
       // Clear input areas
       contentArea.value = '';
@@ -169,7 +174,7 @@ if (import.meta.env.PROD) {
       
       if (isEditMode) {
         // Reset note selection to append mode
-        const noteIdSelect = document.getElementById('noteIdSelect') as HTMLSelectElement;
+        const noteIdSelect = document.getElementById('noteIdSelect');
         noteIdSelect.value = '';
         
         // Re-enable reference area for new content
@@ -180,7 +185,7 @@ if (import.meta.env.PROD) {
     }
 
     // Auto-resize textarea while preserving scroll position
-    function autoResize(textarea: HTMLTextAreaElement, preserveScroll: boolean = true) {
+    function autoResize(textarea, preserveScroll = true) {
       // Save current state
       const scrollTop = preserveScroll ? textarea.scrollTop : 0;
       const maxScrollTop = textarea.scrollHeight - textarea.clientHeight;
@@ -201,7 +206,7 @@ if (import.meta.env.PROD) {
     }
 
     // Detect potential source in reference text
-    function detectSource(text: string): { isSource: boolean; confidence: number; reason: string } {
+    function detectSource(text) {
       const lines = text.trim().split('\n').filter(line => line.trim());
       if (lines.length === 0) return { isSource: false, confidence: 0, reason: '' };
       
@@ -319,8 +324,8 @@ if (import.meta.env.PROD) {
     }
 
     // Show source indicator with split preview
-    function updateSourceIndicator(text: string) {
-      const indicator = document.getElementById('sourceIndicator')!;
+    function updateSourceIndicator(text) {
+      const indicator = document.getElementById('sourceIndicator');
       const detection = detectSource(text);
       
       if (detection.isSource && detection.confidence > 0.5) {
@@ -337,14 +342,14 @@ if (import.meta.env.PROD) {
 
     // Initialize auto-resize on load
     function initializeTextareas() {
-      const contentArea = document.getElementById('contentArea') as HTMLTextAreaElement;
-      const referenceArea = document.getElementById('referenceArea') as HTMLTextAreaElement;
+      const contentArea = document.getElementById('contentArea');
+      const referenceArea = document.getElementById('referenceArea');
       autoResize(contentArea);
       autoResize(referenceArea);
     }
 
     // Generate unique noteId ensuring no conflicts within the same file
-    async function generateUniqueNoteId(content: string, reference: string, filename: string): Promise<string> {
+    async function generateUniqueNoteId(content, reference, filename) {
       // Get existing note IDs from the current file
       const existingIds = await getExistingNoteIds(filename);
       
@@ -361,7 +366,7 @@ if (import.meta.env.PROD) {
     }
     
     // Generate base noteId using content + reference + timestamp + counter, then hash to 5 chars
-    function generateBaseNoteId(content: string, reference: string, counter: number = 0): string {
+    function generateBaseNoteId(content, reference, counter = 0) {
       const timestamp = Date.now().toString();
       const combined = content.trim() + '|' + reference.trim() + '|' + timestamp + '|' + counter;
       
@@ -377,13 +382,13 @@ if (import.meta.env.PROD) {
     }
     
     // Get existing note IDs from a file
-    async function getExistingNoteIds(filename: string): Promise<Set<string>> {
+    async function getExistingNoteIds(filename) {
       try {
         const response = await fetch(`http://localhost:3001/api/notes/${filename}`);
         if (!response.ok) return new Set();
         
         const data = await response.json();
-        return new Set(data.notes?.map((note: any) => note.id) || []);
+        return new Set(data.notes?.map((note) => note.id) || []);
       } catch (error) {
         console.warn('Failed to fetch existing note IDs:', error);
         return new Set();
@@ -391,7 +396,7 @@ if (import.meta.env.PROD) {
     }
 
     // Handle form submission
-    async function handleFormSubmit(e: Event) {
+    async function handleFormSubmit(e) {
       e.preventDefault();
       
       // Prevent submission if message is currently showing
@@ -399,9 +404,9 @@ if (import.meta.env.PROD) {
         return;
       }
       
-      const select = document.getElementById('fileSelect') as HTMLSelectElement;
-      const contentArea = document.getElementById('contentArea') as HTMLTextAreaElement;
-      const referenceArea = document.getElementById('referenceArea') as HTMLTextAreaElement;
+      const select = document.getElementById('fileSelect');
+      const contentArea = document.getElementById('contentArea');
+      const referenceArea = document.getElementById('referenceArea');
       
       const filename = select.value;
       const content = contentArea.value;
@@ -418,7 +423,7 @@ if (import.meta.env.PROD) {
       }
 
       // Check if we're in edit mode by looking at selected noteId
-      const noteIdSelect = document.getElementById('noteIdSelect') as HTMLSelectElement;
+      const noteIdSelect = document.getElementById('noteIdSelect');
       const selectedNoteId = noteIdSelect.value;
       const isEditMode = !!selectedNoteId;
       
@@ -460,7 +465,7 @@ if (import.meta.env.PROD) {
       }
 
       // Disable submit button temporarily
-      const submitBtn = document.querySelector('button[type="submit"]') as HTMLButtonElement;
+      const submitBtn = document.querySelector('button[type="submit"]');
       const originalText = submitBtn.textContent;
       submitBtn.textContent = isEditMode ? 'Saving...' : 'Committing...';
       submitBtn.disabled = true;
@@ -512,34 +517,24 @@ if (import.meta.env.PROD) {
       }
     }
 
-    // Attach form submit handler
-    document.getElementById('editorForm')!.addEventListener('submit', handleFormSubmit);
-
-
     // Handle content area input
-    function handleContentAreaInput(e: Event) {
-      autoResize(e.target as HTMLTextAreaElement);
+    function handleContentAreaInput(e) {
+      autoResize(e.target);
     }
 
-    // Attach content area input handler
-    document.getElementById('contentArea')!.addEventListener('input', handleContentAreaInput);
-
     // Handle reference area input
-    function handleReferenceAreaInput(e: Event) {
-      const textarea = e.target as HTMLTextAreaElement;
+    function handleReferenceAreaInput(e) {
+      const textarea = e.target;
       autoResize(textarea);
       updateSourceIndicator(textarea.value);
     }
 
-    // Attach reference area input handler
-    document.getElementById('referenceArea')!.addEventListener('input', handleReferenceAreaInput);
-
     // Handle paste events specifically to prevent unwanted scrolling
-    function handleReferenceAreaPaste(e: ClipboardEvent) {
-      const textarea = e.target as HTMLTextAreaElement;
+    function handleReferenceAreaPaste(e) {
+      const textarea = e.target;
       
       // Get paste data
-      const clipboardData = e.clipboardData || (window as any).clipboardData;
+      const clipboardData = e.clipboardData || window.clipboardData;
       const pastedData = clipboardData?.getData('Text') || '';
       
       // If it's a large paste, handle it specially
@@ -587,25 +582,19 @@ if (import.meta.env.PROD) {
       }
     }
 
-    // Attach paste handler
-    document.getElementById('referenceArea')!.addEventListener('paste', handleReferenceAreaPaste);
-
     // Handle keyboard shortcuts
-    function handleKeyboardShortcuts(e: KeyboardEvent) {
+    function handleKeyboardShortcuts(e) {
       // Ctrl+Enter or Cmd+Enter to commit
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
-        document.getElementById('editorForm')!.dispatchEvent(new Event('submit'));
+        document.getElementById('editorForm').dispatchEvent(new Event('submit'));
       }
     }
 
-    // Attach keyboard shortcuts handler
-    document.addEventListener('keydown', handleKeyboardShortcuts);
-
     // Load notes for selected chapter
-    async function loadNotesForChapter(filename: string) {
+    async function loadNotesForChapter(filename) {
       if (!filename) {
-        const noteIdSelect = document.getElementById('noteIdSelect') as HTMLSelectElement;
+        const noteIdSelect = document.getElementById('noteIdSelect');
         noteIdSelect.innerHTML = '<option value="">Note</option>';
         noteIdSelect.disabled = true;
         return;
@@ -615,11 +604,11 @@ if (import.meta.env.PROD) {
         const response = await fetch(`http://localhost:3001/api/notes/${filename}`);
         const data = await response.json();
         
-        const noteIdSelect = document.getElementById('noteIdSelect') as HTMLSelectElement;
+        const noteIdSelect = document.getElementById('noteIdSelect');
         noteIdSelect.innerHTML = '<option value="">Note</option>';
         
         if (data.notes && data.notes.length > 0) {
-          data.notes.forEach((note: any) => {
+          data.notes.forEach((note) => {
             const option = document.createElement('option');
             option.value = note.id;
             const optionText = note.preview ? `#${note.id} - ${note.preview}` : `#${note.id}`;
@@ -632,19 +621,19 @@ if (import.meta.env.PROD) {
         }
       } catch (error) {
         console.error('Failed to load notes for chapter:', error);
-        const noteIdSelect = document.getElementById('noteIdSelect') as HTMLSelectElement;
+        const noteIdSelect = document.getElementById('noteIdSelect');
         noteIdSelect.disabled = true;
       }
     }
 
     // Handle chapter selection change
-    function handleFileSelectChange(e: Event) {
-      const select = e.target as HTMLSelectElement;
+    function handleFileSelectChange(e) {
+      const select = e.target;
       loadNotesForChapter(select.value);
       
       // Clear content and reset to append mode when changing chapters
-      const contentArea = document.getElementById('contentArea') as HTMLTextAreaElement;
-      const referenceArea = document.getElementById('referenceArea') as HTMLTextAreaElement;
+      const contentArea = document.getElementById('contentArea');
+      const referenceArea = document.getElementById('referenceArea');
       contentArea.value = '';
       referenceArea.value = '';
       referenceArea.disabled = false;
@@ -654,14 +643,11 @@ if (import.meta.env.PROD) {
       autoResize(referenceArea);
     }
 
-    // Attach file select change handler
-    document.getElementById('fileSelect')!.addEventListener('change', handleFileSelectChange);
-
     // Store original reference content for edit mode
     let originalReference = '';
 
     // Load note by ID
-    async function loadNoteById(noteId: string) {
+    async function loadNoteById(noteId) {
       try {
         const response = await fetch(`http://localhost:3001/api/note/${noteId}`);
         if (!response.ok) {
@@ -671,9 +657,9 @@ if (import.meta.env.PROD) {
         const data = await response.json();
         
         // Populate the form
-        const fileSelect = document.getElementById('fileSelect') as HTMLSelectElement;
-        const contentArea = document.getElementById('contentArea') as HTMLTextAreaElement;
-        const referenceArea = document.getElementById('referenceArea') as HTMLTextAreaElement;
+        const fileSelect = document.getElementById('fileSelect');
+        const contentArea = document.getElementById('contentArea');
+        const referenceArea = document.getElementById('referenceArea');
         
         fileSelect.value = data.filename;
         contentArea.value = data.content;
@@ -695,10 +681,10 @@ if (import.meta.env.PROD) {
     }
 
     // Handle note selection change
-    function handleNoteIdSelectChange(e: Event) {
-      const select = e.target as HTMLSelectElement;
+    function handleNoteIdSelectChange(e) {
+      const select = e.target;
       const noteId = select.value;
-      const referenceArea = document.getElementById('referenceArea') as HTMLTextAreaElement;
+      const referenceArea = document.getElementById('referenceArea');
       
       if (noteId) {
         // Edit mode: load note and disable reference area
@@ -708,7 +694,7 @@ if (import.meta.env.PROD) {
         referenceArea.style.color = '#999';
       } else {
         // Append mode: clear content and enable reference area
-        const contentArea = document.getElementById('contentArea') as HTMLTextAreaElement;
+        const contentArea = document.getElementById('contentArea');
         contentArea.value = '';
         referenceArea.value = '';
         referenceArea.disabled = false;
@@ -719,19 +705,24 @@ if (import.meta.env.PROD) {
       }
     }
 
-    // Attach note ID select change handler
-    document.getElementById('noteIdSelect')!.addEventListener('change', handleNoteIdSelectChange);
-
     // Handle window load
     function handleWindowLoad() {
       initializeTextareas();
-      document.getElementById('contentArea')!.focus();
+      document.getElementById('contentArea').focus();
     }
 
-    // Attach window load handler
+    // Attach event handlers
+    document.getElementById('editorForm').addEventListener('submit', handleFormSubmit);
+    document.getElementById('contentArea').addEventListener('input', handleContentAreaInput);
+    document.getElementById('referenceArea').addEventListener('input', handleReferenceAreaInput);
+    document.getElementById('referenceArea').addEventListener('paste', handleReferenceAreaPaste);
+    document.addEventListener('keydown', handleKeyboardShortcuts);
+    document.getElementById('fileSelect').addEventListener('change', handleFileSelectChange);
+    document.getElementById('noteIdSelect').addEventListener('change', handleNoteIdSelectChange);
     window.addEventListener('load', handleWindowLoad);
 
     // Load files on page load
     loadFiles();
   </script>
-</BaseLayout>
+</body>
+</html>
