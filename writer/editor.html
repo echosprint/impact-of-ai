@@ -55,7 +55,7 @@
         <button 
           type="submit" 
           form="editorForm"
-          class="bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 text-gray-400 hover:text-gray-600 text-sm px-4 py-2 rounded-lg border border-gray-200 font-medium transition-all duration-200 shadow-sm hover:shadow"
+          class="bg-transparent hover:bg-gray-50 text-gray-300 hover:text-gray-500 text-xs px-3 py-1.5 rounded font-light transition-colors duration-200"
           title="Use Ctrl+Enter or Cmd+Enter instead"
         >
           ⌘↵
@@ -189,6 +189,7 @@
         // Reset note selection to append mode
         const noteIdSelect = document.getElementById('noteIdSelect');
         noteIdSelect.value = '';
+        currentNoteId = '';
         
         // Re-enable reference area for new content
         referenceArea.disabled = false;
@@ -700,13 +701,16 @@
     function selectNote(noteId) {
       const noteIdSelect = document.getElementById('noteIdSelect');
       const dropdown = document.getElementById('noteIdDropdown');
+      const referenceArea = document.getElementById('referenceArea');
       
       noteIdSelect.value = `#${noteId}`;
       dropdown.classList.add('hidden');
       
-      // Trigger the existing note selection logic with the original noteId
-      const fakeEvent = { target: { ...noteIdSelect, value: noteId } };
-      handleNoteIdSelectChange(fakeEvent);
+      // Set UI to edit mode and load the note
+      referenceArea.disabled = true;
+      referenceArea.style.backgroundColor = '#f9f9f9';
+      referenceArea.style.color = '#999';
+      loadNoteById(noteId);
     }
 
     // Handle chapter selection change
@@ -728,6 +732,7 @@
 
     // Store original reference content for edit mode
     let originalReference = '';
+    let currentNoteId = '';
 
     // Load note by ID
     async function loadNoteById(noteId) {
@@ -748,8 +753,9 @@
         contentArea.value = data.content;
         referenceArea.value = data.reference;
         
-        // Store original reference for edit mode
+        // Store original reference for edit mode and current note ID
         originalReference = data.reference || '';
+        currentNoteId = noteId;
         
         // Auto-resize textareas
         autoResize(contentArea);
@@ -763,7 +769,7 @@
       }
     }
 
-    // Handle note selection change
+    // Handle note selection change (UI state only, not loading)
     function handleNoteIdSelectChange(e) {
       const select = e.target;
       let noteId = select.value;
@@ -775,23 +781,18 @@
       }
       
       if (noteId) {
-        // Edit mode: load note and disable reference area
-        loadNoteById(noteId);
+        // Edit mode UI: just disable reference area, don't load note
         referenceArea.disabled = true;
         referenceArea.style.backgroundColor = '#f9f9f9';
         referenceArea.style.color = '#999';
       } else {
-        // Append mode: clear content and enable reference area
-        const contentArea = document.getElementById('contentArea');
-        contentArea.value = '';
-        referenceArea.value = '';
+        // Append mode: enable reference area
         referenceArea.disabled = false;
         referenceArea.style.backgroundColor = '#fafafa';
         referenceArea.style.color = '';
-        autoResize(contentArea);
-        autoResize(referenceArea);
       }
     }
+    
 
     // Handle window load
     function handleWindowLoad() {
@@ -864,6 +865,18 @@
         filterNotes(e.target.value);
       }
     }
+    
+    // Handle note ID input blur - revert to current note if any
+    function handleNoteIdBlur(e) {
+      const noteIdSelect = e.target;
+      if (currentNoteId) {
+        // Revert to current note being edited
+        noteIdSelect.value = `#${currentNoteId}`;
+      } else {
+        // Clear field if no current note
+        noteIdSelect.value = '';
+      }
+    }
 
     // Handle clicks on dropdown items
     function handleDropdownClick(e) {
@@ -894,6 +907,7 @@
     document.getElementById('noteIdSelect').addEventListener('change', handleNoteIdSelectChange);
     document.getElementById('noteIdSelect').addEventListener('input', handleNoteIdInput);
     document.getElementById('noteIdSelect').addEventListener('focus', handleNoteIdFocus);
+    document.getElementById('noteIdSelect').addEventListener('blur', handleNoteIdBlur);
     document.getElementById('noteIdSelect').addEventListener('keydown', handleNoteIdKeydown);
     document.getElementById('noteIdDropdown').addEventListener('click', handleDropdownClick);
     document.addEventListener('click', handleDocumentClick);
