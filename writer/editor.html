@@ -529,6 +529,18 @@
             await showMessage('Content committed successfully', 'success');
             clearEditorAndReset(false);
           }
+          
+          // Refresh chapters and notes after successful commit
+          await loadFiles();
+          const fileSelect = document.getElementById('fileSelect');
+          if (fileSelect.value) {
+            await loadNotesForChapter(fileSelect.value);
+          }
+          
+          // Clear current note ID since we're back to append mode
+          currentNoteId = '';
+          const noteIdSelect = document.getElementById('noteIdSelect');
+          noteIdSelect.value = '';
         } else {
           await showMessage(result.error || (isEditMode ? 'Failed to update' : 'Failed to commit'), 'error');
         }
