@@ -156,7 +156,7 @@
       messageEl.style.pointerEvents = 'auto';
       
       // Use provided duration or calculate based on text length
-      const displayDuration = duration ?? Math.max(1000, text.length * 80); // Minimum 2 seconds, longer for longer messages
+      const displayDuration = duration ?? 1000;
       
       console.log(`Showing message for ${displayDuration}ms: "${text}"`);
       
@@ -456,7 +456,7 @@
       // Only generate new noteId for append mode
       let currentNoteId;
       if (isEditMode) {
-        currentNoteId = selectedNoteId; // Keep original ID when editing
+        currentNoteId = selectedNoteId.replace(/^#/, ''); // Clean the # prefix from selected ID
       } else {
         const noteId = await generateUniqueNoteId(content.trim(), reference.trim(), filename);
         currentNoteId = noteId;
@@ -497,7 +497,7 @@
         let response;
         if (isEditMode) {
           // Update existing note
-          response = await fetch(`http://localhost:3001/api/note/${selectedNoteId}`, {
+          response = await fetch(`http://localhost:3001/api/note/${currentNoteId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json'
@@ -505,7 +505,7 @@
             body: JSON.stringify({ 
               filename, 
               content: finalContent,
-              noteId: selectedNoteId
+              noteId: currentNoteId
             })
           });
         } else {
@@ -523,7 +523,7 @@
         
         if (result.success) {
           if (isEditMode) {
-            await showMessage(`Note #${selectedNoteId} updated successfully`, 'success');
+            await showMessage(`Note #${currentNoteId} updated successfully`, 'success');
             clearEditorAndReset(true);
           } else {
             await showMessage('Content committed successfully', 'success');
@@ -540,10 +540,12 @@
       }
     }
 
-    // Count characters properly including Chinese/Unicode characters
+    // Count visible characters only, excluding whitespace and control characters
     function countCharacters(text) {
+      // Remove all whitespace characters (spaces, tabs, newlines, etc.)
+      const visibleText = text.replace(/\s/g, '');
       // Use Array.from to properly count Unicode characters including Chinese
-      return Array.from(text).length;
+      return Array.from(visibleText).length;
     }
     
     // Update character counter
