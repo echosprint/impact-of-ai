@@ -343,8 +343,55 @@ if (import.meta.env.PROD) {
       autoResize(referenceArea);
     }
 
+    // Generate unique noteId ensuring no conflicts within the same file
+    async function generateUniqueNoteId(content: string, reference: string, filename: string): Promise<string> {
+      // Get existing note IDs from the current file
+      const existingIds = await getExistingNoteIds(filename);
+      
+      let counter = 0;
+      let noteId = generateBaseNoteId(content, reference, counter);
+      
+      // Ensure uniqueness by incrementing counter if needed
+      while (existingIds.has(noteId)) {
+        counter++;
+        noteId = generateBaseNoteId(content, reference, counter);
+      }
+      
+      return noteId;
+    }
+    
+    // Generate base noteId using content + reference + timestamp + counter, then hash to 5 chars
+    function generateBaseNoteId(content: string, reference: string, counter: number = 0): string {
+      const timestamp = Date.now().toString();
+      const combined = content.trim() + '|' + reference.trim() + '|' + timestamp + '|' + counter;
+      
+      // Better hash function (FNV-1a variant)
+      let hash = 2166136261 + counter; // Add counter to initial hash
+      for (let i = 0; i < combined.length; i++) {
+        hash ^= combined.charCodeAt(i);
+        hash = (hash * 16777619) >>> 0; // Keep as 32-bit unsigned
+      }
+      
+      // Convert to hex and take first 5 chars
+      return hash.toString(16).substring(0, 5);
+    }
+    
+    // Get existing note IDs from a file
+    async function getExistingNoteIds(filename: string): Promise<Set<string>> {
+      try {
+        const response = await fetch(`http://localhost:3001/api/notes/${filename}`);
+        if (!response.ok) return new Set();
+        
+        const data = await response.json();
+        return new Set(data.notes?.map((note: any) => note.id) || []);
+      } catch (error) {
+        console.warn('Failed to fetch existing note IDs:', error);
+        return new Set();
+      }
+    }
+
     // Handle form submission
-    document.getElementById('editorForm')!.addEventListener('submit', async (e) => {
+    async function handleFormSubmit(e: Event) {
       e.preventDefault();
       
       // Prevent submission if message is currently showing
@@ -370,53 +417,6 @@ if (import.meta.env.PROD) {
         return;
       }
 
-      // Generate unique noteId ensuring no conflicts within the same file
-      async function generateUniqueNoteId(content: string, reference: string, filename: string): Promise<string> {
-        // Get existing note IDs from the current file
-        const existingIds = await getExistingNoteIds(filename);
-        
-        let counter = 0;
-        let noteId = generateBaseNoteId(content, reference, counter);
-        
-        // Ensure uniqueness by incrementing counter if needed
-        while (existingIds.has(noteId)) {
-          counter++;
-          noteId = generateBaseNoteId(content, reference, counter);
-        }
-        
-        return noteId;
-      }
-      
-      // Generate base noteId using content + reference + timestamp + counter, then hash to 5 chars
-      function generateBaseNoteId(content: string, reference: string, counter: number = 0): string {
-        const timestamp = Date.now().toString();
-        const combined = content.trim() + '|' + reference.trim() + '|' + timestamp + '|' + counter;
-        
-        // Better hash function (FNV-1a variant)
-        let hash = 2166136261 + counter; // Add counter to initial hash
-        for (let i = 0; i < combined.length; i++) {
-          hash ^= combined.charCodeAt(i);
-          hash = (hash * 16777619) >>> 0; // Keep as 32-bit unsigned
-        }
-        
-        // Convert to hex and take first 5 chars
-        return hash.toString(16).substring(0, 5);
-      }
-      
-      // Get existing note IDs from a file
-      async function getExistingNoteIds(filename: string): Promise<Set<string>> {
-        try {
-          const response = await fetch(`http://localhost:3001/api/notes/${filename}`);
-          if (!response.ok) return new Set();
-          
-          const data = await response.json();
-          return new Set(data.notes?.map((note: any) => note.id) || []);
-        } catch (error) {
-          console.warn('Failed to fetch existing note IDs:', error);
-          return new Set();
-        }
-      }
-      
       // Check if we're in edit mode by looking at selected noteId
       const noteIdSelect = document.getElementById('noteIdSelect') as HTMLSelectElement;
       const selectedNoteId = noteIdSelect.value;
@@ -495,10 +495,10 @@ if (import.meta.env.PROD) {
         
         if (result.success) {
           if (isEditMode) {
-            await showMessage(`Note #${selectedNoteId} updated successfully`, 'success');
+            await showMessage(`Note #${selectedNoteId} updated successfully`, 'success', 5000);
             clearEditorAndReset(true);
           } else {
-            await showMessage('Content committed successfully', 'success');
+            await showMessage('Content committed successfully', 'success', 5000);
             clearEditorAndReset(false);
           }
         } else {
@@ -510,22 +510,32 @@ if (import.meta.env.PROD) {
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
       }
-    });
+    }
+
+    // Attach form submit handler
+    document.getElementById('editorForm')!.addEventListener('submit', handleFormSubmit);
 
 
-    // Auto-resize on input for both textareas
-    document.getElementById('contentArea')!.addEventListener('input', (e) => {
+    // Handle content area input
+    function handleContentAreaInput(e: Event) {
       autoResize(e.target as HTMLTextAreaElement);
-    });
+    }
 
-    document.getElementById('referenceArea')!.addEventListener('input', (e) => {
+    // Attach content area input handler
+    document.getElementById('contentArea')!.addEventListener('input', handleContentAreaInput);
+
+    // Handle reference area input
+    function handleReferenceAreaInput(e: Event) {
       const textarea = e.target as HTMLTextAreaElement;
       autoResize(textarea);
       updateSourceIndicator(textarea.value);
-    });
+    }
+
+    // Attach reference area input handler
+    document.getElementById('referenceArea')!.addEventListener('input', handleReferenceAreaInput);
 
     // Handle paste events specifically to prevent unwanted scrolling
-    document.getElementById('referenceArea')!.addEventListener('paste', (e) => {
+    function handleReferenceAreaPaste(e: ClipboardEvent) {
       const textarea = e.target as HTMLTextAreaElement;
       
       // Get paste data
@@ -575,16 +585,22 @@ if (import.meta.env.PROD) {
           updateSourceIndicator(textarea.value);
         }, 10);
       }
-    });
+    }
 
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
+    // Attach paste handler
+    document.getElementById('referenceArea')!.addEventListener('paste', handleReferenceAreaPaste);
+
+    // Handle keyboard shortcuts
+    function handleKeyboardShortcuts(e: KeyboardEvent) {
       // Ctrl+Enter or Cmd+Enter to commit
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
         document.getElementById('editorForm')!.dispatchEvent(new Event('submit'));
       }
-    });
+    }
+
+    // Attach keyboard shortcuts handler
+    document.addEventListener('keydown', handleKeyboardShortcuts);
 
     // Load notes for selected chapter
     async function loadNotesForChapter(filename: string) {
@@ -622,7 +638,7 @@ if (import.meta.env.PROD) {
     }
 
     // Handle chapter selection change
-    document.getElementById('fileSelect')!.addEventListener('change', (e) => {
+    function handleFileSelectChange(e: Event) {
       const select = e.target as HTMLSelectElement;
       loadNotesForChapter(select.value);
       
@@ -636,7 +652,10 @@ if (import.meta.env.PROD) {
       referenceArea.style.color = '';
       autoResize(contentArea);
       autoResize(referenceArea);
-    });
+    }
+
+    // Attach file select change handler
+    document.getElementById('fileSelect')!.addEventListener('change', handleFileSelectChange);
 
     // Store original reference content for edit mode
     let originalReference = '';
@@ -676,7 +695,7 @@ if (import.meta.env.PROD) {
     }
 
     // Handle note selection change
-    document.getElementById('noteIdSelect')!.addEventListener('change', (e) => {
+    function handleNoteIdSelectChange(e: Event) {
       const select = e.target as HTMLSelectElement;
       const noteId = select.value;
       const referenceArea = document.getElementById('referenceArea') as HTMLTextAreaElement;
@@ -698,13 +717,19 @@ if (import.meta.env.PROD) {
         autoResize(contentArea);
         autoResize(referenceArea);
       }
-    });
+    }
 
-    // Focus content textarea and initialize on load
-    window.addEventListener('load', () => {
+    // Attach note ID select change handler
+    document.getElementById('noteIdSelect')!.addEventListener('change', handleNoteIdSelectChange);
+
+    // Handle window load
+    function handleWindowLoad() {
       initializeTextareas();
       document.getElementById('contentArea')!.focus();
-    });
+    }
+
+    // Attach window load handler
+    window.addEventListener('load', handleWindowLoad);
 
     // Load files on page load
     loadFiles();
