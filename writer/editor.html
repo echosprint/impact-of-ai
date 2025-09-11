@@ -46,7 +46,7 @@
             disabled
             autocomplete="off"
           />
-          <div id="noteIdDropdown" class="absolute top-full left-0 bg-white/95 border border-gray-100 rounded-lg shadow-lg z-20 w-36 max-h-56 overflow-y-auto hidden backdrop-blur-sm">
+          <div id="noteIdDropdown" class="absolute top-full left-0 bg-white/95 border border-gray-100 rounded-lg shadow-lg z-20 w-48 max-h-56 overflow-y-auto hidden backdrop-blur-sm">
           </div>
         </div>
       </div>
@@ -431,7 +431,7 @@
       }
       
       if (!content.trim()) {
-        await showMessage('empty notes', 'error');
+        // await showMessage('empty notes', 'error');
         // Reload chapters and notes to refresh the interface
         await loadFiles();
         if (filename) {
@@ -686,7 +686,7 @@
       }
 
       dropdown.innerHTML = filtered.map((note, index) => 
-        `<div class="px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-xs font-normal text-gray-400 hover:text-gray-600 transition-colors duration-150 border-b border-gray-50 last:border-b-0 leading-tight dropdown-item ${index === 0 ? 'bg-gray-100' : ''}" style="font-size: 10px; line-height: 1.2;" data-note-id="${note.id}" data-index="${index}">
+        `<div class="px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-xs font-normal text-gray-400 hover:text-gray-600 transition-colors duration-150 border-b border-gray-50 last:border-b-0 leading-tight dropdown-item ${index === 0 ? 'bg-gray-100' : ''}" style="font-size: 10px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" data-note-id="${note.id}" data-index="${index}">
           ${note.text}
         </div>`
       ).join('');

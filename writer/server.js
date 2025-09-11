@@ -73,7 +73,7 @@ function extractNotes(content) {
     // Extract first line for preview (up to 10 chars)
     const lines = noteContent.split('\n').filter(line => line.trim().length > 0);
     const firstLine = lines.length > 0 ? lines[0].trim() : '';
-    const preview = firstLine.length > 10 ? firstLine.substring(0, 10) + '...' : firstLine;
+    const preview = firstLine.length > 22 ? firstLine.substring(0, 22) + '..' : firstLine;
     
     notes.push({ id: noteId, preview });
   }
