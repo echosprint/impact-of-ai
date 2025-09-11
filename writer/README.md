@@ -26,7 +26,7 @@ This is a standalone Node.js writing tool that provides development-only endpoin
 | `\` | Focus Quotes Area | Jump to quotes/references area |
 | `e` | Focus Note ID | Access note search/selection |
 | `Escape` | Blur Current Field | Exit any active input |
-| `Ctrl/Cmd + Enter` | Submit | Save/commit current content |
+| `Ctrl/Cmd + Enter` or `Ctrl/Cmd + S` | Submit | Save/commit current content |
 | `Ctrl/Cmd + L` | Clear All | Reset editor to initial state |
 
 #### Advanced Features

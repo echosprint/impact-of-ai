@@ -645,8 +645,8 @@
       const activeElement = document.activeElement;
       const isTyping = activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA';
       
-      // Ctrl+Enter or Cmd+Enter to commit
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      // Ctrl+Enter/Cmd+Enter or Ctrl+S/Cmd+S to commit
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.key === 's')) {
         e.preventDefault();
         document.getElementById('editorForm').dispatchEvent(new Event('submit'));
         return;
