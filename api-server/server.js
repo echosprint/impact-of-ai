@@ -5,8 +5,8 @@ import { join } from 'path';
 import { parse } from 'url';
 
 const PORT = 3001;
-const CHAPTERS_DIR = join(process.cwd(), 'src', 'content', 'chapters');
-const EDITOR_PATH = join(process.cwd(), 'api-server', 'editor.html');
+const CHAPTERS_DIR = join(process.cwd(), '..', 'src', 'content', 'chapters');
+const EDITOR_PATH = join(process.cwd(), 'editor.html');
 
 // =============================================================================
 // UTILITY FUNCTIONS
