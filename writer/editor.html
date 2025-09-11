@@ -25,7 +25,7 @@
 </head>
 <body class="bg-white">
   <!-- Fixed header -->
-  <header class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-gray-200/60 z-10 shadow-sm">
+  <header class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md z-10">
     <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-4">
         <select 
@@ -42,11 +42,11 @@
             name="noteId" 
             type="text"
             placeholder="Search notes..."
-            class="text-sm font-medium border-none bg-transparent focus:outline-none text-gray-500 hover:text-gray-700 transition-colors w-36"
+            class="text-sm font-normal border-none bg-transparent focus:outline-none text-gray-400 focus:text-gray-600 transition-colors w-36 placeholder-gray-300"
             disabled
             autocomplete="off"
           />
-          <div id="noteIdDropdown" class="absolute top-full left-0 bg-white border border-gray-200/80 rounded-xl shadow-xl z-20 w-72 max-h-56 overflow-y-auto hidden backdrop-blur-sm">
+          <div id="noteIdDropdown" class="absolute top-full left-0 bg-white/95 border border-gray-100 rounded-lg shadow-lg z-20 w-36 max-h-56 overflow-y-auto hidden backdrop-blur-sm">
           </div>
         </div>
       </div>
@@ -73,7 +73,7 @@
           <textarea 
             id="contentArea" 
             name="content" 
-            class="w-full min-h-[200px] resize-none border border-gray-200 rounded-lg p-4 outline-none text-base placeholder-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500"
+            class="w-full min-h-[200px] resize-none border border-gray-200 rounded-lg p-4 outline-none text-base placeholder-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 text-gray-600"
             placeholder="Write notes..."
             style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif; word-spacing: -0.05em; letter-spacing: -0.01em; line-height: 1.6; overflow: hidden;"
           ></textarea>
@@ -84,7 +84,7 @@
           <textarea 
             id="referenceArea" 
             name="reference" 
-            class="w-full min-h-[200px] resize-none border border-gray-200 rounded-lg p-4 outline-none text-sm placeholder-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            class="w-full min-h-[200px] resize-none border border-gray-200 rounded-lg p-4 outline-none text-sm placeholder-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-600"
             placeholder="Quotes..."
             style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif; word-spacing: -0.05em; letter-spacing: -0.01em; line-height: 1.6; background-color: #fafafa; overflow-y: auto;"
           ></textarea>
@@ -611,6 +611,7 @@
 
     // Store all available notes for searching
     let allNotes = [];
+    let selectedDropdownIndex = -1;
 
     // Load notes for selected chapter
     async function loadNotesForChapter(filename) {
@@ -669,10 +670,13 @@
         // Show all notes when no search term
         filtered = allNotes;
       } else {
+        // Clean search term (remove # if present)
+        const cleanSearchTerm = searchTerm.replace(/^#/, '').toLowerCase();
+        
         // Filter based on search term
         filtered = allNotes.filter(note => 
-          note.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (note.preview && note.preview.toLowerCase().includes(searchTerm.toLowerCase()))
+          note.id.toLowerCase().includes(cleanSearchTerm) ||
+          (note.preview && note.preview.toLowerCase().includes(cleanSearchTerm))
         );
       }
 
@@ -681,11 +685,13 @@
         return;
       }
 
-      dropdown.innerHTML = filtered.map(note => 
-        `<div class="px-4 py-3 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900 transition-all duration-150 border-b border-gray-100 last:border-b-0" data-note-id="${note.id}">
+      dropdown.innerHTML = filtered.map((note, index) => 
+        `<div class="px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-xs font-normal text-gray-400 hover:text-gray-600 transition-colors duration-150 border-b border-gray-50 last:border-b-0 leading-tight dropdown-item ${index === 0 ? 'bg-gray-100' : ''}" style="font-size: 10px; line-height: 1.2;" data-note-id="${note.id}" data-index="${index}">
           ${note.text}
         </div>`
       ).join('');
+      
+      selectedDropdownIndex = 0;
 
       dropdown.classList.remove('hidden');
     }
@@ -695,11 +701,12 @@
       const noteIdSelect = document.getElementById('noteIdSelect');
       const dropdown = document.getElementById('noteIdDropdown');
       
-      noteIdSelect.value = noteId;
+      noteIdSelect.value = `#${noteId}`;
       dropdown.classList.add('hidden');
       
-      // Trigger the existing note selection logic
-      handleNoteIdSelectChange({ target: noteIdSelect });
+      // Trigger the existing note selection logic with the original noteId
+      const fakeEvent = { target: { ...noteIdSelect, value: noteId } };
+      handleNoteIdSelectChange(fakeEvent);
     }
 
     // Handle chapter selection change
@@ -759,8 +766,13 @@
     // Handle note selection change
     function handleNoteIdSelectChange(e) {
       const select = e.target;
-      const noteId = select.value;
+      let noteId = select.value;
       const referenceArea = document.getElementById('referenceArea');
+      
+      // Clean noteId (remove # if present)
+      if (noteId) {
+        noteId = noteId.replace(/^#/, '');
+      }
       
       if (noteId) {
         // Edit mode: load note and disable reference area
@@ -791,6 +803,58 @@
     function handleNoteIdInput(e) {
       const searchTerm = e.target.value;
       filterNotes(searchTerm);
+    }
+    
+    // Handle keyboard navigation in note ID input
+    function handleNoteIdKeydown(e) {
+      const dropdown = document.getElementById('noteIdDropdown');
+      const items = dropdown.querySelectorAll('.dropdown-item');
+      
+      if (dropdown.classList.contains('hidden') || items.length === 0) {
+        return;
+      }
+      
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          selectedDropdownIndex = Math.min(selectedDropdownIndex + 1, items.length - 1);
+          updateDropdownSelection(items);
+          break;
+          
+        case 'ArrowUp':
+          e.preventDefault();
+          selectedDropdownIndex = Math.max(selectedDropdownIndex - 1, -1);
+          updateDropdownSelection(items);
+          break;
+          
+        case 'Enter':
+          e.preventDefault();
+          if (selectedDropdownIndex >= 0 && selectedDropdownIndex < items.length) {
+            const selectedItem = items[selectedDropdownIndex];
+            const noteId = selectedItem.getAttribute('data-note-id');
+            selectNote(noteId);
+          }
+          break;
+          
+        case 'Escape':
+          e.preventDefault();
+          dropdown.classList.add('hidden');
+          selectedDropdownIndex = -1;
+          break;
+      }
+    }
+    
+    // Update visual selection in dropdown
+    function updateDropdownSelection(items) {
+      items.forEach((item, index) => {
+        if (index === selectedDropdownIndex) {
+          item.classList.add('bg-gray-100');
+          item.classList.remove('bg-gray-50');
+          item.scrollIntoView({ block: 'nearest' });
+        } else {
+          item.classList.remove('bg-gray-100');
+        }
+      });
     }
 
     // Handle note ID input focus
@@ -830,6 +894,7 @@
     document.getElementById('noteIdSelect').addEventListener('change', handleNoteIdSelectChange);
     document.getElementById('noteIdSelect').addEventListener('input', handleNoteIdInput);
     document.getElementById('noteIdSelect').addEventListener('focus', handleNoteIdFocus);
+    document.getElementById('noteIdSelect').addEventListener('keydown', handleNoteIdKeydown);
     document.getElementById('noteIdDropdown').addEventListener('click', handleDropdownClick);
     document.addEventListener('click', handleDocumentClick);
     window.addEventListener('load', handleWindowLoad);
