@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 import { createServer } from 'http';
 import { promises as fs } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { parse } from 'url';
+import { fileURLToPath } from 'url';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = 3001;
-const CHAPTERS_DIR = join(process.cwd(), '..', 'src', 'content', 'chapters');
-const EDITOR_PATH = join(process.cwd(), 'editor.html');
+const CHAPTERS_DIR = join(__dirname, '..', 'src', 'content', 'chapters');
+const EDITOR_PATH = join(__dirname, 'editor.html');
 
 // =============================================================================
 // UTILITY FUNCTIONS
@@ -338,13 +340,13 @@ async function handleRequest(req, res) {
 const server = createServer(handleRequest);
 
 server.listen(PORT, () => {
-  console.log(`API Server running on http://localhost:${PORT}`);
+  console.log(`Writer running on http://localhost:${PORT}`);
   console.log(`Serving chapters from: ${CHAPTERS_DIR}`);
 });
 
 // Graceful shutdown
 process.on('SIGINT', () => {
-  console.log('\nShutting down API server...');
+  console.log('\nShutting down writer...');
   server.close(() => {
     process.exit(0);
   });
