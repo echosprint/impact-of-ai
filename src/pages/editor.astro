@@ -104,7 +104,7 @@ if (import.meta.env.PROD) {
           loadNotesForChapter(data.lastModified);
         }
       } catch (error) {
-        showMessage('Failed to load files', 'error');
+        await showMessage('Failed to load files', 'error');
       }
     }
 
@@ -112,9 +112,8 @@ if (import.meta.env.PROD) {
     let isMessageShowing = false;
 
     // Show toast message
-    function showMessage(text: string, type: 'success' | 'error', callback?: () => void) {
+    async function showMessage(text: string, type: 'success' | 'error', duration?: number) {
       const messageEl = document.getElementById('message')!;
-      const submitBtn = document.querySelector('button[type="submit"]') as HTMLButtonElement;
       
       // Prevent multiple simultaneous messages
       if (isMessageShowing) {
@@ -137,32 +136,47 @@ if (import.meta.env.PROD) {
       messageEl.style.opacity = '1';
       messageEl.style.pointerEvents = 'auto';
       
-      // Show message for at least 2 seconds, then fade out 
-      const displayDuration = Math.max(2000, text.length * 80); // Minimum 2 seconds, longer for longer messages
+      // Use provided duration or calculate based on text length
+      const displayDuration = duration ?? Math.max(2000, text.length * 80); // Minimum 2 seconds, longer for longer messages
       
       console.log(`Showing message for ${displayDuration}ms: "${text}"`);
       
-      setTimeout(() => {
-        console.log('Starting message fade out');
-        messageEl.style.opacity = '0';
-        messageEl.style.pointerEvents = 'none';
+      // Wait for display duration
+      await new Promise(resolve => setTimeout(resolve, displayDuration));
+      
+      console.log('Starting message fade out');
+      messageEl.style.opacity = '0';
+      messageEl.style.pointerEvents = 'none';
+      
+      // Wait for fade transition to complete
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      console.log('Clearing message state');
+      isMessageShowing = false;
+    }
+
+    // Clear input areas and reset editor state
+    function clearEditorAndReset(isEditMode: boolean) {
+      const contentArea = document.getElementById('contentArea') as HTMLTextAreaElement;
+      const referenceArea = document.getElementById('referenceArea') as HTMLTextAreaElement;
+      
+      // Clear input areas
+      contentArea.value = '';
+      referenceArea.value = '';
+      autoResize(contentArea);
+      autoResize(referenceArea);
+      updateSourceIndicator(''); // Clear source indicator
+      
+      if (isEditMode) {
+        // Reset note selection to append mode
+        const noteIdSelect = document.getElementById('noteIdSelect') as HTMLSelectElement;
+        noteIdSelect.value = '';
         
-        // Execute callback after message disappears
-        if (callback) {
-          setTimeout(() => {
-            console.log('Executing callback and clearing message state');
-            callback();
-            // Re-enable submissions after cleanup is complete
-            isMessageShowing = false;
-          }, 300); // Wait for fade transition to complete
-        } else {
-          // Re-enable submissions if no callback
-          setTimeout(() => {
-            console.log('Clearing message state (no callback)');
-            isMessageShowing = false;
-          }, 300);
-        }
-      }, displayDuration);
+        // Re-enable reference area for new content
+        referenceArea.disabled = false;
+        referenceArea.style.backgroundColor = '#fafafa';
+        referenceArea.style.color = '';
+      }
     }
 
     // Auto-resize textarea while preserving scroll position
@@ -347,12 +361,12 @@ if (import.meta.env.PROD) {
       const reference = referenceArea.value;
       
       if (!filename) {
-        showMessage('Please select a chapter', 'error');
+        await showMessage('Please select a chapter', 'error');
         return;
       }
       
       if (!content.trim()) {
-        showMessage('empty notes', 'error');
+        await showMessage('empty notes', 'error');
         return;
       }
 
@@ -481,38 +495,17 @@ if (import.meta.env.PROD) {
         
         if (result.success) {
           if (isEditMode) {
-            showMessage(`Note #${selectedNoteId} updated successfully`, 'success', () => {
-              // Clear input areas and reset to append mode after message disappears
-              contentArea.value = '';
-              referenceArea.value = '';
-              autoResize(contentArea);
-              autoResize(referenceArea);
-              updateSourceIndicator(''); // Clear source indicator
-              
-              // Reset note selection to append mode
-              const noteIdSelect = document.getElementById('noteIdSelect') as HTMLSelectElement;
-              noteIdSelect.value = '';
-              
-              // Re-enable reference area for new content
-              referenceArea.disabled = false;
-              referenceArea.style.backgroundColor = '#fafafa';
-              referenceArea.style.color = '';
-            });
+            await showMessage(`Note #${selectedNoteId} updated successfully`, 'success');
+            clearEditorAndReset(true);
           } else {
-            showMessage('Content committed successfully', 'success', () => {
-              // Clear input areas after message disappears
-              contentArea.value = '';
-              referenceArea.value = '';
-              autoResize(contentArea);
-              autoResize(referenceArea);
-              updateSourceIndicator(''); // Clear source indicator
-            });
+            await showMessage('Content committed successfully', 'success');
+            clearEditorAndReset(false);
           }
         } else {
-          showMessage(result.error || (isEditMode ? 'Failed to update' : 'Failed to commit'), 'error');
+          await showMessage(result.error || (isEditMode ? 'Failed to update' : 'Failed to commit'), 'error');
         }
       } catch (error) {
-        showMessage('Network error, please try again', 'error');
+        await showMessage('Network error, please try again', 'error');
       } finally {
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
@@ -675,10 +668,10 @@ if (import.meta.env.PROD) {
         autoResize(referenceArea);
         updateSourceIndicator(referenceArea.value);
         
-        showMessage(`Loaded note #${noteId}`, 'success');
+        await showMessage(`Loaded note #${noteId}`, 'success');
         
       } catch (error) {
-        showMessage(`Failed to load note #${noteId}`, 'error');
+        await showMessage(`Failed to load note #${noteId}`, 'error');
       }
     }
 
