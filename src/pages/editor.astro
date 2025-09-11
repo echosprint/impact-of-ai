@@ -116,6 +116,11 @@ if (import.meta.env.PROD) {
       const messageEl = document.getElementById('message')!;
       const submitBtn = document.querySelector('button[type="submit"]') as HTMLButtonElement;
       
+      // Prevent multiple simultaneous messages
+      if (isMessageShowing) {
+        return;
+      }
+      
       // Set message showing state
       isMessageShowing = true;
       
@@ -125,19 +130,27 @@ if (import.meta.env.PROD) {
           : 'bg-orange-100 text-orange-800 border border-orange-200'
       }`;
       messageEl.textContent = text;
+      
+      // Force a reflow to ensure the class changes are applied before showing
+      messageEl.offsetHeight;
+      
       messageEl.style.opacity = '1';
       messageEl.style.pointerEvents = 'auto';
       
-      // Show message for at least 1 second, then fade out over 2 seconds  
-      const displayDuration = Math.max(1000, text.length * 50); // Minimum 1 second, longer for longer messages
+      // Show message for at least 2 seconds, then fade out 
+      const displayDuration = Math.max(2000, text.length * 80); // Minimum 2 seconds, longer for longer messages
+      
+      console.log(`Showing message for ${displayDuration}ms: "${text}"`);
       
       setTimeout(() => {
+        console.log('Starting message fade out');
         messageEl.style.opacity = '0';
         messageEl.style.pointerEvents = 'none';
         
         // Execute callback after message disappears
         if (callback) {
           setTimeout(() => {
+            console.log('Executing callback and clearing message state');
             callback();
             // Re-enable submissions after cleanup is complete
             isMessageShowing = false;
@@ -145,6 +158,7 @@ if (import.meta.env.PROD) {
         } else {
           // Re-enable submissions if no callback
           setTimeout(() => {
+            console.log('Clearing message state (no callback)');
             isMessageShowing = false;
           }, 300);
         }
@@ -318,11 +332,9 @@ if (import.meta.env.PROD) {
     // Handle form submission
     document.getElementById('editorForm')!.addEventListener('submit', async (e) => {
       e.preventDefault();
-      console.log('Form submit triggered');
       
       // Prevent submission if message is currently showing
       if (isMessageShowing) {
-        console.log('Form submission blocked - message is showing');
         return;
       }
       
@@ -333,8 +345,6 @@ if (import.meta.env.PROD) {
       const filename = select.value;
       const content = contentArea.value;
       const reference = referenceArea.value;
-      
-      console.log('Form data:', { filename, content: content.substring(0, 50), reference: reference.substring(0, 50) });
       
       if (!filename) {
         showMessage('Please select a chapter', 'error');
@@ -401,10 +411,14 @@ if (import.meta.env.PROD) {
       // In edit mode, use original reference content to preserve quotes/source
       const finalReference = isEditMode ? originalReference : reference;
       
-      const noteId = await generateUniqueNoteId(content.trim(), reference.trim(), filename);
-
-      // Use same logic for both edit and append modes
-      const currentNoteId = isEditMode ? selectedNoteId : noteId;
+      // Only generate new noteId for append mode
+      let currentNoteId;
+      if (isEditMode) {
+        currentNoteId = selectedNoteId; // Keep original ID when editing
+      } else {
+        const noteId = await generateUniqueNoteId(content.trim(), reference.trim(), filename);
+        currentNoteId = noteId;
+      }
       
       // Format as Note component with smart source detection (same logic for both modes)
       let finalContent;
@@ -581,8 +595,6 @@ if (import.meta.env.PROD) {
 
     // Load notes for selected chapter
     async function loadNotesForChapter(filename: string) {
-      console.log('loadNotesForChapter called with:', filename);
-      
       if (!filename) {
         const noteIdSelect = document.getElementById('noteIdSelect') as HTMLSelectElement;
         noteIdSelect.innerHTML = '<option value="">Note</option>';
@@ -591,29 +603,22 @@ if (import.meta.env.PROD) {
       }
 
       try {
-        console.log('Fetching notes from:', `http://localhost:3001/api/notes/${filename}`);
         const response = await fetch(`http://localhost:3001/api/notes/${filename}`);
-        console.log('Response status:', response.status);
-        
         const data = await response.json();
-        console.log('Response data:', data);
         
         const noteIdSelect = document.getElementById('noteIdSelect') as HTMLSelectElement;
         noteIdSelect.innerHTML = '<option value="">Note</option>';
         
         if (data.notes && data.notes.length > 0) {
-          console.log('Found', data.notes.length, 'notes');
           data.notes.forEach((note: any) => {
             const option = document.createElement('option');
             option.value = note.id;
             const optionText = note.preview ? `#${note.id} - ${note.preview}` : `#${note.id}`;
             option.textContent = optionText;
             noteIdSelect.appendChild(option);
-            console.log('Added option:', note.id, 'preview:', note.preview, 'text:', optionText);
           });
           noteIdSelect.disabled = false;
         } else {
-          console.log('No notes found or invalid data structure');
           noteIdSelect.disabled = true;
         }
       } catch (error) {
@@ -626,7 +631,6 @@ if (import.meta.env.PROD) {
     // Handle chapter selection change
     document.getElementById('fileSelect')!.addEventListener('change', (e) => {
       const select = e.target as HTMLSelectElement;
-      console.log('Chapter selected:', select.value);
       loadNotesForChapter(select.value);
       
       // Clear content and reset to append mode when changing chapters

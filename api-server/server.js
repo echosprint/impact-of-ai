@@ -16,8 +16,8 @@ async function handleRequest(req, res) {
   const { pathname } = parse(req.url, true);
   const method = req.method;
   
-  // Log requests (except OPTIONS and GET /api/files for cleaner logs)
-  if (method !== 'OPTIONS' && !(method === 'GET' && pathname === '/api/files')) {
+  // Log requests (except OPTIONS and GET requests for cleaner logs)
+  if (method !== 'OPTIONS' && method !== 'GET') {
     const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
     console.log(`${timestamp} ${method} ${pathname}`);
   }
@@ -276,15 +276,36 @@ async function handleRequest(req, res) {
           return;
         }
 
-        // Replace the specific note
-        const noteRegex = new RegExp(`<Note id="${noteId}"[^>]*>[\\s\\S]*?<\\/Note>`, 'g');
-        const updatedContent = fileContent.replace(noteRegex, content);
+        // Find and replace the specific note using manual position detection
+        const noteStartPattern = `<Note id="${noteId}"`;
+        const noteStart = fileContent.indexOf(noteStartPattern);
         
-        if (updatedContent === fileContent) {
+        if (noteStart === -1) {
           res.writeHead(404, CORS_HEADERS);
           res.end(JSON.stringify({ error: `Note #${noteId} not found in ${filename}` }));
           return;
         }
+        
+        // Find the opening tag end
+        const openTagEnd = fileContent.indexOf('>', noteStart);
+        if (openTagEnd === -1) {
+          res.writeHead(500, CORS_HEADERS);
+          res.end(JSON.stringify({ error: 'Malformed Note tag' }));
+          return;
+        }
+        
+        // Find the closing tag
+        const noteEnd = fileContent.indexOf('</Note>', openTagEnd);
+        if (noteEnd === -1) {
+          res.writeHead(500, CORS_HEADERS);
+          res.end(JSON.stringify({ error: 'Note closing tag not found' }));
+          return;
+        }
+        
+        // Replace the note content
+        const beforeNote = fileContent.substring(0, noteStart);
+        const afterNote = fileContent.substring(noteEnd + 7); // +7 for '</Note>'
+        const updatedContent = beforeNote + content + afterNote;
 
         // Write the updated content back
         await fs.writeFile(safePath, updatedContent, 'utf8');
