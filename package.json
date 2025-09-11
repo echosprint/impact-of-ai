@@ -3,9 +3,9 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "concurrently -n \"astro,api\" -c \"blue,green\" \"astro dev\" \"node api-server/server.js\"",
+    "dev": "concurrently -n \"astro,writer\" -c \"blue,green\" \"astro dev\" \"node writer/server.js\"",
     "dev:astro": "astro dev",
-    "dev:api": "node api-server/server.js",
+    "dev:writer": "node writer/server.js",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
