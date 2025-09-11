@@ -15,8 +15,26 @@ This is a standalone Node.js writing tool that provides development-only endpoin
 - **GET /editor** - Standalone HTML editor for writing and editing notes
 - Smart source detection for bibliography formats
 - Real-time preview and auto-resize textareas
+- Character counter with Chinese/Unicode support
 - Edit existing notes or create new ones
-- Keyboard shortcuts (Ctrl+Enter / Cmd+Enter to submit)
+- Comprehensive keyboard shortcuts for efficient writing
+
+#### Keyboard Shortcuts
+| Shortcut | Action | Description |
+|----------|--------|-------------|
+| `/` | Focus Note Content | Jump to main writing area |
+| `\` | Focus Quotes Area | Jump to quotes/references area |
+| `e` | Focus Note ID | Access note search/selection |
+| `Escape` | Blur Current Field | Exit any active input |
+| `Ctrl/Cmd + Enter` | Submit | Save/commit current content |
+| `Ctrl/Cmd + L` | Clear All | Reset editor to initial state |
+
+#### Advanced Features
+- **Dropdown Navigation**: Arrow keys, Enter, Escape in note selection
+- **Unsaved Changes Protection**: Prevents accidental data loss
+- **Smart Field Behavior**: Note ID field reverts to current note on blur
+- **Chinese Input Support**: Proper pinyin composition handling
+- **Character Counting**: Excludes whitespace, counts visible characters only
 
 ## Setup
 

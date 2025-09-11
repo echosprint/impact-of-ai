@@ -641,10 +641,62 @@
 
     // Handle keyboard shortcuts
     function handleKeyboardShortcuts(e) {
+      // Only handle shortcuts if not typing in an input/textarea
+      const activeElement = document.activeElement;
+      const isTyping = activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA';
+      
       // Ctrl+Enter or Cmd+Enter to commit
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
         document.getElementById('editorForm').dispatchEvent(new Event('submit'));
+        return;
+      }
+      
+      // Ctrl+L or Cmd+L to clear all inputs and reset to initial state
+      if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+        e.preventDefault();
+        clearEditorAndReset(true);
+        return;
+      }
+      
+      // Escape to blur active textarea/input
+      if (e.key === 'Escape' && isTyping) {
+        e.preventDefault();
+        activeElement.blur();
+        return;
+      }
+      
+      // Forward slash (/) to focus note input
+      if (e.key === '/' && !isTyping) {
+        e.preventDefault();
+        const contentArea = document.getElementById('contentArea');
+        contentArea.focus();
+        // Move cursor to end of existing text
+        contentArea.setSelectionRange(contentArea.value.length, contentArea.value.length);
+      }
+      
+      // Backslash (\) to focus quotes/reference area
+      if (e.key === '\\' && !isTyping) {
+        e.preventDefault();
+        const referenceArea = document.getElementById('referenceArea');
+        // Only focus if not disabled (not in edit mode)
+        if (!referenceArea.disabled) {
+          referenceArea.focus();
+          // Move cursor to end of existing text
+          referenceArea.setSelectionRange(referenceArea.value.length, referenceArea.value.length);
+        }
+      }
+      
+      // E key to focus note ID area
+      if (e.key === 'e' && !isTyping) {
+        e.preventDefault();
+        const noteIdSelect = document.getElementById('noteIdSelect');
+        // Only focus if not disabled
+        if (!noteIdSelect.disabled) {
+          noteIdSelect.focus();
+          // Select all text for easy replacement
+          noteIdSelect.select();
+        }
       }
     }
 
