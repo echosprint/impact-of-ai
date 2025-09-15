@@ -416,11 +416,14 @@
     // Handle form submission
     async function handleFormSubmit(e) {
       e.preventDefault();
-      
+
       // Prevent submission if message is currently showing
       if (isMessageShowing) {
         return;
       }
+
+      // Check if this is from keyboard shortcut with shouldClear parameter
+      const shouldClear = e.detail?.shouldClear !== false; // Default to true for button clicks
       
       const select = document.getElementById('fileSelect');
       const contentArea = document.getElementById('contentArea');
@@ -524,23 +527,53 @@
         if (result.success) {
           if (isEditMode) {
             await showMessage(`Note #${currentNoteId} updated successfully`, 'success');
-            clearEditorAndReset(true);
+            if (shouldClear) {
+              clearEditorAndReset(true);
+            }
           } else {
             await showMessage('Content committed successfully', 'success');
-            clearEditorAndReset(false);
+            if (shouldClear) {
+              clearEditorAndReset(false);
+            }
           }
-          
+
           // Refresh chapters and notes after successful commit
           await loadFiles();
           const fileSelect = document.getElementById('fileSelect');
           if (fileSelect.value) {
             await loadNotesForChapter(fileSelect.value);
           }
-          
-          // Clear current note ID since we're back to append mode
-          currentNoteId = '';
-          const noteIdSelect = document.getElementById('noteIdSelect');
-          noteIdSelect.value = '';
+
+          // Handle note ID management based on clear behavior
+          if (shouldClear) {
+            // Clear mode: reset to append mode
+            currentNoteId = '';
+            const noteIdSelect = document.getElementById('noteIdSelect');
+            noteIdSelect.value = '';
+          } else {
+            // No clear mode (Ctrl+S): ensure we're in edit mode for the current note
+            if (!isEditMode && currentNoteId) {
+              // We just created a new note, set it as selected for continued editing AFTER refresh
+              const noteIdSelect = document.getElementById('noteIdSelect');
+              noteIdSelect.value = `#${currentNoteId}`;
+
+              // Set original reference to preserve it for future edits
+              originalReference = reference;
+
+              // Set UI to edit mode
+              const referenceArea = document.getElementById('referenceArea');
+              referenceArea.disabled = true;
+              referenceArea.style.backgroundColor = '#f9f9f9';
+              referenceArea.style.color = '#999';
+            } else if (isEditMode && currentNoteId) {
+              // Already in edit mode, maintain the selection after refresh
+              const noteIdSelect = document.getElementById('noteIdSelect');
+              noteIdSelect.value = `#${currentNoteId}`;
+
+              // Ensure originalReference is preserved
+              originalReference = originalReference || reference;
+            }
+          }
         } else {
           await showMessage(result.error || (isEditMode ? 'Failed to update' : 'Failed to commit'), 'error');
         }
@@ -662,10 +695,19 @@
       const activeElement = document.activeElement;
       const isTyping = activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA';
       
-      // Ctrl+Enter/Cmd+Enter or Ctrl+S/Cmd+S to commit
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.key === 's')) {
+      // Ctrl+Enter/Cmd+Enter to commit and clear
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
-        document.getElementById('editorForm').dispatchEvent(new Event('submit'));
+        const submitEvent = new CustomEvent('submit', { detail: { shouldClear: true } });
+        document.getElementById('editorForm').dispatchEvent(submitEvent);
+        return;
+      }
+
+      // Ctrl+S/Cmd+S to commit without clearing (stay in edit mode)
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        const submitEvent = new CustomEvent('submit', { detail: { shouldClear: false } });
+        document.getElementById('editorForm').dispatchEvent(submitEvent);
         return;
       }
       
