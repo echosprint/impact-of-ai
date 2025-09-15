@@ -653,6 +653,11 @@
 
     // Handle keyboard shortcuts
     function handleKeyboardShortcuts(e) {
+      // Ensure the window has focus before processing shortcuts
+      if (!document.hasFocus()) {
+        return;
+      }
+      
       // Only handle shortcuts if not typing in an input/textarea
       const activeElement = document.activeElement;
       const isTyping = activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA';
