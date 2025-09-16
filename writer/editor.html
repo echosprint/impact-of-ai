@@ -734,8 +734,8 @@
         contentArea.setSelectionRange(contentArea.value.length, contentArea.value.length);
       }
       
-      // Backslash (\) to focus quotes/reference area
-      if (e.key === '\\' && !isTyping) {
+      // Right bracket (]) to focus quotes/reference area
+      if (e.key === ']' && !isTyping) {
         e.preventDefault();
         const referenceArea = document.getElementById('referenceArea');
         // Only focus if not disabled (not in edit mode)
