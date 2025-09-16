@@ -28,6 +28,7 @@ This is a standalone Node.js writing tool that provides development-only endpoin
 | `Escape` | Blur Current Field | Exit any active input |
 | `Ctrl/Cmd + Enter` or `Ctrl/Cmd + S` | Submit | Save/commit current content |
 | `Ctrl/Cmd + L` | Clear All | Reset editor to initial state |
+| `Ctrl/Cmd + R` | Load Recent | Load last note from current chapter |
 
 #### Advanced Features
 - **Dropdown Navigation**: Arrow keys, Enter, Escape in note selection

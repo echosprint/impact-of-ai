@@ -585,12 +585,43 @@
       }
     }
 
-    // Count visible characters only, excluding whitespace and control characters
+    // Count words: English words separated by spaces, Chinese characters as individual words
     function countCharacters(text) {
-      // Remove all whitespace characters (spaces, tabs, newlines, etc.)
-      const visibleText = text.replace(/\s/g, '');
-      // Use Array.from to properly count Unicode characters including Chinese
-      return Array.from(visibleText).length;
+      if (!text.trim()) return 0;
+
+      let count = 0;
+      // Split by whitespace to get potential English words
+      const segments = text.trim().split(/\s+/);
+
+      for (const segment of segments) {
+        // For each segment, count Chinese characters individually and English words as 1
+        let englishWord = '';
+        for (const char of segment) {
+          if (/[\u4e00-\u9fff]/.test(char)) {
+            // Chinese character - count as 1 word
+            if (englishWord) {
+              count++; // Count accumulated English word
+              englishWord = '';
+            }
+            count++; // Count Chinese character
+          } else if (/[a-zA-Z0-9]/.test(char)) {
+            // English letter or number - accumulate
+            englishWord += char;
+          } else {
+            // Punctuation or other - end current English word
+            if (englishWord) {
+              count++;
+              englishWord = '';
+            }
+          }
+        }
+        // Don't forget the last English word in segment
+        if (englishWord) {
+          count++;
+        }
+      }
+
+      return count;
     }
     
     // Update character counter
@@ -715,6 +746,13 @@
       if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
         e.preventDefault();
         clearEditorAndReset(true);
+        return;
+      }
+
+      // Ctrl+R or Cmd+R to load most recent note
+      if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+        e.preventDefault();
+        loadMostRecentNote();
         return;
       }
       
@@ -917,6 +955,27 @@
       } catch (error) {
         await showMessage(`Failed to load note #${noteId}`, 'error');
       }
+    }
+
+    // Load most recent note using existing allNotes array
+    async function loadMostRecentNote() {
+      const fileSelect = document.getElementById('fileSelect');
+
+      if (!fileSelect.value) {
+        showMessage('Please select a chapter first', 'info');
+        return;
+      }
+
+      if (allNotes.length === 0) {
+        showMessage('No notes found in current chapter', 'info');
+        return;
+      }
+
+      // Get the last note (most recent)
+      const mostRecentNote = allNotes[allNotes.length - 1];
+
+      // Use existing selectNote function to load the note
+      selectNote(mostRecentNote.id);
     }
 
     // Handle note selection change (UI state only, not loading)
