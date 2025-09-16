@@ -104,7 +104,7 @@
     // Load available files
     async function loadFiles() {
       try {
-        const response = await fetch('http://localhost:3001/api/files');
+        const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.files}`);
         const data = await response.json();
         
         const select = document.getElementById('fileSelect');
@@ -123,56 +123,101 @@
           loadNotesForChapter(data.lastModified);
         }
       } catch (error) {
-        await showMessage('Failed to load files', 'error');
+        await UIFeedback.UIFeedback.showMessage('Failed to load files', 'error');
       }
     }
 
-    // Track if message is currently showing to prevent duplicate submissions
-    let isMessageShowing = false;
-
-    // Show toast message
-    async function showMessage(text, type, duration) {
-      const messageEl = document.getElementById('message');
-      
-      // Prevent multiple simultaneous messages
-      if (isMessageShowing) {
-        return;
+    // API Configuration
+    const API_CONFIG = {
+      baseUrl: 'http://localhost:3001',
+      endpoints: {
+        notes: (filename) => `/api/notes/${filename}`,
+        note: (id) => `/api/note/${id}`,
+        updateNote: (id) => `/api/note/${id}`,
+        append: '/api/append',
+        files: '/api/files'
       }
-      
-      // Set message showing state
-      isMessageShowing = true;
-      
-      messageEl.className = `fixed bottom-6 left-1/2 transform -translate-x-1/2 px-3 py-1.5 rounded-full shadow-md transition-all duration-300 text-xs ${
-        type === 'success' 
-          ? 'bg-green-600 text-white' 
-          : 'bg-orange-100 text-orange-800 border border-orange-200'
-      }`;
-      messageEl.textContent = text;
-      
-      // Force a reflow to ensure the class changes are applied before showing
-      messageEl.offsetHeight;
-      
-      messageEl.style.opacity = '1';
-      messageEl.style.pointerEvents = 'auto';
-      
-      // Use provided duration or calculate based on text length
-      const displayDuration = duration ?? 1000;
-      
-      console.log(`Showing message for ${displayDuration}ms: "${text}"`);
-      
-      // Wait for display duration
-      await new Promise(resolve => setTimeout(resolve, displayDuration));
-      
-      console.log('Starting message fade out');
-      messageEl.style.opacity = '0';
-      messageEl.style.pointerEvents = 'none';
-      
-      // Wait for fade transition to complete
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      console.log('Clearing message state');
-      isMessageShowing = false;
-    }
+    };
+
+    // Text Processing Utilities
+    const TextUtils = {
+      countCharacters: function(text) {
+        if (!text.trim()) return 0;
+
+        let count = 0;
+        // Split by whitespace to get potential English words
+        const segments = text.trim().split(/\s+/);
+
+        for (const segment of segments) {
+          // For each segment, count Chinese characters individually and English words as 1
+          let englishWord = '';
+          for (const char of segment) {
+            if (/[\u4e00-\u9fff]/.test(char)) {
+              // Chinese character - count as 1 word
+              if (englishWord) {
+                count++; // Count accumulated English word
+                englishWord = '';
+              }
+              count++; // Count Chinese character
+            } else if (/[a-zA-Z0-9]/.test(char)) {
+              // English letter or number - accumulate
+              englishWord += char;
+            } else {
+              // Punctuation or other - end current English word
+              if (englishWord) {
+                count++;
+                englishWord = '';
+              }
+            }
+          }
+          // Don't forget the last English word in segment
+          if (englishWord) {
+            count++;
+          }
+        }
+
+        return count;
+      }
+    };
+
+    // UI Feedback System
+    const UIFeedback = {
+      isMessageShowing: false,
+
+      showMessage: async function(text, type, duration) {
+        const messageEl = document.getElementById('message');
+
+        // Prevent multiple simultaneous messages
+        if (this.isMessageShowing) {
+          return;
+        }
+
+        // Set message showing state
+        this.isMessageShowing = true;
+
+        messageEl.className = `fixed bottom-6 left-1/2 transform -translate-x-1/2 px-3 py-1.5 rounded-full shadow-md transition-all duration-300 text-xs ${
+          type === 'success'
+            ? 'bg-green-600 text-white'
+            : 'bg-orange-100 text-orange-800 border border-orange-200'
+        }`;
+        messageEl.textContent = text;
+        messageEl.style.opacity = '1';
+        messageEl.style.pointerEvents = 'auto';
+
+        // Auto-hide after delay
+        const hideDelay = duration || (type === 'error' ? 4000 : 2000);
+        await new Promise(resolve => setTimeout(resolve, hideDelay));
+
+        messageEl.style.opacity = '0';
+        messageEl.style.pointerEvents = 'none';
+
+        // Reset message showing state after animation
+        setTimeout(() => {
+          this.isMessageShowing = false;
+        }, 300);
+      }
+    };
+
 
     // Clear input areas and reset editor state
     function clearEditorAndReset(isEditMode) {
@@ -402,7 +447,7 @@
     // Get existing note IDs from a file
     async function getExistingNoteIds(filename) {
       try {
-        const response = await fetch(`http://localhost:3001/api/notes/${filename}`);
+        const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.notes(filename)}`);
         if (!response.ok) return new Set();
         
         const data = await response.json();
@@ -418,7 +463,7 @@
       e.preventDefault();
 
       // Prevent submission if message is currently showing
-      if (isMessageShowing) {
+      if (UIFeedback.isMessageShowing) {
         return;
       }
 
@@ -434,12 +479,12 @@
       const reference = referenceArea.value;
       
       if (!filename) {
-        await showMessage('Please select a chapter', 'error');
+        await UIFeedback.showMessage('Please select a chapter', 'error');
         return;
       }
       
       if (!content.trim()) {
-        // await showMessage('empty notes', 'error');
+        // await UIFeedback.showMessage('empty notes', 'error');
         // Reload chapters and notes to refresh the interface
         await loadFiles();
         if (filename) {
@@ -500,7 +545,7 @@
         let response;
         if (isEditMode) {
           // Update existing note
-          response = await fetch(`http://localhost:3001/api/note/${currentNoteId}`, {
+          response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.updateNote(currentNoteId)}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json'
@@ -513,7 +558,7 @@
           });
         } else {
           // Append new note
-          response = await fetch('http://localhost:3001/api/append', {
+          response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.append}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -526,12 +571,12 @@
         
         if (result.success) {
           if (isEditMode) {
-            await showMessage(`Note #${currentNoteId} updated successfully`, 'success');
+            await UIFeedback.showMessage(`Note #${currentNoteId} updated successfully`, 'success');
             if (shouldClear) {
               clearEditorAndReset(true);
             }
           } else {
-            await showMessage('Content committed successfully', 'success');
+            await UIFeedback.showMessage('Content committed successfully', 'success');
             if (shouldClear) {
               clearEditorAndReset(false);
             }
@@ -575,59 +620,21 @@
             }
           }
         } else {
-          await showMessage(result.error || (isEditMode ? 'Failed to update' : 'Failed to commit'), 'error');
+          await UIFeedback.showMessage(result.error || (isEditMode ? 'Failed to update' : 'Failed to commit'), 'error');
         }
       } catch (error) {
-        await showMessage('Network error, please try again', 'error');
+        await UIFeedback.showMessage('Network error, please try again', 'error');
       } finally {
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
       }
     }
 
-    // Count words: English words separated by spaces, Chinese characters as individual words
-    function countCharacters(text) {
-      if (!text.trim()) return 0;
-
-      let count = 0;
-      // Split by whitespace to get potential English words
-      const segments = text.trim().split(/\s+/);
-
-      for (const segment of segments) {
-        // For each segment, count Chinese characters individually and English words as 1
-        let englishWord = '';
-        for (const char of segment) {
-          if (/[\u4e00-\u9fff]/.test(char)) {
-            // Chinese character - count as 1 word
-            if (englishWord) {
-              count++; // Count accumulated English word
-              englishWord = '';
-            }
-            count++; // Count Chinese character
-          } else if (/[a-zA-Z0-9]/.test(char)) {
-            // English letter or number - accumulate
-            englishWord += char;
-          } else {
-            // Punctuation or other - end current English word
-            if (englishWord) {
-              count++;
-              englishWord = '';
-            }
-          }
-        }
-        // Don't forget the last English word in segment
-        if (englishWord) {
-          count++;
-        }
-      }
-
-      return count;
-    }
     
     // Update character counter
     function updateCharacterCounter(textarea, counterId) {
       const counter = document.getElementById(counterId);
-      const count = countCharacters(textarea.value);
+      const count = TextUtils.countCharacters(textarea.value);
       counter.textContent = count.toLocaleString();
     }
     
@@ -816,7 +823,7 @@
       }
 
       try {
-        const response = await fetch(`http://localhost:3001/api/notes/${filename}`);
+        const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.notes(filename)}`);
         const data = await response.json();
         
         if (data.notes && data.notes.length > 0) {
@@ -924,7 +931,7 @@
     // Load note by ID
     async function loadNoteById(noteId) {
       try {
-        const response = await fetch(`http://localhost:3001/api/note/${noteId}`);
+        const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.note(noteId)}`);
         if (!response.ok) {
           throw new Error('Note not found');
         }
@@ -950,10 +957,10 @@
         updateSourceIndicator(referenceArea.value);
         updateCharacterCounter(contentArea, 'contentCounter');
         
-        await showMessage(`Loaded note #${noteId}`, 'success');
+        await UIFeedback.showMessage(`Loaded note #${noteId}`, 'success');
         
       } catch (error) {
-        await showMessage(`Failed to load note #${noteId}`, 'error');
+        await UIFeedback.showMessage(`Failed to load note #${noteId}`, 'error');
       }
     }
 
@@ -962,12 +969,12 @@
       const fileSelect = document.getElementById('fileSelect');
 
       if (!fileSelect.value) {
-        showMessage('Please select a chapter first', 'info');
+        UIFeedback.showMessage('Please select a chapter first', 'info');
         return;
       }
 
       if (allNotes.length === 0) {
-        showMessage('No notes found in current chapter', 'info');
+        UIFeedback.showMessage('No notes found in current chapter', 'info');
         return;
       }
 
