@@ -786,9 +786,16 @@
       }
 
       // Ctrl+R or Cmd+R to load most recent note
-      if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'r') {
         e.preventDefault();
         await loadMostRecentNote();
+        return;
+      }
+
+      // Ctrl+Shift+R or Cmd+Shift+R to refresh page
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
+        e.preventDefault();
+        window.location.reload();
         return;
       }
       
@@ -1144,6 +1151,7 @@
     document.getElementById('referenceArea').addEventListener('input', handleReferenceAreaInput);
     document.getElementById('referenceArea').addEventListener('paste', handleReferenceAreaPaste);
     document.addEventListener('keydown', handleKeyboardShortcuts);
+    document.addEventListener('contextmenu', (e) => e.preventDefault()); // Disable right-click
     document.getElementById('fileSelect').addEventListener('change', handleFileSelectChange);
     document.getElementById('noteIdSelect').addEventListener('change', handleNoteIdSelectChange);
     document.getElementById('noteIdSelect').addEventListener('input', handleNoteIdInput);
