@@ -12,7 +12,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-public/styles.css
+writer/public/styles.css
 # environment variables
 .env
 .env.production
