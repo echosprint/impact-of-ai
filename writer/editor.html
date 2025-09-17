@@ -236,7 +236,7 @@
         // Reset note selection to append mode
         const noteIdSelect = document.getElementById('noteIdSelect');
         noteIdSelect.value = '';
-        currentNoteId = '';
+        EditorState.currentNoteId = '';
         
         // Re-enable reference area for new content
         referenceArea.disabled = false;
@@ -499,7 +499,7 @@
       const isEditMode = !!selectedNoteId;
       
       // In edit mode, use original reference content to preserve quotes/source
-      const finalReference = isEditMode ? originalReference : reference;
+      const finalReference = isEditMode ? EditorState.originalReference : reference;
       
       // Only generate new noteId for append mode
       let currentNoteId;
@@ -592,7 +592,7 @@
           // Handle note ID management based on clear behavior
           if (shouldClear) {
             // Clear mode: reset to append mode
-            currentNoteId = '';
+            EditorState.currentNoteId = '';
             const noteIdSelect = document.getElementById('noteIdSelect');
             noteIdSelect.value = '';
           } else {
@@ -601,22 +601,23 @@
               // We just created a new note, set it as selected for continued editing AFTER refresh
               const noteIdSelect = document.getElementById('noteIdSelect');
               noteIdSelect.value = `#${currentNoteId}`;
+              EditorState.currentNoteId = currentNoteId;
 
               // Set original reference to preserve it for future edits
-              originalReference = reference;
+              EditorState.originalReference = reference;
 
               // Set UI to edit mode
               const referenceArea = document.getElementById('referenceArea');
               referenceArea.disabled = true;
               referenceArea.style.backgroundColor = '#f9f9f9';
               referenceArea.style.color = '#999';
-            } else if (isEditMode && currentNoteId) {
+            } else if (isEditMode && EditorState.currentNoteId) {
               // Already in edit mode, maintain the selection after refresh
               const noteIdSelect = document.getElementById('noteIdSelect');
-              noteIdSelect.value = `#${currentNoteId}`;
+              noteIdSelect.value = `#${EditorState.currentNoteId}`;
 
-              // Ensure originalReference is preserved
-              originalReference = originalReference || reference;
+              // Ensure EditorState.originalReference is preserved
+              EditorState.originalReference = EditorState.originalReference || reference;
             }
           }
         } else {
@@ -638,17 +639,35 @@
       counter.textContent = count.toLocaleString();
     }
     
-    // Track composition state for pinyin input
-    let isComposing = false;
+    // Editor State Management
+    const EditorState = {
+      isComposing: false,
+      allNotes: [],
+      selectedDropdownIndex: -1,
+      originalReference: '',
+      currentNoteId: '',
+
+      reset: function() {
+        this.currentNoteId = '';
+        this.originalReference = '';
+        this.selectedDropdownIndex = -1;
+      },
+
+      setCurrentNote: function(noteId, reference) {
+        this.currentNoteId = noteId;
+        this.originalReference = reference || '';
+      }
+    };
+
     
     // Handle composition start (pinyin input begins)
     function handleCompositionStart(e) {
-      isComposing = true;
+      EditorState.isComposing = true;
     }
     
     // Handle composition end (pinyin input finishes)
     function handleCompositionEnd(e) {
-      isComposing = false;
+      EditorState.isComposing = false;
       // Update counter after composition is complete
       updateCharacterCounter(e.target, 'contentCounter');
     }
@@ -657,7 +676,7 @@
     function handleContentAreaInput(e) {
       autoResize(e.target);
       // Only update counter if not in the middle of pinyin composition
-      if (!isComposing) {
+      if (!EditorState.isComposing) {
         updateCharacterCounter(e.target, 'contentCounter');
       }
     }
@@ -804,9 +823,6 @@
       }
     }
 
-    // Store all available notes for searching
-    let allNotes = [];
-    let selectedDropdownIndex = -1;
 
     // Load notes for selected chapter
     async function loadNotesForChapter(filename) {
@@ -814,7 +830,7 @@
       const dropdown = document.getElementById('noteIdDropdown');
       
       if (!filename) {
-        allNotes = [];
+        EditorState.allNotes = [];
         noteIdSelect.value = '';
         noteIdSelect.placeholder = 'Note ID or search...';
         noteIdSelect.disabled = true;
@@ -827,7 +843,7 @@
         const data = await response.json();
         
         if (data.notes && data.notes.length > 0) {
-          allNotes = data.notes.map(note => ({
+          EditorState.allNotes = data.notes.map(note => ({
             id: note.id,
             preview: note.preview,
             text: note.preview ? `#${note.id} - ${note.preview}` : `#${note.id}`
@@ -835,7 +851,7 @@
           noteIdSelect.disabled = false;
           noteIdSelect.placeholder = 'Note';
         } else {
-          allNotes = [];
+          EditorState.allNotes = [];
           noteIdSelect.disabled = true;
           noteIdSelect.placeholder = 'No notes found';
         }
@@ -844,7 +860,7 @@
         dropdown.classList.add('hidden');
       } catch (error) {
         console.error('Failed to load notes for chapter:', error);
-        allNotes = [];
+        EditorState.allNotes = [];
         noteIdSelect.disabled = true;
         noteIdSelect.placeholder = 'Error loading notes';
         dropdown.classList.add('hidden');
@@ -855,7 +871,7 @@
     function filterNotes(searchTerm) {
       const dropdown = document.getElementById('noteIdDropdown');
       
-      if (allNotes.length === 0) {
+      if (EditorState.allNotes.length === 0) {
         dropdown.classList.add('hidden');
         return;
       }
@@ -863,7 +879,7 @@
       let filtered;
       if (!searchTerm.trim()) {
         // Show all notes when no search term
-        filtered = allNotes;
+        filtered = EditorState.allNotes;
       } else {
         // Clean search term (remove # if present)
         const cleanSearchTerm = searchTerm.replace(/^#/, '').toLowerCase();
@@ -886,7 +902,7 @@
         </div>`
       ).join('');
       
-      selectedDropdownIndex = 0;
+      EditorState.selectedDropdownIndex = 0;
 
       dropdown.classList.remove('hidden');
     }
@@ -924,9 +940,6 @@
       autoResize(referenceArea);
     }
 
-    // Store original reference content for edit mode
-    let originalReference = '';
-    let currentNoteId = '';
 
     // Load note by ID
     async function loadNoteById(noteId) {
@@ -948,8 +961,8 @@
         referenceArea.value = data.reference;
         
         // Store original reference for edit mode and current note ID
-        originalReference = data.reference || '';
-        currentNoteId = noteId;
+        EditorState.originalReference = data.reference || '';
+        EditorState.currentNoteId = noteId;
         
         // Auto-resize textareas and update counter
         autoResize(contentArea);
@@ -973,13 +986,13 @@
         return;
       }
 
-      if (allNotes.length === 0) {
+      if (EditorState.allNotes.length === 0) {
         UIFeedback.showMessage('No notes found in current chapter', 'info');
         return;
       }
 
       // Get the last note (most recent)
-      const mostRecentNote = allNotes[allNotes.length - 1];
+      const mostRecentNote = EditorState.allNotes[EditorState.allNotes.length - 1];
 
       // Use existing selectNote function to load the note
       selectNote(mostRecentNote.id);
@@ -1034,20 +1047,20 @@
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
-          selectedDropdownIndex = Math.min(selectedDropdownIndex + 1, items.length - 1);
+          EditorState.selectedDropdownIndex = Math.min(EditorState.selectedDropdownIndex + 1, items.length - 1);
           updateDropdownSelection(items);
           break;
           
         case 'ArrowUp':
           e.preventDefault();
-          selectedDropdownIndex = Math.max(selectedDropdownIndex - 1, -1);
+          EditorState.selectedDropdownIndex = Math.max(EditorState.selectedDropdownIndex - 1, -1);
           updateDropdownSelection(items);
           break;
           
         case 'Enter':
           e.preventDefault();
-          if (selectedDropdownIndex >= 0 && selectedDropdownIndex < items.length) {
-            const selectedItem = items[selectedDropdownIndex];
+          if (EditorState.selectedDropdownIndex >= 0 && EditorState.selectedDropdownIndex < items.length) {
+            const selectedItem = items[EditorState.selectedDropdownIndex];
             const noteId = selectedItem.getAttribute('data-note-id');
             selectNote(noteId);
           }
@@ -1056,7 +1069,7 @@
         case 'Escape':
           e.preventDefault();
           dropdown.classList.add('hidden');
-          selectedDropdownIndex = -1;
+          EditorState.selectedDropdownIndex = -1;
           break;
       }
     }
@@ -1064,7 +1077,7 @@
     // Update visual selection in dropdown
     function updateDropdownSelection(items) {
       items.forEach((item, index) => {
-        if (index === selectedDropdownIndex) {
+        if (index === EditorState.selectedDropdownIndex) {
           item.classList.add('bg-gray-100');
           item.classList.remove('bg-gray-50');
           item.scrollIntoView({ block: 'nearest' });
@@ -1076,7 +1089,7 @@
 
     // Handle note ID input focus
     function handleNoteIdFocus(e) {
-      if (allNotes.length > 0) {
+      if (EditorState.allNotes.length > 0) {
         // Show all notes on focus, regardless of current input value
         filterNotes(e.target.value);
       }
@@ -1085,9 +1098,9 @@
     // Handle note ID input blur - revert to current note if any
     function handleNoteIdBlur(e) {
       const noteIdSelect = e.target;
-      if (currentNoteId) {
+      if (EditorState.currentNoteId) {
         // Revert to current note being edited
-        noteIdSelect.value = `#${currentNoteId}`;
+        noteIdSelect.value = `#${EditorState.currentNoteId}`;
       } else {
         // Clear field if no current note
         noteIdSelect.value = '';
