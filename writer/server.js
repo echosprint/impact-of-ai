@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { createServer } from 'http';
-import { promises as fs } from 'fs';
+import { promises as fs, watchFile } from 'fs';
 import { join, dirname } from 'path';
 import { parse } from 'url';
 import { fileURLToPath } from 'url';
@@ -9,10 +9,31 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = 3001;
 const CHAPTERS_DIR = join(__dirname, '..', 'src', 'content', 'chapters');
 const EDITOR_PATH = join(__dirname, 'editor.html');
+const CSS_OUTPUT_PATH = join(__dirname, 'public', 'styles.css');
 
 // =============================================================================
 // UTILITY FUNCTIONS
 // =============================================================================
+
+async function generateCSS() {
+  try {
+    const { exec } = await import('child_process');
+    const { promisify } = await import('util');
+    const execAsync = promisify(exec);
+
+    log('info', 'Generating CSS...');
+    const { stdout: css } = await execAsync('pnpm exec tailwindcss -i styles.css --content "editor.html" --stdout', {
+      cwd: __dirname
+    });
+
+    await fs.writeFile(CSS_OUTPUT_PATH, css, 'utf8');
+    const size = Buffer.byteLength(css, 'utf8');
+    log('info', `CSS generated: ${(size / 1024).toFixed(1)}KB (saved to public/styles.css)`);
+  } catch (error) {
+    log('error', 'Failed to generate CSS:', error);
+    throw error;
+  }
+}
 
 function log(level, message, ...args) {
   const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
@@ -93,6 +114,18 @@ async function handleEditor(req, res) {
     log('error', 'Error loading editor:', error);
     res.writeHead(500, { 'Content-Type': 'text/plain' });
     res.end('Error loading editor');
+  }
+}
+
+async function handleCss(req, res) {
+  try {
+    const cssContent = await fs.readFile(CSS_OUTPUT_PATH, 'utf8');
+    res.writeHead(200, { 'Content-Type': 'text/css' });
+    res.end(cssContent);
+  } catch (error) {
+    log('error', 'Error serving CSS:', error);
+    res.writeHead(500, { 'Content-Type': 'text/plain' });
+    res.end('Error loading CSS');
   }
 }
 
@@ -276,6 +309,7 @@ async function handleUpdateNote(req, res, noteId) {
 
 const routes = [
   { method: 'GET', pattern: '/editor', handler: handleEditor },
+  { method: 'GET', pattern: '/styles.css', handler: handleCss },
   { method: 'GET', pattern: '/api/files', handler: handleGetFiles },
   { method: 'POST', pattern: '/api/append', handler: handleAppendContent },
   {
@@ -339,9 +373,35 @@ async function handleRequest(req, res) {
 
 const server = createServer(handleRequest);
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   console.log(`Writer running on http://localhost:${PORT}`);
   console.log(`Serving chapters from: ${CHAPTERS_DIR}`);
+
+  // Generate CSS on startup
+  try {
+    await generateCSS();
+  } catch (error) {
+    console.error('Failed to generate CSS on startup:', error);
+    process.exit(1);
+  }
+
+  // Watch for changes to editor.html and styles.css
+  const filesToWatch = [EDITOR_PATH, join(__dirname, 'styles.css')];
+
+  filesToWatch.forEach(file => {
+    watchFile(file, { interval: 1000 }, async (curr, prev) => {
+      if (curr.mtime > prev.mtime) {
+        log('info', `File changed: ${file}, regenerating CSS...`);
+        try {
+          await generateCSS();
+        } catch (error) {
+          log('error', 'Failed to regenerate CSS:', error);
+        }
+      }
+    });
+  });
+
+  log('info', 'Watching for changes to editor.html and styles.css');
 });
 
 // Graceful shutdown
