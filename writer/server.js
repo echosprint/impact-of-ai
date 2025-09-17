@@ -110,6 +110,7 @@ async function handleEditor(req, res) {
   try {
     const editorContent = await fs.readFile(EDITOR_PATH, 'utf8');
     sendHtml(res, editorContent);
+    log('load', `refresh editor`);
   } catch (error) {
     log('error', 'Error loading editor:', error);
     res.writeHead(500, { 'Content-Type': 'text/plain' });
