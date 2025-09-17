@@ -14,7 +14,10 @@
     body { visibility: hidden; }
   </style>
   <script>
-    window.addEventListener('load', () => {
+    // Show page only after files are loaded
+    window.addEventListener('load', async () => {
+      // Wait for files to load before showing the page
+      await loadFiles();
       document.body.style.visibility = 'visible';
     });
   </script>
@@ -1151,10 +1154,7 @@
     document.addEventListener('click', handleDocumentClick);
     window.addEventListener('load', handleWindowLoad);
 
-    // Load files on page load
-    (async () => {
-      await loadFiles();
-    })();
+    // Files are now loaded by the window load event handler above
   </script>
 </body>
 </html>
