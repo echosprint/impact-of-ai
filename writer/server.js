@@ -120,7 +120,14 @@ async function handleEditor(req, res) {
 async function handleCss(req, res) {
   try {
     const cssContent = await fs.readFile(CSS_OUTPUT_PATH, 'utf8');
-    res.writeHead(200, { 'Content-Type': 'text/css' });
+    const stats = await fs.stat(CSS_OUTPUT_PATH);
+    const etag = `"${stats.mtime.getTime()}"`;
+
+    res.writeHead(200, {
+      'Content-Type': 'text/css',
+      'Cache-Control': 'public, max-age=3600', // 1 hour cache
+      'ETag': etag
+    });
     res.end(cssContent);
   } catch (error) {
     log('error', 'Error serving CSS:', error);

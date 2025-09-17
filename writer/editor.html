@@ -8,6 +8,16 @@
   
   <!-- Tailwind CSS -->
   <link rel="stylesheet" href="/styles.css">
+
+  <!-- Prevent FOUC (Flash of Unstyled Content) -->
+  <style>
+    body { visibility: hidden; }
+  </style>
+  <script>
+    window.addEventListener('load', () => {
+      document.body.style.visibility = 'visible';
+    });
+  </script>
 </head>
 <body class="bg-white">
   <!-- Fixed header -->
@@ -19,7 +29,7 @@
           name="filename" 
           class="text-xs border-none bg-transparent focus:outline-none text-gray-400 hover:text-gray-600 transition-colors appearance-none cursor-pointer"
         >
-          <option value="">Select chapter...</option>
+          <option value="">Chapters...</option>
         </select>
         
         <div class="relative">
@@ -94,7 +104,7 @@
         const data = await response.json();
         
         const select = document.getElementById('fileSelect');
-        select.innerHTML = '<option value="">Select chapter...</option>';
+        select.innerHTML = '<option value="">Chapters...</option>';
         
         data.files.forEach((file) => {
           const option = document.createElement('option');
