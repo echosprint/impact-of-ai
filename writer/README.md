@@ -12,7 +12,8 @@ This is a standalone Node.js writing tool that provides development-only endpoin
 - **PUT /api/note/:id** - Update existing note content
 
 ### Editor Interface
-- **GET /editor** - Standalone HTML editor for writing and editing notes
+- **GET /editor** - Standalone HTML editor with Tailwind CSS styling
+- **GET /styles.css** - Optimized Tailwind CSS generated from editor content
 - Smart source detection for bibliography formats
 - Real-time preview and auto-resize textareas
 - Character counter with Chinese/Unicode support
@@ -41,7 +42,8 @@ This is a standalone Node.js writing tool that provides development-only endpoin
 
 ```bash
 cd writer
-# No dependencies needed - uses only Node.js built-ins!
+# Install Tailwind CSS dependencies
+pnpm install
 ```
 
 ## Usage
@@ -60,16 +62,19 @@ The server runs on `http://localhost:3001` and:
 
 ## Architecture
 
-The editor is now **self-contained** within the writer:
+The editor is **self-contained** within the writer:
 
-1. **Zero Dependencies** - Uses only Node.js built-ins (http, fs, path, url)
+1. **Local Tailwind CSS** - Uses Tailwind v4 with optimized CSS generation
 2. **Same-Origin** - Editor and API served from same port, no CORS needed
 3. **No Auto-Refresh Issues** - Editor won't reload when content files change
 4. **Modular Design** - Clean separation of utilities, route handlers, and routing
+5. **CSS Optimization** - Generates minimal CSS based on actual HTML content
+6. **File Watching** - Auto-regenerates CSS when editor.html or styles.css changes
 
 ## Benefits
 
 - **Development Efficiency** - Dedicated writing interface with smart features
 - **Clean Separation** - Writer independent of main Astro project
-- **No Build Dependencies** - Runs anywhere Node.js runs
+- **Optimized Performance** - Pre-built CSS with file watching for development
+- **No CDN Dependencies** - Local Tailwind CSS for faster loading
 - **Consistent UX** - Messages display properly without interruption
