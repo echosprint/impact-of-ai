@@ -743,6 +743,17 @@
 
     // Handle keyboard shortcuts
     function handleKeyboardShortcuts(e) {
+      // Log the key event details
+      console.log('Key pressed:', {
+        key: e.key,
+        code: e.code,
+        ctrlKey: e.ctrlKey,
+        metaKey: e.metaKey,
+        shiftKey: e.shiftKey,
+        altKey: e.altKey,
+        target: e.target.tagName
+      });
+
       // Ensure the window has focus before processing shortcuts
       if (!document.hasFocus()) {
         return;
