@@ -120,10 +120,10 @@
         // Auto-select the most recently modified file
         if (data.lastModified) {
           select.value = data.lastModified;
-          loadNotesForChapter(data.lastModified);
+          await loadNotesForChapter(data.lastModified);
         }
       } catch (error) {
-        await UIFeedback.UIFeedback.showMessage('Failed to load files', 'error');
+        await UIFeedback.showMessage('Failed to load files', 'error');
       }
     }
 
@@ -742,7 +742,7 @@
     }
 
     // Handle keyboard shortcuts
-    function handleKeyboardShortcuts(e) {
+    async function handleKeyboardShortcuts(e) {
       // Log the key event details
       console.log('Key pressed:', {
         key: e.key,
@@ -789,7 +789,7 @@
       // Ctrl+R or Cmd+R to load most recent note
       if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
         e.preventDefault();
-        loadMostRecentNote();
+        await loadMostRecentNote();
         return;
       }
       
@@ -896,7 +896,7 @@
         const cleanSearchTerm = searchTerm.replace(/^#/, '').toLowerCase();
         
         // Filter based on search term
-        filtered = allNotes.filter(note => 
+        filtered = EditorState.allNotes.filter(note =>
           note.id.toLowerCase().includes(cleanSearchTerm) ||
           (note.preview && note.preview.toLowerCase().includes(cleanSearchTerm))
         );
@@ -919,7 +919,7 @@
     }
 
     // Handle note selection from dropdown
-    function selectNote(noteId) {
+    async function selectNote(noteId) {
       const noteIdSelect = document.getElementById('noteIdSelect');
       const dropdown = document.getElementById('noteIdDropdown');
       const referenceArea = document.getElementById('referenceArea');
@@ -931,13 +931,13 @@
       referenceArea.disabled = true;
       referenceArea.style.backgroundColor = '#f9f9f9';
       referenceArea.style.color = '#999';
-      loadNoteById(noteId);
+      await loadNoteById(noteId);
     }
 
     // Handle chapter selection change
-    function handleFileSelectChange(e) {
+    async function handleFileSelectChange(e) {
       const select = e.target;
-      loadNotesForChapter(select.value);
+      await loadNotesForChapter(select.value);
       
       // Clear content and reset to append mode when changing chapters
       const contentArea = document.getElementById('contentArea');
@@ -993,12 +993,12 @@
       const fileSelect = document.getElementById('fileSelect');
 
       if (!fileSelect.value) {
-        UIFeedback.showMessage('Please select a chapter first', 'info');
+        await UIFeedback.showMessage('Please select a chapter first', 'info');
         return;
       }
 
       if (EditorState.allNotes.length === 0) {
-        UIFeedback.showMessage('No notes found in current chapter', 'info');
+        await UIFeedback.showMessage('No notes found in current chapter', 'info');
         return;
       }
 
@@ -1006,7 +1006,7 @@
       const mostRecentNote = EditorState.allNotes[EditorState.allNotes.length - 1];
 
       // Use existing selectNote function to load the note
-      selectNote(mostRecentNote.id);
+      await selectNote(mostRecentNote.id);
     }
 
     // Handle note selection change (UI state only, not loading)
@@ -1047,7 +1047,7 @@
     }
     
     // Handle keyboard navigation in note ID input
-    function handleNoteIdKeydown(e) {
+    async function handleNoteIdKeydown(e) {
       const dropdown = document.getElementById('noteIdDropdown');
       const items = dropdown.querySelectorAll('.dropdown-item');
       
@@ -1073,7 +1073,7 @@
           if (EditorState.selectedDropdownIndex >= 0 && EditorState.selectedDropdownIndex < items.length) {
             const selectedItem = items[EditorState.selectedDropdownIndex];
             const noteId = selectedItem.getAttribute('data-note-id');
-            selectNote(noteId);
+            await selectNote(noteId);
           }
           break;
           
@@ -1119,11 +1119,11 @@
     }
 
     // Handle clicks on dropdown items
-    function handleDropdownClick(e) {
+    async function handleDropdownClick(e) {
       const item = e.target.closest('[data-note-id]');
       if (item) {
         const noteId = item.getAttribute('data-note-id');
-        selectNote(noteId);
+        await selectNote(noteId);
       }
     }
 
@@ -1156,7 +1156,9 @@
     window.addEventListener('load', handleWindowLoad);
 
     // Load files on page load
-    loadFiles();
+    (async () => {
+      await loadFiles();
+    })();
   </script>
 </body>
 </html>
