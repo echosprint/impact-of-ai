@@ -581,7 +581,7 @@
       // Disable submit button temporarily
       const submitBtn = document.querySelector('button[type="submit"]');
       const originalText = submitBtn.textContent;
-      submitBtn.textContent = isEditMode ? 'Saving...' : 'Committing...';
+      submitBtn.textContent = !shouldClear ? 'Saving...' : 'Committing...';
       submitBtn.disabled = true;
 
       try {
