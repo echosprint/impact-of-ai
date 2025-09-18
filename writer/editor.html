@@ -871,7 +871,7 @@
       }
       
       // Right bracket (]) to focus quotes/reference area
-      if (e.key === ']' && !isTyping) {
+      if ((e.key === ']' || e.key === '】') && !isTyping) {
         e.preventDefault();
         const referenceArea = document.getElementById('referenceArea');
         // Only focus if not disabled (not in edit mode)
