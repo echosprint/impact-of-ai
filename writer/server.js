@@ -21,14 +21,13 @@ async function generateCSS() {
     const { promisify } = await import('util');
     const execAsync = promisify(exec);
 
-    log('info', 'Generating CSS...');
     const { stdout: css } = await execAsync('pnpm exec tailwindcss -i styles.css --content "editor.html" --stdout', {
       cwd: __dirname
     });
 
     await fs.writeFile(CSS_OUTPUT_PATH, css, 'utf8');
     const size = Buffer.byteLength(css, 'utf8');
-    log('info', `CSS generated: ${(size / 1024).toFixed(1)}KB (saved to public/styles.css)`);
+    log('css', `Generated ${(size / 1024).toFixed(1)}KB (saved to public/styles.css)`);
   } catch (error) {
     log('error', 'Failed to generate CSS:', error);
     throw error;
@@ -37,7 +36,18 @@ async function generateCSS() {
 
 function log(level, message, ...args) {
   const timestamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
-  const levelStr = level === 'error' ? '[error]' : level === 'update' ? '[update]' : level === 'append' ? '[append]' : '';
+  let levelStr = '';
+  if (level === 'error') {
+    levelStr = '[error]';
+  } else if (level === 'update') {
+    levelStr = '[update]';
+  } else if (level === 'append') {
+    levelStr = '[append]';
+  } else if (level === 'css') {
+    levelStr = '[css]';
+  } else if (level === 'refresh') {
+    levelStr = '[refresh]';
+  }
   console.log(`${timestamp} ${levelStr} ${message}`, ...args);
 }
 
@@ -110,7 +120,7 @@ async function handleEditor(req, res) {
   try {
     const editorContent = await fs.readFile(EDITOR_PATH, 'utf8');
     sendHtml(res, editorContent);
-    log('load', `refresh editor`);
+    log('refresh', `editor`);
   } catch (error) {
     log('error', 'Error loading editor:', error);
     res.writeHead(500, { 'Content-Type': 'text/plain' });
@@ -399,7 +409,7 @@ server.listen(PORT, async () => {
   filesToWatch.forEach(file => {
     watchFile(file, { interval: 1000 }, async (curr, prev) => {
       if (curr.mtime > prev.mtime) {
-        log('info', `File changed: ${file}, regenerating CSS...`);
+        // log('info', `File changed: ${file}, regenerating CSS...`);
         try {
           await generateCSS();
         } catch (error) {
