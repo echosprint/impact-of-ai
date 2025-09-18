@@ -95,7 +95,7 @@
 
       <!-- Help hint -->
       <div class="text-right mt-8 text-xs text-gray-300 font-light">
-        Press <kbd class="px-1 py-0.5 bg-gray-100 text-gray-400 rounded text-xs">.</kbd> for help
+        <kbd class="px-1 py-0.5 bg-gray-100 text-gray-400 rounded text-xs">?</kbd> for help
       </div>
     </div>
   </main>
@@ -110,19 +110,19 @@
     <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-semibold text-gray-800">Keyboard Shortcuts</h3>
-        <button id="closeShortcutHelper" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+        <button id="closeShortcutHelper" class="text-gray-400 hover:text-gray-600 text-xl leading-none focus:outline-none border-none bg-transparent p-0 m-0">&times;</button>
       </div>
-      <div class="space-y-2 text-sm">
-        <div class="flex justify-between"><span class="text-gray-600">/</span><span>Focus Note Content</span></div>
-        <div class="flex justify-between"><span class="text-gray-600">]</span><span>Focus Quotes Area</span></div>
-        <div class="flex justify-between"><span class="text-gray-600">e</span><span>Focus Note ID</span></div>
-        <div class="flex justify-between"><span class="text-gray-600">Esc</span><span>Blur Current Field</span></div>
-        <div class="flex justify-between"><span class="text-gray-600">⌘/Ctrl + Enter</span><span>Save & Clear</span></div>
-        <div class="flex justify-between"><span class="text-gray-600">⌘/Ctrl + S</span><span>Save & Stay</span></div>
-        <div class="flex justify-between"><span class="text-gray-600">⌘/Ctrl + L</span><span>Clear All</span></div>
-        <div class="flex justify-between"><span class="text-gray-600">⌘/Ctrl + R</span><span>Load Recent</span></div>
-        <div class="flex justify-between"><span class="text-gray-600">⌘/Ctrl + Shift + R</span><span>Refresh Page</span></div>
-        <div class="flex justify-between"><span class="text-gray-600 font-semibold">.</span><span class="font-semibold">Show This Help</span></div>
+      <div class="space-y-2 text-sm text-gray-500">
+        <div class="flex justify-between"><span class="text-gray-400">/</span><span>Focus Note Content</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">]</span><span>Focus Quotes Area</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">e</span><span>Focus Note ID</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">Esc</span><span>Blur Current Field</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">⌘/Ctrl + Enter</span><span>Save & Clear</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">⌘/Ctrl + S</span><span>Save & Stay</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">⌘/Ctrl + L</span><span>Clear All</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">⌘/Ctrl + R</span><span>Load Recent</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">⌘/Ctrl + Shift + R</span><span>Refresh Page</span></div>
+        <div class="flex justify-between"><span class="text-gray-400 font-semibold">?</span><span class="font-semibold text-gray-600">Show This Help</span></div>
       </div>
       <div class="mt-4 pt-3 border-t border-gray-100 text-xs text-gray-500 text-center">
         Press <kbd class="px-1 py-0.5 bg-gray-100 rounded text-xs">Esc</kbd> or click outside to close
@@ -864,8 +864,8 @@
         contentArea.setSelectionRange(contentArea.value.length, contentArea.value.length);
       }
 
-      // Dot (.) to show keyboard shortcuts help
-      if (e.key === '.' && !isTyping) {
+      // Question mark (?) to show keyboard shortcuts help
+      if (e.key === '?' && !isTyping) {
         e.preventDefault();
         showShortcutHelper();
       }
