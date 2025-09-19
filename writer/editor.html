@@ -12,6 +12,40 @@
   <!-- Prevent FOUC (Flash of Unstyled Content) -->
   <style>
     body { visibility: hidden; }
+
+    /* Natural beige color scheme */
+    .btn-natural:hover {
+      background-color: #f5f4f0 !important;
+      color: #78716c !important;
+    }
+
+    .textarea-natural:focus {
+      border-color: #22c55e !important;
+    }
+
+    .textarea-natural-ref:focus {
+      border-color: #3b82f6 !important;
+    }
+
+    .dropdown-item-natural:hover {
+      background-color: #f5f4f0 !important;
+      color: #78716c !important;
+      transition: all 0.15s ease;
+    }
+
+    .dropdown-item-natural.selected {
+      background-color: #e8e6e0 !important;
+      color: #57534e !important;
+    }
+
+    .dropdown-item-natural {
+      transition: all 0.15s ease;
+      border-bottom: 1px solid #f0eeea;
+    }
+
+    .dropdown-item-natural:last-child {
+      border-bottom: none;
+    }
   </style>
   <script>
     // Show page only after files are loaded
@@ -28,9 +62,9 @@
     });
   </script>
 </head>
-<body class="bg-white">
+<body style="background-color: #faf9f5;">
   <!-- Fixed header -->
-  <header class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md z-10">
+  <header class="fixed top-0 left-0 right-0 backdrop-blur-md z-10" style="background-color: rgba(250, 249, 245, 0.95);">
     <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-4">
         <select 
@@ -51,7 +85,7 @@
             disabled
             autocomplete="off"
           />
-          <div id="noteIdDropdown" class="absolute top-full left-0 bg-white/95 border border-gray-100 rounded-lg shadow-lg z-20 w-48 max-h-56 overflow-y-auto hidden backdrop-blur-sm">
+          <div id="noteIdDropdown" class="absolute top-full left-0 rounded-lg shadow-lg z-20 w-48 max-h-56 overflow-y-auto hidden backdrop-blur-sm" style="background-color: rgba(250, 249, 245, 0.95); border: 1px solid #e8e6e0;">
           </div>
         </div>
       </div>
@@ -60,7 +94,7 @@
         <button
           type="submit"
           form="editorForm"
-          class="bg-transparent hover:bg-gray-50 text-gray-300 hover:text-gray-500 text-xs px-3 py-1.5 rounded font-light transition-colors duration-200"
+          class="bg-transparent btn-natural text-xs px-3 py-1.5 rounded font-light transition-colors duration-200" style="color: #a8a29e;"
           title="Use Ctrl+Enter or Cmd+Enter instead"
         >
           ⌘↵
@@ -70,7 +104,7 @@
   </header>
 
   <!-- Writing area -->
-  <main class="pt-20 min-h-screen bg-gradient-to-br from-gray-50 to-white">
+  <main class="pt-20 min-h-screen" style="background: linear-gradient(to bottom right, #f5f4f0, #faf9f5);">
     <div class="max-w-3xl mx-auto px-6 py-12">
       <form id="editorForm" class="flex flex-col gap-6">
         <!-- Writing Section -->
@@ -78,11 +112,10 @@
           <textarea 
             id="contentArea" 
             name="content" 
-            class="w-full min-h-[200px] resize-none border border-gray-200 rounded-lg p-4 outline-none text-base placeholder-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 text-gray-600"
-            placeholder="Write notes..."
+            class="w-full min-h-[200px] resize-none rounded-lg p-4 outline-none text-base textarea-natural focus:ring-1 focus:ring-green-500" style="border: 1px solid #d6d3ce; background-color: #fefcf8; color: #57534e;" placeholder="Write notes..."
             style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif; word-spacing: -0.05em; letter-spacing: -0.01em; line-height: 1.6; overflow: hidden;"
           ></textarea>
-          <div id="contentCounter" class="absolute bottom-2 right-3 text-xs text-gray-400 pointer-events-none">0</div>
+          <div id="contentCounter" class="absolute bottom-2 right-3 text-xs pointer-events-none" style="color: #a8a29e;">0</div>
         </div>
 
         <!-- Reference Section -->
@@ -90,9 +123,8 @@
           <textarea 
             id="referenceArea" 
             name="reference" 
-            class="w-full min-h-[200px] resize-none border border-gray-200 rounded-lg p-4 outline-none text-sm placeholder-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-600"
-            placeholder="Quotes..."
-            style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif; word-spacing: -0.05em; letter-spacing: -0.01em; line-height: 1.6; background-color: #fafafa; overflow-y: auto;"
+            class="w-full min-h-[200px] resize-none rounded-lg p-4 outline-none text-sm textarea-natural-ref focus:ring-1 focus:ring-blue-500" style="border: 1px solid #d6d3ce; background-color: #f5f4f0; color: #57534e;" placeholder="Quotes..."
+            style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif; word-spacing: -0.05em; letter-spacing: -0.01em; line-height: 1.6; overflow-y: auto;"
           ></textarea>
           <div id="sourceIndicator" class="absolute bottom-3 right-3 px-2 py-1 text-xs rounded-md transition-all duration-300 opacity-0 pointer-events-none">
           </div>
@@ -100,8 +132,8 @@
       </form>
 
       <!-- Help hint -->
-      <div class="text-right mt-8 text-xs text-gray-300 font-light">
-        <kbd class="px-1 py-0.5 bg-gray-100 text-gray-400 rounded text-xs">?</kbd> for help
+      <div class="text-right mt-8 text-xs font-light" style="color: #a8a29e;">
+        <kbd class="px-1 py-0.5 rounded text-xs" style="background-color: #e8e6e0; color: #78716c;">?</kbd> for help
       </div>
     </div>
   </main>
@@ -113,25 +145,25 @@
 
   <!-- Shortcut Helper Modal -->
   <div id="shortcutHelper" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 opacity-0 pointer-events-none transition-all duration-300">
-    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
+    <div class="rounded-xl shadow-2xl max-w-md w-full mx-4 p-6" style="background-color: #f5f4f0;">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold text-gray-800">Keyboard Shortcuts</h3>
+        <h3 class="text-lg font-semibold" style="color: #57534e;">Keyboard Shortcuts</h3>
         <button id="closeShortcutHelper" class="text-gray-400 hover:text-gray-600 text-xl leading-none focus:outline-none border-none bg-transparent p-0 m-0">&times;</button>
       </div>
-      <div class="space-y-2 text-sm text-gray-500">
-        <div class="flex justify-between"><span class="text-gray-400">/</span><span>Focus Note Content</span></div>
-        <div class="flex justify-between"><span class="text-gray-400">]</span><span>Focus Quotes Area</span></div>
-        <div class="flex justify-between"><span class="text-gray-400">e</span><span>Focus Note ID</span></div>
-        <div class="flex justify-between"><span class="text-gray-400">Esc</span><span>Blur Current Field</span></div>
-        <div class="flex justify-between"><span class="text-gray-400">⌘/Ctrl + Enter</span><span>Save & Clear</span></div>
-        <div class="flex justify-between"><span class="text-gray-400">⌘/Ctrl + S</span><span>Save & Stay</span></div>
-        <div class="flex justify-between"><span class="text-gray-400">⌘/Ctrl + L</span><span>Clear All</span></div>
-        <div class="flex justify-between"><span class="text-gray-400">⌘/Ctrl + R</span><span>Load Recent</span></div>
-        <div class="flex justify-between"><span class="text-gray-400">⌘/Ctrl + Shift + R</span><span>Refresh Page</span></div>
-        <div class="flex justify-between"><span class="text-gray-400 font-semibold">?</span><span class="font-semibold text-gray-600">Show This Help</span></div>
+      <div class="space-y-2 text-sm" style="color: #78716c;">
+        <div class="flex justify-between"><span style="color: #a8a29e;">/</span><span>Focus Note Content</span></div>
+        <div class="flex justify-between"><span style="color: #a8a29e;">]</span><span>Focus Quotes Area</span></div>
+        <div class="flex justify-between"><span style="color: #a8a29e;">e</span><span>Focus Note ID</span></div>
+        <div class="flex justify-between"><span style="color: #a8a29e;">Esc</span><span>Blur Current Field</span></div>
+        <div class="flex justify-between"><span style="color: #a8a29e;">⌘/Ctrl + Enter</span><span>Save & Clear</span></div>
+        <div class="flex justify-between"><span style="color: #a8a29e;">⌘/Ctrl + S</span><span>Save & Stay</span></div>
+        <div class="flex justify-between"><span style="color: #a8a29e;">⌘/Ctrl + L</span><span>Clear All</span></div>
+        <div class="flex justify-between"><span style="color: #a8a29e;">⌘/Ctrl + R</span><span>Load Recent</span></div>
+        <div class="flex justify-between"><span style="color: #a8a29e;">⌘/Ctrl + Shift + R</span><span>Refresh Page</span></div>
+        <div class="flex justify-between"><span class="font-semibold" style="color: #a8a29e;">?</span><span class="font-semibold" style="color: #57534e;">Show This Help</span></div>
       </div>
-      <div class="mt-4 pt-3 border-t border-gray-100 text-xs text-gray-500 text-center">
-        Press <kbd class="px-1 py-0.5 bg-gray-100 rounded text-xs">Esc</kbd> or click outside to close
+      <div class="mt-4 pt-3 text-xs text-center" style="border-top: 1px solid #e8e6e0; color: #78716c;">
+        Press <kbd class="px-1 py-0.5 rounded text-xs" style="background-color: #e8e6e0; color: #78716c;">Esc</kbd> or click outside to close
       </div>
     </div>
   </div>
@@ -289,7 +321,7 @@
         
         // Re-enable reference area for new content
         referenceArea.disabled = false;
-        referenceArea.style.backgroundColor = '#fafafa';
+        referenceArea.style.backgroundColor = '#f5f4f0';
         referenceArea.style.color = '';
       }
     }
@@ -662,7 +694,7 @@
               // Set UI to edit mode
               const referenceArea = document.getElementById('referenceArea');
               referenceArea.disabled = true;
-              referenceArea.style.backgroundColor = '#f9f9f9';
+              referenceArea.style.backgroundColor = '#ebe9e5';
               referenceArea.style.color = '#999';
             } else if (isEditMode && EditorState.currentNoteId) {
               // Already in edit mode, maintain the selection after refresh
@@ -875,7 +907,7 @@
       }
 
       // Question mark (?) to show keyboard shortcuts help
-      if (e.key === '?' && !isTyping) {
+      if ((e.key === '?' || e.key === '？') && !isTyping) {
         e.preventDefault();
         showShortcutHelper();
       }
@@ -978,8 +1010,8 @@
         return;
       }
 
-      dropdown.innerHTML = filtered.map((note, index) => 
-        `<div class="px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-xs font-normal text-gray-400 hover:text-gray-600 transition-colors duration-150 border-b border-gray-50 last:border-b-0 leading-tight dropdown-item ${index === 0 ? 'bg-gray-100' : ''}" style="font-size: 10px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" data-note-id="${note.id}" data-index="${index}">
+      dropdown.innerHTML = filtered.map((note, index) =>
+        `<div class="px-4 py-2.5 cursor-pointer text-xs font-normal leading-tight dropdown-item dropdown-item-natural ${index === 0 ? 'selected' : ''}" style="font-size: 10px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: #78716c;" data-note-id="${note.id}" data-index="${index}">
           ${note.text}
         </div>`
       ).join('');
@@ -1000,7 +1032,7 @@
       
       // Set UI to edit mode and load the note
       referenceArea.disabled = true;
-      referenceArea.style.backgroundColor = '#f9f9f9';
+      referenceArea.style.backgroundColor = '#ebe9e5';
       referenceArea.style.color = '#999';
       await loadNoteById(noteId);
     }
@@ -1016,7 +1048,7 @@
       contentArea.value = '';
       referenceArea.value = '';
       referenceArea.disabled = false;
-      referenceArea.style.backgroundColor = '#fafafa';
+      referenceArea.style.backgroundColor = '#f5f4f0';
       referenceArea.style.color = '';
       autoResize(contentArea);
       autoResize(referenceArea);
@@ -1094,12 +1126,12 @@
       if (noteId) {
         // Edit mode UI: just disable reference area, don't load note
         referenceArea.disabled = true;
-        referenceArea.style.backgroundColor = '#f9f9f9';
+        referenceArea.style.backgroundColor = '#ebe9e5';
         referenceArea.style.color = '#999';
       } else {
         // Append mode: enable reference area
         referenceArea.disabled = false;
-        referenceArea.style.backgroundColor = '#fafafa';
+        referenceArea.style.backgroundColor = '#f5f4f0';
         referenceArea.style.color = '';
       }
     }
@@ -1160,11 +1192,10 @@
     function updateDropdownSelection(items) {
       items.forEach((item, index) => {
         if (index === EditorState.selectedDropdownIndex) {
-          item.classList.add('bg-gray-100');
-          item.classList.remove('bg-gray-50');
+          item.classList.add('selected');
           item.scrollIntoView({ block: 'nearest' });
         } else {
-          item.classList.remove('bg-gray-100');
+          item.classList.remove('selected');
         }
       });
     }
