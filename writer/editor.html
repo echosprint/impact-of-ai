@@ -16,6 +16,12 @@
   <script>
     // Show page only after files are loaded
     window.addEventListener('load', async () => {
+      // Force window size after page loads
+      setTimeout(() => {
+        window.resizeTo(450, 720);
+        //window.moveTo(1200, -900);
+      }, 100);
+
       // Wait for files to load before showing the page
       await loadFiles();
       document.body.style.visibility = 'visible';
