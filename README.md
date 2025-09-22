@@ -17,11 +17,13 @@
 ## ✨ Features
 
 - 📱 **Responsive Design** - Optimized for desktop, tablet, and mobile reading
-- 🔍 **Interactive References** - Self-contained citations with embedded reference content  
+- 🔍 **Interactive References** - Self-contained citations with embedded reference content
 - 📑 **Smart Navigation** - Sticky table of contents with progress tracking
 - 🎨 **Beautiful Typography** - Optimized Chinese text rendering with proper spacing
 - ⚡ **Fast Loading** - Static site generation with optimal performance
 - 🌐 **Multi-language Support** - Built-in Chinese and English text handling
+- ✍️ **Writer Interface** - Integrated note-taking and editing system with natural beige theme
+- 🌙 **Dark Theme** - VS Code-inspired dark mode with automatic persistence
 
 ## 🏗️ Architecture
 
@@ -31,7 +33,7 @@ This project uses a **modern, modular architecture** with clean separation of co
 src/
 ├── components/           # Reusable UI components
 │   ├── notes/           # Note content components
-│   ├── references/      # Reference system components  
+│   ├── references/      # Reference system components
 │   └── TableOfContents.astro
 ├── config/              # Configuration constants
 │   ├── layout.ts        # Layout and responsive settings
@@ -47,9 +49,11 @@ src/
 │   ├── components/      # Component-specific styles
 │   └── global.css       # Base typography
 ├── types/               # TypeScript definitions
-└── utils/               # Shared utility functions
-    ├── markdown.ts      # Markdown processing
-    └── reference-positioning.ts
+├── utils/               # Shared utility functions
+│   ├── markdown.ts      # Markdown processing
+│   └── reference-positioning.ts
+└── writer/              # Writing interface
+    └── editor.html      # Note editing UI with dual theme support
 ```
 
 ## 🚀 Quick Start
@@ -74,6 +78,15 @@ pnpm dev
 ```
 
 Visit `http://localhost:4321` to start reading!
+
+### Writer Interface
+
+Access the integrated writing interface at `http://localhost:4321/writer/editor.html` during development. This provides:
+
+- **Dual Theme Support**: Toggle between natural beige and VS Code dark themes with `Ctrl+B`
+- **Smart Note Management**: Create, edit, and organize notes with automatic source detection
+- **Keyboard Shortcuts**: Efficient navigation and editing with extensive hotkey support
+- **Real-time Persistence**: Automatic saving with theme preference storage
 
 ## 📝 Commands
 
@@ -155,9 +168,15 @@ publishDate: 2024-01-01
 
 ### Reading Experience
 - **Smart Reference System** - Contextual citation display with smooth animations
-- **Optimal Typography** - Chinese text optimized with proper fonts and spacing  
+- **Optimal Typography** - Chinese text optimized with proper fonts and spacing
 - **Responsive Layout** - Adaptive design for all screen sizes
 - **Accessibility** - Semantic HTML with ARIA support
+
+### Writing Experience
+- **Natural Themes** - Warm beige light theme and VS Code-inspired dark theme
+- **Smart Editing** - Auto-resizing text areas with character counting
+- **Source Detection** - Automatic bibliography format recognition
+- **Keyboard Navigation** - Comprehensive hotkey support for efficient workflow
 
 ## 🌐 Deployment
 

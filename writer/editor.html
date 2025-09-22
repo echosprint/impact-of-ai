@@ -34,7 +34,7 @@
     }
 
     .dropdown-item-natural.selected {
-      background-color: #e8e6e0 !important;
+      background-color: #ebe9e5 !important;
       color: #57534e !important;
     }
 
@@ -45,6 +45,156 @@
 
     .dropdown-item-natural:last-child {
       border-bottom: none;
+    }
+
+    /* Dark theme styles */
+    body.dark-theme {
+      background-color: #1e1e1e !important;
+    }
+
+    .dark-theme header {
+      background-color: rgba(35, 35, 35, 0.98) !important;
+    }
+
+    .dark-theme main {
+      background: linear-gradient(to bottom right, #252526, #1e1e1e) !important;
+    }
+
+    .dark-theme .textarea-natural,
+    .dark-theme .textarea-natural-ref {
+      background-color: #252526 !important;
+      border-color: #3e3e42 !important;
+      color: #cccccc !important;
+    }
+
+    .dark-theme .textarea-natural {
+      background-color: #1e1e1e !important;
+    }
+
+    .dark-theme .dropdown-item-natural {
+      color: #cccccc !important;
+      border-bottom: 1px solid #3e3e42 !important;
+    }
+
+    .dark-theme .dropdown-item-natural:hover {
+      background-color: #2d2d30 !important;
+      color: #ffffff !important;
+    }
+
+    .dark-theme .dropdown-item-natural.selected {
+      background-color: #37373d !important;
+      color: #ffffff !important;
+    }
+
+    .dark-theme #noteIdDropdown {
+      background-color: rgba(30, 30, 30, 0.95) !important;
+      border: 1px solid #3e3e42 !important;
+    }
+
+    .dark-theme #contentCounter {
+      color: #858585 !important;
+    }
+
+    .dark-theme .btn-natural {
+      color: #6a6a6a !important;
+    }
+
+    .dark-theme .btn-natural:hover {
+      background-color: #2d2d30 !important;
+      color: #ffffff !important;
+    }
+
+    .dark-theme .help-text {
+      color: #858585 !important;
+    }
+
+    .dark-theme .help-kbd {
+      background-color: #3e3e42 !important;
+      color: #cccccc !important;
+    }
+
+    .dark-theme .modal-bg {
+      background-color: #2d2d30 !important;
+    }
+
+    .dark-theme .modal-title {
+      color: #cccccc !important;
+    }
+
+    .dark-theme .modal-content {
+      color: #cccccc !important;
+    }
+
+    .dark-theme .modal-shortcuts {
+      color: #858585 !important;
+    }
+
+    .dark-theme .modal-border {
+      border-top: 1px solid #3e3e42 !important;
+    }
+
+    .dark-theme .modal-kbd {
+      background-color: #3e3e42 !important;
+      color: #cccccc !important;
+    }
+
+    .dark-theme select,
+    .dark-theme input {
+      color: #9d9d9d !important;
+      background-color: transparent !important;
+    }
+
+    .dark-theme select:hover,
+    .dark-theme input:focus {
+      color: #cccccc !important;
+    }
+
+    .dark-theme input::placeholder {
+      color: #6a6a6a !important;
+    }
+
+    .dark-theme textarea::placeholder {
+      color: #6a6a6a !important;
+    }
+
+    .dark-theme option {
+      background-color: #2d2d30 !important;
+      color: #cccccc !important;
+    }
+
+    /* Dark theme scrollbar styles */
+    .dark-theme #noteIdDropdown::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .dark-theme #noteIdDropdown::-webkit-scrollbar-track {
+      background: #1e1e1e;
+    }
+
+    .dark-theme #noteIdDropdown::-webkit-scrollbar-thumb {
+      background: #424242;
+      border-radius: 4px;
+    }
+
+    .dark-theme #noteIdDropdown::-webkit-scrollbar-thumb:hover {
+      background: #4f4f4f;
+    }
+
+    .dark-theme textarea::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .dark-theme textarea::-webkit-scrollbar-track {
+      background: #252526;
+    }
+
+    .dark-theme textarea::-webkit-scrollbar-thumb {
+      background: #424242;
+      border-radius: 4px;
+    }
+
+    .dark-theme textarea::-webkit-scrollbar-thumb:hover {
+      background: #4f4f4f;
     }
   </style>
   <script>
@@ -132,8 +282,8 @@
       </form>
 
       <!-- Help hint -->
-      <div class="text-right mt-8 text-xs font-light" style="color: #a8a29e;">
-        <kbd class="px-1 py-0.5 rounded text-xs" style="background-color: #e8e6e0; color: #78716c;">?</kbd> for help
+      <div class="text-right mt-8 text-xs font-light help-text" style="color: #a8a29e;">
+        <kbd class="px-1 py-0.5 rounded text-xs help-kbd" style="background-color: #e8e6e0; color: #78716c;">?</kbd> for help
       </div>
     </div>
   </main>
@@ -145,25 +295,26 @@
 
   <!-- Shortcut Helper Modal -->
   <div id="shortcutHelper" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 opacity-0 pointer-events-none transition-all duration-300">
-    <div class="rounded-xl shadow-2xl max-w-md w-full mx-4 p-6" style="background-color: #f5f4f0;">
+    <div class="rounded-xl shadow-2xl max-w-md w-full mx-4 p-6 modal-bg" style="background-color: #f5f4f0;">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold" style="color: #57534e;">Keyboard Shortcuts</h3>
+        <h3 class="text-lg font-semibold modal-title" style="color: #57534e;">Keyboard Shortcuts</h3>
         <button id="closeShortcutHelper" class="text-gray-400 hover:text-gray-600 text-xl leading-none focus:outline-none border-none bg-transparent p-0 m-0">&times;</button>
       </div>
-      <div class="space-y-2 text-sm" style="color: #78716c;">
-        <div class="flex justify-between"><span style="color: #a8a29e;">/</span><span>Focus Note Content</span></div>
-        <div class="flex justify-between"><span style="color: #a8a29e;">]</span><span>Focus Quotes Area</span></div>
-        <div class="flex justify-between"><span style="color: #a8a29e;">e</span><span>Focus Note ID</span></div>
-        <div class="flex justify-between"><span style="color: #a8a29e;">Esc</span><span>Blur Current Field</span></div>
-        <div class="flex justify-between"><span style="color: #a8a29e;">⌘/Ctrl + Enter</span><span>Save & Clear</span></div>
-        <div class="flex justify-between"><span style="color: #a8a29e;">⌘/Ctrl + S</span><span>Save & Stay</span></div>
-        <div class="flex justify-between"><span style="color: #a8a29e;">⌘/Ctrl + L</span><span>Clear All</span></div>
-        <div class="flex justify-between"><span style="color: #a8a29e;">⌘/Ctrl + R</span><span>Load Recent</span></div>
-        <div class="flex justify-between"><span style="color: #a8a29e;">⌘/Ctrl + Shift + R</span><span>Refresh Page</span></div>
-        <div class="flex justify-between"><span class="font-semibold" style="color: #a8a29e;">?</span><span class="font-semibold" style="color: #57534e;">Show This Help</span></div>
+      <div class="space-y-2 text-sm modal-content" style="color: #78716c;">
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">/</span><span>Focus Note Content</span></div>
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">]</span><span>Focus Quotes Area</span></div>
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">e</span><span>Focus Note ID</span></div>
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">Esc</span><span>Blur Current Field</span></div>
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + Enter</span><span>Save & Clear</span></div>
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + S</span><span>Save & Stay</span></div>
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + L</span><span>Clear All</span></div>
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + R</span><span>Load Recent</span></div>
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + Shift + R</span><span>Refresh Page</span></div>
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + B</span><span>Toggle Dark Theme</span></div>
+        <div class="flex justify-between"><span class="font-semibold modal-shortcuts" style="color: #a8a29e;">?</span><span class="font-semibold modal-title" style="color: #57534e;">Show This Help</span></div>
       </div>
-      <div class="mt-4 pt-3 text-xs text-center" style="border-top: 1px solid #e8e6e0; color: #78716c;">
-        Press <kbd class="px-1 py-0.5 rounded text-xs" style="background-color: #e8e6e0; color: #78716c;">Esc</kbd> or click outside to close
+      <div class="mt-4 pt-3 text-xs text-center modal-border" style="border-top: 1px solid #e8e6e0; color: #78716c;">
+        Press <kbd class="px-1 py-0.5 rounded text-xs modal-kbd" style="background-color: #e8e6e0; color: #78716c;">Esc</kbd> or click outside to close
       </div>
     </div>
   </div>
@@ -826,6 +977,22 @@
       }
     }
 
+    // Theme management
+    function toggleDarkTheme() {
+      document.body.classList.toggle('dark-theme');
+      // Save theme preference to localStorage
+      const isDark = document.body.classList.contains('dark-theme');
+      localStorage.setItem('editor-theme', isDark ? 'dark' : 'light');
+    }
+
+    // Load saved theme on page load
+    function loadSavedTheme() {
+      const savedTheme = localStorage.getItem('editor-theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+      }
+    }
+
     // Handle keyboard shortcuts
     async function handleKeyboardShortcuts(e) {
       // Log the key event details
@@ -882,6 +1049,13 @@
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
         e.preventDefault();
         window.location.reload();
+        return;
+      }
+
+      // Ctrl+B or Cmd+B to toggle dark theme
+      if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+        e.preventDefault();
+        toggleDarkTheme();
         return;
       }
       
@@ -1140,6 +1314,7 @@
     // Handle window load
     function handleWindowLoad() {
       initializeTextareas();
+      loadSavedTheme();
       // document.getElementById('contentArea').focus();
     }
 
