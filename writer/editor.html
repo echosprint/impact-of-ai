@@ -127,6 +127,7 @@
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + R</span><span>Load Recent</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + Shift + R</span><span>Refresh Page</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + B</span><span>Toggle Dark Theme</span></div>
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + H</span><span>Toggle Quotes Area</span></div>
         <div class="flex justify-between"><span class="font-semibold modal-shortcuts" style="color: #a8a29e;">?</span><span class="font-semibold modal-title" style="color: #57534e;">Show This Help</span></div>
       </div>
       <div class="mt-4 pt-3 text-xs text-center modal-border" style="border-top: 1px solid #e8e6e0; color: #78716c;">
@@ -295,22 +296,66 @@
 
     // Auto-resize textarea while preserving scroll position
     function autoResize(textarea, preserveScroll = true) {
-      // Save current state
-      const scrollTop = preserveScroll ? textarea.scrollTop : 0;
-      const maxScrollTop = textarea.scrollHeight - textarea.clientHeight;
-      
-      // Reset height to get accurate scrollHeight
-      textarea.style.height = 'auto';
-      
-      // Calculate new height with some padding
-      const newHeight = Math.max(textarea.scrollHeight + 10, 200);
-      textarea.style.height = newHeight + 'px';
-      
-      // Restore scroll position if preserving
-      if (preserveScroll && scrollTop > 0) {
-        // Ensure scroll position is valid for new height
-        const newMaxScroll = textarea.scrollHeight - textarea.clientHeight;
-        textarea.scrollTop = Math.min(scrollTop, Math.max(0, newMaxScroll));
+      // Save current state before any changes
+      const scrollTop = textarea.scrollTop;
+      const cursorPosition = textarea.selectionStart;
+      const currentHeight = textarea.offsetHeight;
+
+      // Create a hidden clone to measure content height without disrupting the original
+      const clone = textarea.cloneNode(true);
+      clone.style.position = 'absolute';
+      clone.style.visibility = 'hidden';
+      clone.style.height = 'auto';
+      clone.style.minHeight = 'auto';
+      clone.style.maxHeight = 'none';
+      clone.style.overflow = 'hidden';
+      clone.style.zIndex = '-1000';
+      clone.value = textarea.value;
+
+      // Temporarily add to DOM to measure
+      textarea.parentNode.insertBefore(clone, textarea);
+      const newHeight = Math.max(clone.scrollHeight + 10, 200);
+      textarea.parentNode.removeChild(clone);
+
+      // Only resize if there's a significant change to avoid micro-adjustments
+      const heightDifference = Math.abs(newHeight - currentHeight);
+      if (heightDifference > 5) {
+        textarea.style.height = newHeight + 'px';
+
+        // Restore scroll position immediately to prevent jumping
+        if (preserveScroll) {
+          textarea.scrollTop = scrollTop;
+        }
+      }
+
+      // Smart cursor positioning for better typing experience (only for active element)
+      if (preserveScroll && textarea === document.activeElement && heightDifference > 5) {
+        // Use requestAnimationFrame to ensure DOM has updated
+        requestAnimationFrame(() => {
+          const textBeforeCursor = textarea.value.substring(0, cursorPosition);
+          const linesBeforeCursor = textBeforeCursor.split('\n').length;
+          const lineHeight = parseInt(getComputedStyle(textarea).lineHeight) || 22;
+
+          // Get current viewport info
+          const textareaRect = textarea.getBoundingClientRect();
+          const viewportHeight = window.innerHeight;
+          const isTextareaLarge = textareaRect.height > viewportHeight * 0.6;
+
+          if (isTextareaLarge) {
+            // Calculate cursor position relative to viewport
+            const targetCursorY = viewportHeight * 0.4; // 40% from top
+            const currentCursorY = textareaRect.top + (linesBeforeCursor * lineHeight);
+
+            // Only scroll if cursor is significantly below target
+            if (currentCursorY > targetCursorY + 50) {
+              const scrollOffset = currentCursorY - targetCursorY;
+              window.scrollTo({
+                top: window.scrollY + scrollOffset,
+                behavior: 'smooth'
+              });
+            }
+          }
+        });
       }
     }
 
@@ -698,11 +743,16 @@
       selectedDropdownIndex: -1,
       originalReference: '',
       currentNoteId: '',
+      scrollTimeout: null,
 
       reset: function() {
         this.currentNoteId = '';
         this.originalReference = '';
         this.selectedDropdownIndex = -1;
+        if (this.scrollTimeout) {
+          clearTimeout(this.scrollTimeout);
+          this.scrollTimeout = null;
+        }
       },
 
       setCurrentNote: function(noteId, reference) {
@@ -726,7 +776,9 @@
     
     // Handle content area input
     function handleContentAreaInput(e) {
-      autoResize(e.target);
+      // Single auto-resize call with smart positioning
+      autoResize(e.target, true);
+
       // Only update counter if not in the middle of pinyin composition
       if (!EditorState.isComposing) {
         updateCharacterCounter(e.target, 'contentCounter');
@@ -801,11 +853,53 @@
       localStorage.setItem('editor-theme', isDark ? 'dark' : 'light');
     }
 
+    // Toggle quotes area visibility
+    function toggleQuotesArea() {
+      const referenceContainer = document.querySelector('.relative:has(#referenceArea)');
+      const contentArea = document.getElementById('contentArea');
+
+      if (referenceContainer && contentArea) {
+        const isHidden = referenceContainer.style.display === 'none';
+
+        if (isHidden) {
+          // Show quotes area and restore content area height
+          referenceContainer.style.display = '';
+          contentArea.style.minHeight = '200px';
+        } else {
+          // Hide quotes area and expand content area
+          referenceContainer.style.display = 'none';
+          contentArea.style.minHeight = '400px';
+        }
+
+        // Auto-resize content area to fit current content
+        autoResize(contentArea);
+
+        // Save state to localStorage
+        localStorage.setItem('quotesAreaHidden', !isHidden);
+      }
+    }
+
     // Load saved theme on page load
     function loadSavedTheme() {
       const savedTheme = localStorage.getItem('editor-theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-theme');
+      }
+    }
+
+    // Load saved quotes area visibility state
+    function loadSavedQuotesAreaState() {
+      const quotesHidden = localStorage.getItem('quotesAreaHidden') === 'true';
+      const referenceContainer = document.querySelector('.relative:has(#referenceArea)');
+      const contentArea = document.getElementById('contentArea');
+
+      if (quotesHidden && referenceContainer && contentArea) {
+        // Hide quotes area and expand content area
+        referenceContainer.style.display = 'none';
+        contentArea.style.minHeight = '400px';
+      } else if (contentArea) {
+        // Ensure normal height when quotes area is visible
+        contentArea.style.minHeight = '200px';
       }
     }
 
@@ -872,6 +966,13 @@
       if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
         e.preventDefault();
         toggleDarkTheme();
+        return;
+      }
+
+      // Ctrl+H or Cmd+H to toggle quotes area visibility
+      if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+        e.preventDefault();
+        toggleQuotesArea();
         return;
       }
       
@@ -1131,6 +1232,7 @@
     function handleWindowLoad() {
       initializeTextareas();
       loadSavedTheme();
+      loadSavedQuotesAreaState();
       // document.getElementById('contentArea').focus();
     }
 

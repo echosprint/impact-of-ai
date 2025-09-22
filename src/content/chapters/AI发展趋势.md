@@ -38,3 +38,30 @@ chapter: 6
 AI的突破也迅速从语言扩展到其他领域。图像生成模型DALL·E系列让人只需一句话就能生成逼真的图像。"一只穿着西装的猫在开会"，几秒钟就能生成一张让人啼笑皆非的图片。2024年，Sora模型甚至可以从文字直接生成高质量的短视频。AI不仅能"说话"，还能"看图说话"，掌握了"镜头语言"，跨越了模态的界限。现在的AI已经不再是只会聊天的机器人，而是能看、能听、能画、能写的全能助手。你可以上传一张菜谱图片让它教你做菜，也可以拍张数学题让它帮你解答，甚至可以给它看一段代码截图让它找出错误。这种多模态能力的突破，让AI从单一技能的专家变成了全面发展的通才。
 
 从图灵到ChatGPT，人工智能用70年完成了一次惊人的转身。1950年，图灵问："机器能思考吗？"那时的答案是理论上的"也许"。2024年，当你和ChatGPT聊天时，这个问题已经不再重要。重要的是，AI已经从冷冰冰的机器，变成了与人亲密互动的智能伙伴。这70年的发展历程告诉我们：技术的进步从来不是一帆风顺的。它有高潮和低谷，有突破和挫折。但每一次的积累，都为下一次的飞跃做准备。今天，当我们站在AI大规模应用的门槛上，回望这70年的历程，或许能更好地理解：真正的创新，需要的不仅是技术突破，更需要时间的沉淀和一代代人的接力。AI的故事还在继续，而我们，正在见证历史。
+
+
+<Note id="961d0">
+AI的发展历史，得对行业之外的人，通俗易懂地介绍AI各个阶段是怎么工作的。CNN是怎么工作的。不要用这个术语。介绍图片分类怎么训练预测，简要易懂即可。图像识别技术。杨立昆的支票，数字识别系统，带着故事讲，娓娓道来。
+///
+This time, rather than mathematical and logic-based approaches intended to replicate human cognition, researchers turned various human tasks into prediction or classification problems. For example, recognizing an image can be conceived as predicting which one of a long list of categories the image belongs to. AI programs can then rely on statistical techniques applied to massive data sets to make increasingly accurate classifications. Social media messages that pass among billions of people are an exemplar of this type of data.
+///
+Acemoglu, Daron; Johnson, Simon. Power and Progress: Our Thousand-Year Struggle Over Technology and Prosperity (p. 361). (Function). Kindle Edition.
+</Note>
+
+<Note id="82614">
+这个写的好。举个例子。怎么识别图片中有一只狗，这个图片是关于猫的图片还是狗的图片。之前是怎么做到。狗的耳朵特征，眼睛的特征，手工做的，效果怎么样的，对实验室里面的图片，识别都比较好。但是，从其他地方获取的照片，或者从一个特别的角度拍摄的，效果就不好。后来，干脆就不手工搞了，从网上下载各种各样的图片，人们先用肉眼看，手工把它标记分好类。大数据。
+///
+Take the problem of recognizing whether there is a cat in a picture. The old approach would have required a machine to model the complete decision-making process used by humans to spot cats. The modern approach bypasses the step of modeling or even understanding how humans make decisions. Instead, it relies on a large data set of humans making correct recognition decisions based on images. It then fits a statistical model to large data sets of image features to predict when humans say that there is a cat in the frame. It subsequently applies the estimated statistical model to new pictures to predict whether there is a cat there or not.
+///
+Acemoglu, Daron; Johnson, Simon. Power and Progress: Our Thousand-Year Struggle Over Technology and Prosperity (p. 361). (Function). Kindle Edition.
+</Note>
+
+<Note id="c29ab">
+AI当然离不开GPU，原来为游戏渲染加速的硬件，很适合AI的运算。后来，AI的蓬勃发展， 直接把英伟达送上了全球市值第一的宝座。AI的运算主要是矩阵乘法，游戏渲染，计算像素点的颜色数值，虽然这两者之间逻辑上没有太大关系，似乎加速渲染的硬件和加速AI矩阵运算无关，但两者运算在特征是有两个共同点：一是，逻辑比较简单，但运算量巨大，手动计算过矩阵的，3x4 乘以 4x3得到的是3x3的方阵，即便计算这样的简单矩阵，就相当繁琐，何况真实情况要处理行和列都是几千乃至百万的矩阵相乘，屏幕像素，现在分辨率动作百万像素，每个像素都有在三十分之一秒乃至六十分之一秒，计算一次像素值并进行渲染。
+二是，每个像素点的数值，每个矩阵的数值，互相独立，没有先后顺序，可以同时进行。也就是说，可以并行计算。
+这就是GPU所擅长的事情。CPU为什么不行，三个臭皮匠抵得上一个诸葛亮。CPU单个核心性能非常强悍，就像一个诸葛亮，但同样面积的芯片面积，只能容纳下几十个诸葛亮，而GPU可以容纳下几万个臭皮匠。GPU和CPU并无高下之分，他们是面向不同的任务进行设计的。
+///
+Progress was made possible by faster computer processor speed, as well as new graphics processing units (GPUs), originally used to generate high-resolution graphics in video games, which proved to be a powerful tool for data crunching. There have also been major advances in data storage, reducing the cost of storing and accessing massive data sets, and improvements in the ability to perform large amounts of computation distributed across many devices, aided by rapid advances in microprocessors and cloud computing.
+///
+Acemoglu, Daron; Johnson, Simon. Power and Progress: Our Thousand-Year Struggle Over Technology and Prosperity (pp. 361-362). (Function). Kindle Edition.
+</Note>
