@@ -6,196 +6,12 @@
   <title>Writer</title>
   <meta name="description" content="Simple writing editor for book chapters">
   
-  <!-- Tailwind CSS -->
-  <link rel="stylesheet" href="/styles.css">
+  <!-- Tailwind CSS and Editor styles -->
+  <link rel="stylesheet" href="styles.css">
 
   <!-- Prevent FOUC (Flash of Unstyled Content) -->
   <style>
     body { visibility: hidden; }
-
-    /* Natural beige color scheme */
-    .btn-natural:hover {
-      background-color: #f5f4f0 !important;
-      color: #78716c !important;
-    }
-
-    .textarea-natural:focus {
-      border-color: #22c55e !important;
-    }
-
-    .textarea-natural-ref:focus {
-      border-color: #3b82f6 !important;
-    }
-
-    .dropdown-item-natural:hover {
-      background-color: #f5f4f0 !important;
-      color: #78716c !important;
-      transition: all 0.15s ease;
-    }
-
-    .dropdown-item-natural.selected {
-      background-color: #ebe9e5 !important;
-      color: #57534e !important;
-    }
-
-    .dropdown-item-natural {
-      transition: all 0.15s ease;
-      border-bottom: 1px solid #f0eeea;
-    }
-
-    .dropdown-item-natural:last-child {
-      border-bottom: none;
-    }
-
-    /* Dark theme styles */
-    body.dark-theme {
-      background-color: #1e1e1e !important;
-    }
-
-    .dark-theme header {
-      background-color: rgba(35, 35, 35, 0.98) !important;
-    }
-
-    .dark-theme main {
-      background: linear-gradient(to bottom right, #252526, #1e1e1e) !important;
-    }
-
-    .dark-theme .textarea-natural,
-    .dark-theme .textarea-natural-ref {
-      background-color: #252526 !important;
-      border-color: #3e3e42 !important;
-      color: #cccccc !important;
-    }
-
-    .dark-theme .textarea-natural {
-      background-color: #1e1e1e !important;
-    }
-
-    .dark-theme .dropdown-item-natural {
-      color: #cccccc !important;
-      border-bottom: 1px solid #3e3e42 !important;
-    }
-
-    .dark-theme .dropdown-item-natural:hover {
-      background-color: #2d2d30 !important;
-      color: #ffffff !important;
-    }
-
-    .dark-theme .dropdown-item-natural.selected {
-      background-color: #37373d !important;
-      color: #ffffff !important;
-    }
-
-    .dark-theme #noteIdDropdown {
-      background-color: rgba(30, 30, 30, 0.95) !important;
-      border: 1px solid #3e3e42 !important;
-    }
-
-    .dark-theme #contentCounter {
-      color: #858585 !important;
-    }
-
-    .dark-theme .btn-natural {
-      color: #6a6a6a !important;
-    }
-
-    .dark-theme .btn-natural:hover {
-      background-color: #2d2d30 !important;
-      color: #ffffff !important;
-    }
-
-    .dark-theme .help-text {
-      color: #858585 !important;
-    }
-
-    .dark-theme .help-kbd {
-      background-color: #3e3e42 !important;
-      color: #cccccc !important;
-    }
-
-    .dark-theme .modal-bg {
-      background-color: #2d2d30 !important;
-    }
-
-    .dark-theme .modal-title {
-      color: #cccccc !important;
-    }
-
-    .dark-theme .modal-content {
-      color: #cccccc !important;
-    }
-
-    .dark-theme .modal-shortcuts {
-      color: #858585 !important;
-    }
-
-    .dark-theme .modal-border {
-      border-top: 1px solid #3e3e42 !important;
-    }
-
-    .dark-theme .modal-kbd {
-      background-color: #3e3e42 !important;
-      color: #cccccc !important;
-    }
-
-    .dark-theme select,
-    .dark-theme input {
-      color: #9d9d9d !important;
-      background-color: transparent !important;
-    }
-
-    .dark-theme select:hover,
-    .dark-theme input:focus {
-      color: #cccccc !important;
-    }
-
-    .dark-theme input::placeholder {
-      color: #6a6a6a !important;
-    }
-
-    .dark-theme textarea::placeholder {
-      color: #6a6a6a !important;
-    }
-
-    .dark-theme option {
-      background-color: #2d2d30 !important;
-      color: #cccccc !important;
-    }
-
-    /* Dark theme scrollbar styles */
-    .dark-theme #noteIdDropdown::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .dark-theme #noteIdDropdown::-webkit-scrollbar-track {
-      background: #1e1e1e;
-    }
-
-    .dark-theme #noteIdDropdown::-webkit-scrollbar-thumb {
-      background: #424242;
-      border-radius: 4px;
-    }
-
-    .dark-theme #noteIdDropdown::-webkit-scrollbar-thumb:hover {
-      background: #4f4f4f;
-    }
-
-    .dark-theme textarea::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .dark-theme textarea::-webkit-scrollbar-track {
-      background: #252526;
-    }
-
-    .dark-theme textarea::-webkit-scrollbar-thumb {
-      background: #424242;
-      border-radius: 4px;
-    }
-
-    .dark-theme textarea::-webkit-scrollbar-thumb:hover {
-      background: #4f4f4f;
-    }
   </style>
   <script>
     // Show page only after files are loaded
@@ -244,7 +60,7 @@
         <button
           type="submit"
           form="editorForm"
-          class="bg-transparent btn-natural text-xs px-3 py-1.5 rounded font-light transition-colors duration-200" style="color: #a8a29e;"
+          class="bg-transparent btn-natural text-xs px-3 py-1.5 rounded font-light transition-colors duration-200"
           title="Use Ctrl+Enter or Cmd+Enter instead"
         >
           ⌘↵
