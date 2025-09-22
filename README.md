@@ -176,7 +176,12 @@ publishDate: 2024-01-01
 - **Natural Themes** - Warm beige light theme and VS Code-inspired dark theme
 - **Smart Editing** - Auto-resizing text areas with character counting
 - **Source Detection** - Automatic bibliography format recognition
-- **Keyboard Navigation** - Comprehensive hotkey support for efficient workflow
+- **Keyboard Navigation** - Comprehensive hotkey support for efficient workflow:
+  - `/` or `i` - Focus note input area
+  - `]` or `I` - Focus quotes/reference area
+  - `?` - Show keyboard shortcuts help
+  - `e` - Focus note ID area
+  - `Ctrl+B` - Toggle theme
 
 ## 🌐 Deployment
 

@@ -887,8 +887,8 @@
         return;
       }
       
-      // Forward slash (/) to focus note input
-      if (e.key === '/' && !isTyping) {
+      // Forward slash (/) or 'i' to focus note input
+      if ((e.key === '/' || e.key === 'i') && !isTyping) {
         e.preventDefault();
         const contentArea = document.getElementById('contentArea');
         contentArea.focus();
@@ -902,8 +902,8 @@
         showShortcutHelper();
       }
       
-      // Right bracket (]) to focus quotes/reference area
-      if ((e.key === ']' || e.key === '】') && !isTyping) {
+      // Right bracket (]) or 'I' to focus quotes/reference area
+      if ((e.key === ']' || e.key === '】' || e.key === 'I') && !isTyping) {
         e.preventDefault();
         const referenceArea = document.getElementById('referenceArea');
         // Only focus if not disabled (not in edit mode)
