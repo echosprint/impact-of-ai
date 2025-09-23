@@ -105,6 +105,9 @@ export function updateCharacterCounter(textarea, counterId) {
   const counter = document.getElementById(counterId);
   const count = TextUtils.countCharacters(textarea.value);
   counter.textContent = count.toLocaleString();
+
+  counter.style.display = count >0 ? '' : 'none';
+ 
 }
 
 // Clear input areas and reset editor state
