@@ -61,6 +61,11 @@ function sendHtml(res, content) {
   res.end(content);
 }
 
+function sendJs(res, content) {
+  res.writeHead(200, { 'Content-Type': 'application/javascript' });
+  res.end(content);
+}
+
 function sendError(res, statusCode, message, details = null) {
   const error = { error: message };
   if (details) error.details = details;
@@ -144,6 +149,26 @@ async function handleCss(req, res) {
     log('error', 'Error serving CSS:', error);
     res.writeHead(500, { 'Content-Type': 'text/plain' });
     res.end('Error loading CSS');
+  }
+}
+
+async function handleJs(req, res, pathname) {
+  try {
+    // Extract filename from path (e.g., /js/noteManager.js -> noteManager.js)
+    const filename = pathname.split('/js/')[1];
+    const jsPath = join(__dirname, 'js', filename);
+
+    // Security check: ensure file is in js directory
+    if (!filename || filename.includes('..') || !filename.endsWith('.js')) {
+      return sendError(res, 400, 'Invalid file request');
+    }
+
+    const jsContent = await fs.readFile(jsPath, 'utf8');
+    sendJs(res, jsContent);
+  } catch (error) {
+    log('error', `Error serving JS file ${pathname}:`, error);
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('JS file not found');
   }
 }
 
@@ -328,6 +353,7 @@ async function handleUpdateNote(req, res, noteId) {
 const routes = [
   { method: 'GET', pattern: '/editor', handler: handleEditor },
   { method: 'GET', pattern: '/styles.css', handler: handleCss },
+  { method: 'GET', pattern: '/js/', handler: handleJs },
   { method: 'GET', pattern: '/api/files', handler: handleGetFiles },
   { method: 'POST', pattern: '/api/append', handler: handleAppendContent },
   {
@@ -370,7 +396,12 @@ async function handleRequest(req, res) {
     if (route.method === method) {
       if (route.pattern === pathname || pathname.startsWith(route.pattern)) {
         try {
-          await route.handler(req, res, pathname);
+          // Pass pathname for routes that need it (like JS file serving)
+          if (route.handler.length > 2) {
+            await route.handler(req, res, pathname);
+          } else {
+            await route.handler(req, res);
+          }
           return;
         } catch (error) {
           log('error', 'Route handler error:', error);
