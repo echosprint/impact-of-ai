@@ -69,7 +69,7 @@ export function toggleQuotesArea() {
       referenceContainer.style.overflow = 'hidden';
       referenceContainer.style.opacity = '0';
       referenceContainer.style.transform = 'translateY(-10px)';
-      contentArea.style.minHeight = '400px';
+      contentArea.style.minHeight = '460px';
 
       // Hide after animation completes
       setTimeout(() => {
