@@ -41,8 +41,8 @@ export async function handleKeyboardShortcuts(e) {
     return;
   }
 
-  // Ctrl+L or Cmd+L to clear all inputs and reset to initial state
-  if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+  // Ctrl+Shift+L or Cmd+Shift+L to clear all inputs and reset to initial state
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'L') {
     e.preventDefault();
     clearEditorAndReset(true);
     return;

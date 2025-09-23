@@ -23,15 +23,18 @@ This is a standalone Node.js writing tool that provides development-only endpoin
 #### Keyboard Shortcuts
 | Shortcut | Action | Description |
 |----------|--------|-------------|
-| `/` | Focus Note Content | Jump to main writing area |
-| `]` | Focus Quotes Area | Jump to quotes/references area |
+| `/` or `i` | Focus Note Content | Jump to main writing area |
+| `]` or `I` | Focus Quotes Area | Jump to quotes/references area |
 | `e` | Focus Note ID | Access note search/selection |
+| `c` | Focus Chapter Selection | Access chapter dropdown |
 | `?` | Show Help | Display keyboard shortcuts help |
 | `Escape` | Blur Current Field | Exit any active input |
 | `Ctrl/Cmd + Enter` or `Ctrl/Cmd + S` | Submit | Save/commit current content |
-| `Ctrl/Cmd + L` | Clear All | Reset editor to initial state |
+| `Ctrl/Cmd + Shift + L` | Clear All | Reset editor to initial state |
 | `Ctrl/Cmd + R` | Load Recent | Load last note from current chapter |
 | `Ctrl/Cmd + Shift + R` | Refresh Page | Reload the entire page |
+| `Ctrl/Cmd + B` | Toggle Dark Theme | Switch between light and dark modes |
+| `Ctrl/Cmd + H` | Toggle Quotes Area | Show/hide the quotes section |
 
 #### Advanced Features
 - **Dropdown Navigation**: Arrow keys, Enter, Escape in note selection

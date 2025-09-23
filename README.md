@@ -183,7 +183,7 @@ publishDate: 2024-01-01
   - `?` - Show keyboard shortcuts help
   - `Escape` - Blur current field
   - `Ctrl/Cmd + Enter` or `Ctrl/Cmd + S` - Submit/save content
-  - `Ctrl/Cmd + L` - Clear all and reset
+  - `Ctrl/Cmd + Shift + L` - Clear all and reset
   - `Ctrl/Cmd + R` - Load most recent note
   - `Ctrl/Cmd + B` - Toggle theme
 
