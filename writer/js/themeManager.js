@@ -24,11 +24,20 @@ export function toggleQuotesArea() {
       contentArea.style.transition = 'min-height 0.3s ease';
     }
 
-    // Prevent scrollbars during animation
+    // Prevent scrollbars during animation only if content doesn't already need scrolling
     const originalMainOverflow = mainContainer ? mainContainer.style.overflowY : '';
     const originalBodyOverflow = document.body.style.overflow;
-    if (mainContainer) mainContainer.style.overflowY = 'hidden';
-    document.body.style.overflow = 'hidden';
+
+    // Only hide main overflow if it's not currently needed for scrolling
+    const mainNeedsScroll = mainContainer && mainContainer.scrollHeight > mainContainer.clientHeight;
+    const bodyNeedsScroll = document.body.scrollHeight > window.innerHeight;
+
+    if (mainContainer && !mainNeedsScroll) {
+      mainContainer.style.overflowY = 'hidden';
+    }
+    if (!bodyNeedsScroll) {
+      document.body.style.overflow = 'hidden';
+    }
 
     if (isHidden) {
       // Show quotes area with animation
@@ -46,9 +55,13 @@ export function toggleQuotesArea() {
         // Restore overflow after animation
         setTimeout(() => {
           referenceContainer.style.overflow = '';
-          // Restore main container and body overflow
-          if (mainContainer) mainContainer.style.overflowY = originalMainOverflow;
-          document.body.style.overflow = originalBodyOverflow;
+          // Restore main container and body overflow only if we changed them
+          if (mainContainer && !mainNeedsScroll) {
+            mainContainer.style.overflowY = originalMainOverflow;
+          }
+          if (!bodyNeedsScroll) {
+            document.body.style.overflow = originalBodyOverflow;
+          }
         }, 300);
       });
     } else {
@@ -62,9 +75,13 @@ export function toggleQuotesArea() {
       setTimeout(() => {
         referenceContainer.style.display = 'none';
         referenceContainer.style.overflow = '';
-        // Restore main container and body overflow
-        if (mainContainer) mainContainer.style.overflowY = originalMainOverflow;
-        document.body.style.overflow = originalBodyOverflow;
+        // Restore main container and body overflow only if we changed them
+        if (mainContainer && !mainNeedsScroll) {
+          mainContainer.style.overflowY = originalMainOverflow;
+        }
+        if (!bodyNeedsScroll) {
+          document.body.style.overflow = originalBodyOverflow;
+        }
       }, 300);
     }
 
