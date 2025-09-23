@@ -312,24 +312,31 @@
       clone.style.zIndex = '-1000';
       clone.value = textarea.value;
 
+      // Copy all computed styles to ensure accurate measurement
+      const computedStyle = window.getComputedStyle(textarea);
+      clone.style.width = computedStyle.width;
+      clone.style.padding = computedStyle.padding;
+      clone.style.border = computedStyle.border;
+      clone.style.boxSizing = computedStyle.boxSizing;
+      clone.style.fontFamily = computedStyle.fontFamily;
+      clone.style.fontSize = computedStyle.fontSize;
+      clone.style.lineHeight = computedStyle.lineHeight;
+      clone.style.letterSpacing = computedStyle.letterSpacing;
+      clone.style.wordSpacing = computedStyle.wordSpacing;
+
       // Temporarily add to DOM to measure
       textarea.parentNode.insertBefore(clone, textarea);
       const newHeight = Math.max(clone.scrollHeight + 10, 200);
       textarea.parentNode.removeChild(clone);
 
-      // Only resize if there's a significant change to avoid micro-adjustments
-      const heightDifference = Math.abs(newHeight - currentHeight);
-      if (heightDifference > 5) {
-        textarea.style.height = newHeight + 'px';
+      // Always update height to prevent scrollbars, even for small changes
+      textarea.style.height = newHeight + 'px';
 
-        // Restore scroll position immediately to prevent jumping
-        if (preserveScroll) {
-          textarea.scrollTop = scrollTop;
-        }
-      }
+      // Ensure overflow is hidden to prevent scrollbars
+      textarea.style.overflow = 'hidden';
 
       // Smart cursor positioning for better typing experience (only for active element)
-      if (preserveScroll && textarea === document.activeElement && heightDifference > 5) {
+      if (preserveScroll && textarea === document.activeElement) {
         // Use requestAnimationFrame to ensure DOM has updated
         requestAnimationFrame(() => {
           const textBeforeCursor = textarea.value.substring(0, cursorPosition);
