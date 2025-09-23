@@ -17,7 +17,6 @@ import {
   loadFiles
 } from './noteManager.js';
 import { handleKeyboardShortcuts } from './keyboardShortcuts.js';
-import { loadSavedQuotesAreaState } from './themeManager.js';
 
 // Handle chapter selection change
 export async function handleFileSelectChange(e) {
@@ -63,7 +62,6 @@ export function handleNoteIdSelectChange(e) {
 // Handle window load
 export function handleWindowLoad() {
   initializeTextareas();
-  loadSavedQuotesAreaState();
 }
 
 // Handle note ID input (search functionality)

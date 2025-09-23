@@ -127,10 +127,24 @@
     import { loadFiles } from './js/noteManager.js';
     import { initializeEventHandlers } from './js/eventHandlers.js';
 
-    // Apply saved theme immediately before showing page
+    // Apply saved theme and quotes area state immediately before showing page
     const savedTheme = localStorage.getItem('editor-theme');
     if (savedTheme === 'dark') {
       document.body.classList.add('dark-theme');
+    }
+
+    // Apply saved quotes area state immediately
+    const quotesHidden = localStorage.getItem('quotesAreaHidden') === 'true';
+    if (quotesHidden) {
+      // Hide quotes area immediately to prevent layout flash
+      document.addEventListener('DOMContentLoaded', () => {
+        const referenceContainer = document.querySelector('.relative:has(#referenceArea)');
+        const contentArea = document.getElementById('contentArea');
+        if (referenceContainer && contentArea) {
+          referenceContainer.style.display = 'none';
+          contentArea.style.minHeight = '400px';
+        }
+      });
     }
 
     // Initialize the application
