@@ -126,4 +126,11 @@ export async function handleKeyboardShortcuts(e) {
       noteIdSelect.select();
     }
   }
+
+  // C key to focus chapter selection
+  if (e.key === 'c' && !isTyping) {
+    e.preventDefault();
+    const fileSelect = document.getElementById('fileSelect');
+    fileSelect.focus();
+  }
 }
