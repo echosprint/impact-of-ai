@@ -113,7 +113,7 @@ export function loadSavedQuotesAreaState() {
     // Hide quotes area and expand content area (without animation on load)
     referenceContainer.style.display = 'none';
     referenceContainer.style.opacity = '0';
-    contentArea.style.minHeight = '400px';
+    contentArea.style.minHeight = '460px';
   } else if (contentArea) {
     // Ensure normal height when quotes area is visible
     contentArea.style.minHeight = '200px';
