@@ -42,7 +42,7 @@ export async function handleKeyboardShortcuts(e) {
   }
 
   // Ctrl+Shift+L or Cmd+Shift+L to clear all inputs and reset to initial state
-  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'L') {
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'l') {
     e.preventDefault();
     clearEditorAndReset(true);
     return;
@@ -56,7 +56,7 @@ export async function handleKeyboardShortcuts(e) {
   }
 
   // Ctrl+Shift+R or Cmd+Shift+R to refresh page
-  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'r') {
     e.preventDefault();
     window.location.reload();
     return;
