@@ -29,7 +29,7 @@ export async function handleFileSelectChange(e) {
   contentArea.value = '';
   referenceArea.value = '';
   referenceArea.disabled = false;
-  referenceArea.style.backgroundColor = '#f5f4f0';
+  referenceArea.style.backgroundColor = '#fefcf8';
   referenceArea.style.color = '';
   autoResize(contentArea);
   autoResize(referenceArea);
@@ -54,7 +54,7 @@ export function handleNoteIdSelectChange(e) {
   } else {
     // Append mode: enable reference area
     referenceArea.disabled = false;
-    referenceArea.style.backgroundColor = '#f5f4f0';
+    referenceArea.style.backgroundColor = '#fefcf8';
     referenceArea.style.color = '';
   }
 }

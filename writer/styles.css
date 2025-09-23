@@ -67,13 +67,9 @@ body.dark-theme {
 
 .dark-theme .textarea-natural,
 .dark-theme .textarea-natural-ref {
-  background-color: #252526 !important;
+  background-color: #1e1e1e !important;
   border-color: #3e3e42 !important;
   color: #cccccc !important;
-}
-
-.dark-theme .textarea-natural {
-  background-color: #1e1e1e !important;
 }
 
 .dark-theme .dropdown-item-natural {

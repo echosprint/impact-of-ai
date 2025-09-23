@@ -131,7 +131,7 @@ export function clearEditorAndReset(isEditMode) {
 
     // Re-enable reference area for new content
     referenceArea.disabled = false;
-    referenceArea.style.backgroundColor = '#f5f4f0';
+    referenceArea.style.backgroundColor = '#fefcf8';
     referenceArea.style.color = '';
   }
 }
