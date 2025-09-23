@@ -12,22 +12,66 @@ export function toggleDarkTheme() {
 export function toggleQuotesArea() {
   const referenceContainer = document.querySelector('.relative:has(#referenceArea)');
   const contentArea = document.getElementById('contentArea');
+  const mainContainer = document.querySelector('main');
 
   if (referenceContainer && contentArea) {
-    const isHidden = referenceContainer.style.display === 'none';
+    const isHidden = referenceContainer.style.display === 'none' ||
+                     referenceContainer.style.opacity === '0';
 
-    if (isHidden) {
-      // Show quotes area and restore content area height
-      referenceContainer.style.display = '';
-      contentArea.style.minHeight = '200px';
-    } else {
-      // Hide quotes area and expand content area
-      referenceContainer.style.display = 'none';
-      contentArea.style.minHeight = '400px';
+    // Add transition styles if not already present
+    if (!referenceContainer.style.transition) {
+      referenceContainer.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+      contentArea.style.transition = 'min-height 0.3s ease';
     }
 
-    // Auto-resize content area to fit current content
-    autoResize(contentArea);
+    // Prevent scrollbars during animation
+    const originalMainOverflow = mainContainer ? mainContainer.style.overflowY : '';
+    const originalBodyOverflow = document.body.style.overflow;
+    if (mainContainer) mainContainer.style.overflowY = 'hidden';
+    document.body.style.overflow = 'hidden';
+
+    if (isHidden) {
+      // Show quotes area with animation
+      referenceContainer.style.display = '';
+      referenceContainer.style.opacity = '0';
+      referenceContainer.style.transform = 'translateY(-10px)';
+      referenceContainer.style.overflow = 'hidden';
+
+      // Trigger animation after display is set
+      requestAnimationFrame(() => {
+        referenceContainer.style.opacity = '1';
+        referenceContainer.style.transform = 'translateY(0)';
+        contentArea.style.minHeight = '200px';
+
+        // Restore overflow after animation
+        setTimeout(() => {
+          referenceContainer.style.overflow = '';
+          // Restore main container and body overflow
+          if (mainContainer) mainContainer.style.overflowY = originalMainOverflow;
+          document.body.style.overflow = originalBodyOverflow;
+        }, 300);
+      });
+    } else {
+      // Hide quotes area with animation
+      referenceContainer.style.overflow = 'hidden';
+      referenceContainer.style.opacity = '0';
+      referenceContainer.style.transform = 'translateY(-10px)';
+      contentArea.style.minHeight = '400px';
+
+      // Hide after animation completes
+      setTimeout(() => {
+        referenceContainer.style.display = 'none';
+        referenceContainer.style.overflow = '';
+        // Restore main container and body overflow
+        if (mainContainer) mainContainer.style.overflowY = originalMainOverflow;
+        document.body.style.overflow = originalBodyOverflow;
+      }, 300);
+    }
+
+    // Auto-resize content area to fit current content after animation
+    setTimeout(() => {
+      autoResize(contentArea);
+    }, 300);
 
     // Save state to localStorage
     localStorage.setItem('quotesAreaHidden', !isHidden);
@@ -49,11 +93,16 @@ export function loadSavedQuotesAreaState() {
   const contentArea = document.getElementById('contentArea');
 
   if (quotesHidden && referenceContainer && contentArea) {
-    // Hide quotes area and expand content area
+    // Hide quotes area and expand content area (without animation on load)
     referenceContainer.style.display = 'none';
+    referenceContainer.style.opacity = '0';
     contentArea.style.minHeight = '400px';
   } else if (contentArea) {
     // Ensure normal height when quotes area is visible
     contentArea.style.minHeight = '200px';
+    if (referenceContainer) {
+      referenceContainer.style.opacity = '1';
+      referenceContainer.style.transform = 'translateY(0)';
+    }
   }
 }
