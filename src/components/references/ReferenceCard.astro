@@ -31,7 +31,7 @@ const { reference, noteId } = Astro.props;
         <div set:html={formatReferenceContent(reference.text)}></div>
       </div>
       
-      {reference.source && (
+      {reference.source && !reference.source.endsWith('[Null]') && (
         <div class="text-xs text-amber-700 pt-2 border-t border-amber-200/50 sticky bottom-0 bg-amber-50/95 backdrop-blur-sm mt-3">
           <div class="py-1" set:html={processMarkdownLinks(reference.source)}></div>
         </div>
