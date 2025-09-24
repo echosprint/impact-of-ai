@@ -174,6 +174,22 @@ export function navigateSearchResults(direction) {
 
   if (SearchState.selectedIndex !== previousIndex) {
     displaySearchResults(SearchState.searchResults);
+    // Scroll selected item into view
+    scrollSelectedIntoView();
+  }
+}
+
+// Scroll selected item into view
+function scrollSelectedIntoView() {
+  if (SearchState.selectedIndex >= 0) {
+    const selectedElement = document.querySelector(`.search-result[data-index="${SearchState.selectedIndex}"]`);
+    if (selectedElement) {
+      selectedElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'nearest'
+      });
+    }
   }
 }
 
