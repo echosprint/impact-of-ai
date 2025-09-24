@@ -147,7 +147,7 @@ export async function handleFormSubmit(e) {
       }
     } else {
       // No source detected, treat entire reference as reference content
-      finalContent = `<Note id="${currentNoteId}">\n${content.trim()}\n///\n${finalReference.trim()}\n///\nSource: [Please add source information]\n</Note>`;
+      finalContent = `<Note id="${currentNoteId}">\n${content.trim()}\n///\n${finalReference.trim()}\n///\nSource: [Null]\n</Note>`;
     }
   } else {
     finalContent = `<Note id="${currentNoteId}">\n${content.trim()}\n</Note>`;
