@@ -2,6 +2,7 @@ import { hideShortcutHelper, showShortcutHelper } from './uiFeedback.js';
 import { clearEditorAndReset } from './textareaManager.js';
 import { loadMostRecentNote } from './noteManager.js';
 import { toggleDarkTheme, toggleQuotesArea } from './themeManager.js';
+import { showSearchModal, hideSearchModal, SearchState } from './searchModule.js';
 
 // Handle keyboard shortcuts
 export async function handleKeyboardShortcuts(e) {
@@ -76,20 +77,29 @@ export async function handleKeyboardShortcuts(e) {
     return;
   }
 
-  // Escape to blur active textarea/input or close shortcut helper
+  // Escape to blur active textarea/input, close modals
   if (e.key === 'Escape') {
     e.preventDefault();
     const helper = document.getElementById('shortcutHelper');
     if (helper.style.opacity === '1') {
       hideShortcutHelper();
+    } else if (SearchState.isSearchModalOpen) {
+      hideSearchModal();
     } else if (isTyping) {
       activeElement.blur();
     }
     return;
   }
 
-  // Forward slash (/) or 'i' to focus note input
-  if ((e.key === '/' || e.key === 'i') && !isTyping) {
+  // Forward slash (/) to show search modal
+  if (e.key === '/' && !isTyping) {
+    e.preventDefault();
+    showSearchModal();
+    return;
+  }
+
+  // 'i' key to focus note input
+  if (e.key === 'i' && !isTyping) {
     e.preventDefault();
     const contentArea = document.getElementById('contentArea');
     contentArea.focus();

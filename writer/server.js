@@ -198,6 +198,100 @@ async function handleGetFiles(req, res) {
   }
 }
 
+async function handleSearch(req, res) {
+  try {
+    const { query } = parse(req.url, true);
+    const searchQuery = query.q;
+
+    if (!searchQuery || searchQuery.trim().length < 2) {
+      return sendJson(res, 200, { results: [] });
+    }
+
+    const files = await fs.readdir(CHAPTERS_DIR);
+    const mdFiles = files.filter(file => file.endsWith('.md') || file.endsWith('.mdx'));
+    const results = [];
+    const searchTerm = searchQuery.toLowerCase().trim();
+
+    // Search through each file
+    for (const filename of mdFiles) {
+      try {
+        const safePath = await validateFile(filename);
+        const content = await fs.readFile(safePath, 'utf8');
+
+        // Search through notes in this file
+        const noteRegex = /<Note id="([^"]+)"[^>]*>([\s\S]*?)<\/Note>/g;
+        let match;
+
+        while ((match = noteRegex.exec(content)) !== null) {
+          const noteId = match[1];
+          const noteRawContent = match[2].trim();
+
+          // Extract only the note content (before first ///)
+          const fullContent = noteRawContent.split('///')[0].trim();
+
+          if (fullContent.toLowerCase().includes(searchTerm)) {
+            // Create preview that includes the search term
+            const searchIndex = fullContent.toLowerCase().indexOf(searchTerm);
+            let preview;
+
+            if (searchIndex !== -1) {
+              // Extract context around the search term (50 chars before and after)
+              const start = Math.max(0, searchIndex - 50);
+              const end = Math.min(fullContent.length, searchIndex + searchTerm.length + 50);
+              let snippet = fullContent.substring(start, end);
+
+              // Add ellipsis if we truncated
+              if (start > 0) snippet = '...' + snippet;
+              if (end < fullContent.length) snippet = snippet + '...';
+
+              preview = snippet.trim();
+            } else {
+              // Fallback to first line if somehow search term not found
+              const lines = fullContent.split('\n').filter(line => line.trim().length > 0);
+              const firstLine = lines.length > 0 ? lines[0].trim() : '';
+              preview = firstLine.length > 100 ? firstLine.substring(0, 100) + '...' : firstLine;
+            }
+
+            // Create highlighted preview
+            const highlightedPreview = highlightSearchTerm(preview, searchQuery);
+
+            results.push({
+              filename,
+              noteId,
+              preview,
+              highlightedPreview
+            });
+          }
+        }
+      } catch (error) {
+        console.warn(`Failed to search in file ${filename}:`, error);
+      }
+    }
+
+    // Sort results by relevance (position of match in text)
+    results.sort((a, b) => {
+      const aIndex = a.preview.toLowerCase().indexOf(searchTerm);
+      const bIndex = b.preview.toLowerCase().indexOf(searchTerm);
+      return aIndex - bIndex;
+    });
+
+    // Limit results to 20
+    const limitedResults = results.slice(0, 20);
+
+    sendJson(res, 200, { results: limitedResults });
+  } catch (error) {
+    log('error', 'Search error:', error);
+    sendError(res, 500, 'Search failed', error.message);
+  }
+}
+
+// Helper function to highlight search terms
+function highlightSearchTerm(text, term) {
+  if (!text || !term) return text;
+  const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  return text.replace(regex, '<mark style="background-color: #fef3c7; color: #92400e;">$1</mark>');
+}
+
 async function handleAppendContent(req, res) {
   try {
     const { filename, content } = await parseBody(req);
@@ -355,6 +449,7 @@ const routes = [
   { method: 'GET', pattern: '/styles.css', handler: handleCss },
   { method: 'GET', pattern: '/js/', handler: handleJs },
   { method: 'GET', pattern: '/api/files', handler: handleGetFiles },
+  { method: 'GET', pattern: '/api/search', handler: handleSearch },
   { method: 'POST', pattern: '/api/append', handler: handleAppendContent },
   {
     method: 'GET',

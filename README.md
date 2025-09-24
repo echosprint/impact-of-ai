@@ -177,15 +177,20 @@ publishDate: 2024-01-01
 - **Smart Editing** - Auto-resizing text areas with character counting
 - **Source Detection** - Automatic bibliography format recognition
 - **Keyboard Navigation** - Comprehensive hotkey support for efficient workflow:
-  - `/` or `i` - Focus note input area
+  - `/` - Open search modal to find and edit existing notes
+  - `i` - Focus note input area
   - `]` or `I` - Focus quotes/reference area
   - `e` - Focus note ID area
   - `?` - Show keyboard shortcuts help
-  - `Escape` - Blur current field
+  - `Escape` - Blur current field or close search modal
   - `Ctrl/Cmd + Enter` or `Ctrl/Cmd + S` - Submit/save content
   - `Ctrl/Cmd + Shift + L` - Clear all and reset
   - `Ctrl/Cmd + R` - Load most recent note
   - `Ctrl/Cmd + B` - Toggle theme
+- **Search Functionality** - Fast note discovery across all chapters:
+  - Server-side full-text search with highlighting
+  - Arrow key navigation through results
+  - Instant note loading and editing
 
 ## 🌐 Deployment
 

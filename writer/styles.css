@@ -28,8 +28,60 @@ body {
   border-color: #22c55e !important;
 }
 
+.search-input {
+  border: none !important;
+}
+
+.search-input:focus {
+  border: none !important;
+  --tw-ring-color: transparent !important;
+  --tw-ring-opacity: 0 !important;
+  box-shadow: none !important;
+}
+
 .textarea-natural-ref:focus {
   border-color: #3b82f6 !important;
+}
+
+/* Search result items - compatible with editor page */
+.search-result {
+  background-color: #fefcf8;
+  border: 1px solid #d6d3ce;
+  color: #57534e;
+}
+
+.search-result.selected {
+  background-color: #f5f4f0;
+  border-color: #a8a29e;
+}
+
+.search-result .note-id {
+  color: #78716c;
+}
+
+/* Dark mode overrides for search results */
+.dark-theme .search-result {
+  background-color: #1f1f1f;
+  border-color: #404040;
+  color: #e5e5e5;
+}
+
+.dark-theme .search-result.selected {
+  background-color: #2a2a2a;
+  border-color: #606060;
+}
+
+.dark-theme .search-result .note-id {
+  color: #a8a29e;
+}
+
+/* Search modal adaptive height */
+#searchModal .modal-bg {
+  max-height: 80vh;
+}
+
+#searchResults {
+  max-height: 60vh;
 }
 
 .dropdown-item-natural:hover {

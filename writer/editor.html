@@ -104,11 +104,12 @@
         <button id="closeShortcutHelper" class="text-gray-400 hover:text-gray-600 text-xl leading-none focus:outline-none border-none bg-transparent p-0 m-0">&times;</button>
       </div>
       <div class="space-y-2 text-sm modal-content" style="color: #78716c;">
-        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">/ , i</span><span>Focus Note Content</span></div>
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">/</span><span>Search Notes</span></div>
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">i</span><span>Focus Note Content</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">] , I</span><span>Focus Quotes Area</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">e</span><span>Focus Note ID</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">c</span><span>Focus Chapters (then Space)</span></div>
-        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">Esc</span><span>Blur Current Field</span></div>
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">Esc</span><span>Blur Field / Close Search</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + Enter</span><span>Save & Clear</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + S</span><span>Save & Stay</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + Shift + L</span><span>Clear All</span></div>
@@ -124,9 +125,30 @@
     </div>
   </div>
 
+  <!-- Search Modal -->
+  <div id="searchModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 opacity-0 pointer-events-none transition-all duration-300">
+    <div class="rounded-xl shadow-2xl max-w-lg w-full mx-4 p-4 modal-bg" style="background-color: #f5f4f0;">
+      <!-- Search Input -->
+      <div class="mb-3">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search notes..."
+          class="w-full px-3 py-2 rounded-lg focus:outline-none transition-colors search-input"
+          style="background-color: #faf9f6; color: #57534e;"
+        />
+      </div>
+
+      <!-- Search Results -->
+      <div id="searchResults" class="overflow-y-auto space-y-1">
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { loadFiles } from './js/noteManager.js';
     import { initializeEventHandlers } from './js/eventHandlers.js';
+    import { initializeSearchModal } from './js/searchModule.js';
 
     // Apply saved theme and quotes area state immediately before showing page
     const savedTheme = localStorage.getItem('editor-theme');
@@ -153,6 +175,9 @@
       try {
         // Initialize all event handlers first
         initializeEventHandlers();
+
+        // Initialize search modal
+        initializeSearchModal();
 
         // Force window size after page loads
         setTimeout(() => {
