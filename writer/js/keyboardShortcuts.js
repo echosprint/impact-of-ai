@@ -2,7 +2,7 @@ import { hideShortcutHelper, showShortcutHelper } from './uiFeedback.js';
 import { clearEditorAndReset } from './textareaManager.js';
 import { loadMostRecentNote } from './noteManager.js';
 import { toggleDarkTheme, toggleQuotesArea } from './themeManager.js';
-import { showSearchModal, hideSearchModal, SearchState } from './searchModule.js';
+import { showSearchModal, hideSearchModal, SearchState } from './searchNotes.js';
 
 // Handle keyboard shortcuts
 export async function handleKeyboardShortcuts(e) {
