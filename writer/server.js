@@ -11,6 +11,9 @@ const CHAPTERS_DIR = join(__dirname, '..', 'src', 'content', 'chapters');
 const EDITOR_PATH = join(__dirname, 'editor.html');
 const CSS_OUTPUT_PATH = join(__dirname, 'public', 'styles.css');
 
+// File cache for search optimization
+const fileCache = new Map(); // filename -> { mtime, notes }
+
 // =============================================================================
 // UTILITY FUNCTIONS
 // =============================================================================
@@ -212,22 +215,14 @@ async function handleSearch(req, res) {
     const results = [];
     const searchTerm = searchQuery.toLowerCase().trim();
 
-    // Search through each file
+    // Search through each file using cached notes
     for (const filename of mdFiles) {
       try {
-        const safePath = await validateFile(filename);
-        const content = await fs.readFile(safePath, 'utf8');
+        const notes = await getCachedNotes(filename);
 
-        // Search through notes in this file
-        const noteRegex = /<Note id="([^"]+)"[^>]*>([\s\S]*?)<\/Note>/g;
-        let match;
-
-        while ((match = noteRegex.exec(content)) !== null) {
-          const noteId = match[1];
-          const noteRawContent = match[2].trim();
-
-          // Extract only the note content (before first ///)
-          const fullContent = noteRawContent.split('///')[0].trim();
+        // Search through cached notes
+        for (const note of notes) {
+          const fullContent = note.content;
 
           if (fullContent.toLowerCase().includes(searchTerm)) {
             // Create preview that includes the search term
@@ -257,7 +252,7 @@ async function handleSearch(req, res) {
 
             results.push({
               filename,
-              noteId,
+              noteId: note.noteId,
               preview,
               highlightedPreview
             });
@@ -283,6 +278,45 @@ async function handleSearch(req, res) {
     log('error', 'Search error:', error);
     sendError(res, 500, 'Search failed', error.message);
   }
+}
+
+// Extract notes from file content
+function parseNotesFromContent(content) {
+  const notes = [];
+  const noteRegex = /<Note id="([^"]+)"[^>]*>([\s\S]*?)<\/Note>/g;
+  let match;
+
+  while ((match = noteRegex.exec(content)) !== null) {
+    const noteId = match[1];
+    const noteRawContent = match[2].trim();
+    // Extract only the note content (before first ///)
+    const noteContent = noteRawContent.split('///')[0].trim();
+
+    notes.push({ noteId, content: noteContent });
+  }
+
+  return notes;
+}
+
+// Get cached notes for a file, checking modification time
+async function getCachedNotes(filename) {
+  const safePath = await validateFile(filename);
+  const stats = await fs.stat(safePath);
+  const currentMtime = stats.mtime.getTime();
+
+  const cached = fileCache.get(filename);
+
+  // Cache hit: return cached notes if mtime matches
+  if (cached && cached.mtime === currentMtime) {
+    return cached.notes;
+  }
+
+  // Cache miss: read file, parse notes, update cache
+  const content = await fs.readFile(safePath, 'utf8');
+  const notes = parseNotesFromContent(content);
+
+  fileCache.set(filename, { mtime: currentMtime, notes });
+  return notes;
 }
 
 // Helper function to highlight search terms
