@@ -206,10 +206,32 @@ export function initializeSearchModal() {
   const searchInput = document.getElementById('searchInput');
   const modal = document.getElementById('searchModal');
 
-  // Search input handler with debouncing
+  // Search input handler with debouncing and IME composition support
   if (searchInput) {
     let searchTimeout;
+    let isComposing = false;
+
+    // Handle IME composition events (Chinese/Japanese/Korean input)
+    searchInput.addEventListener('compositionstart', () => {
+      isComposing = true;
+    });
+
+    searchInput.addEventListener('compositionend', () => {
+      isComposing = false;
+      // Trigger search after composition is complete
+      const query = searchInput.value.trim();
+      if (query.length >= 2) {
+        SearchState.selectedIndex = -1;
+        searchNotes(query);
+      } else {
+        clearSearchResults();
+      }
+    });
+
     searchInput.addEventListener('input', (e) => {
+      // Skip search during IME composition (pinyin input)
+      if (isComposing) return;
+
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
         const query = e.target.value.trim();
