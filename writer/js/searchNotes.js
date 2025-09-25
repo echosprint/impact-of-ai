@@ -8,6 +8,24 @@ export const SearchState = {
   isSearchModalOpen: false
 };
 
+// Warm up cache in background
+async function warmCache() {
+  try {
+    const response = await fetch('/api/warm-cache', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log(`Cache warmed: ${data.warmedFiles} files loaded in ${data.warmTime}ms`);
+    }
+  } catch (error) {
+    // Silently fail - cache warming is optional optimization
+    console.debug('Cache warming failed:', error);
+  }
+}
+
 // Show search modal
 export function showSearchModal() {
   const modal = document.getElementById('searchModal');
@@ -17,6 +35,9 @@ export function showSearchModal() {
     SearchState.isSearchModalOpen = true;
     modal.classList.remove('opacity-0', 'pointer-events-none');
     modal.classList.add('opacity-100', 'pointer-events-auto');
+
+    // Warm cache in background for faster searches
+    warmCache();
 
     // Focus the search input
     setTimeout(() => {

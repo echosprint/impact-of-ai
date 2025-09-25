@@ -210,15 +210,21 @@ async function handleSearch(req, res) {
       return sendJson(res, 200, { results: [] });
     }
 
-    const files = await fs.readdir(CHAPTERS_DIR);
-    const mdFiles = files.filter(file => file.endsWith('.md') || file.endsWith('.mdx'));
     const results = [];
     const searchTerm = searchQuery.toLowerCase().trim();
 
-    // Search through each file using cached notes
-    for (const filename of mdFiles) {
+    // If cache is empty, return empty results (cache warming should handle this)
+    if (fileCache.size === 0) {
+      return sendJson(res, 200, {
+        results: [],
+        message: "Cache not ready. Please try again in a moment."
+      });
+    }
+
+    // Search through cached files only (no file I/O)
+    for (const [filename, cachedData] of fileCache) {
       try {
-        const notes = await getCachedNotes(filename);
+        const notes = cachedData.notes;
 
         // Search through cached notes
         for (const note of notes) {
@@ -317,6 +323,55 @@ async function getCachedNotes(filename) {
 
   fileCache.set(filename, { mtime: currentMtime, notes });
   return notes;
+}
+
+// Warm up cache by pre-loading all files
+async function handleWarmCache(req, res) {
+  try {
+    const startTime = process.hrtime.bigint();
+
+    const files = await fs.readdir(CHAPTERS_DIR);
+    const mdFiles = files.filter(file => file.endsWith('.md') || file.endsWith('.mdx'));
+
+    let warmedFiles = 0;
+    let skippedFiles = 0;
+
+    for (const filename of mdFiles) {
+      try {
+        const safePath = await validateFile(filename);
+        const stats = await fs.stat(safePath);
+        const currentMtime = stats.mtime.getTime();
+        const cached = fileCache.get(filename);
+
+        // Only warm files not in cache or with different mtime
+        if (!cached || cached.mtime !== currentMtime) {
+          await getCachedNotes(filename);
+          warmedFiles++;
+        } else {
+          skippedFiles++;
+        }
+      } catch (error) {
+        console.warn(`Failed to warm cache for file ${filename}:`, error);
+      }
+    }
+
+    const endTime = process.hrtime.bigint();
+    const warmTime = Number(endTime - startTime) / 1_000_000;
+
+    log('performance', `Cache warmed: ${warmedFiles} files loaded, ${skippedFiles} already cached (${Math.round(warmTime)}ms)`);
+
+    sendJson(res, 200, {
+      success: true,
+      warmedFiles,
+      skippedFiles,
+      totalFiles: mdFiles.length,
+      warmTime: Math.round(warmTime * 100) / 100,
+      cacheSize: fileCache.size
+    });
+  } catch (error) {
+    log('error', 'Cache warming error:', error);
+    sendError(res, 500, 'Cache warming failed', error.message);
+  }
 }
 
 // Helper function to highlight search terms
@@ -485,6 +540,7 @@ const routes = [
   { method: 'GET', pattern: '/api/files', handler: handleGetFiles },
   { method: 'GET', pattern: '/api/search', handler: handleSearch },
   { method: 'POST', pattern: '/api/append', handler: handleAppendContent },
+  { method: 'POST', pattern: '/api/warm-cache', handler: handleWarmCache },
   {
     method: 'GET',
     pattern: '/api/notes/',
