@@ -42,34 +42,18 @@ export function autoResize(textarea, preserveScroll = true) {
   // Ensure overflow is hidden to prevent scrollbars
   textarea.style.overflow = 'hidden';
 
-  // Smart cursor positioning for better typing experience (only for active element)
+  // Auto-scroll down when textarea grows taller (for active element)
   if (preserveScroll && textarea === document.activeElement) {
-    // Use requestAnimationFrame to ensure DOM has updated
-    requestAnimationFrame(() => {
-      const textBeforeCursor = textarea.value.substring(0, cursorPosition);
-      const linesBeforeCursor = textBeforeCursor.split('\n').length;
-      const lineHeight = parseInt(getComputedStyle(textarea).lineHeight) || 22;
+    // Check if textarea height has increased
+    const heightIncreased = newHeight > currentHeight;
 
-      // Get current viewport info
-      const textareaRect = textarea.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const isTextareaLarge = textareaRect.height > viewportHeight * 0.6;
+    if (heightIncreased) {
+      // Calculate how much the textarea grew
+      const heightDifference = newHeight - currentHeight;
 
-      if (isTextareaLarge) {
-        // Calculate cursor position relative to viewport
-        const targetCursorY = viewportHeight * 0.4; // 40% from top
-        const currentCursorY = textareaRect.top + (linesBeforeCursor * lineHeight);
-
-        // Only scroll if cursor is significantly below target
-        if (currentCursorY > targetCursorY + 50) {
-          const scrollOffset = currentCursorY - targetCursorY;
-          window.scrollTo({
-            top: window.scrollY + scrollOffset,
-            behavior: 'smooth'
-          });
-        }
-      }
-    });
+      // Instant scroll to match the height growth - no animation to prevent flashing
+      window.scrollBy(0, heightDifference);
+    }
   }
 }
 
