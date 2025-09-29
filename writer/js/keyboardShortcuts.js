@@ -56,10 +56,22 @@ export async function handleKeyboardShortcuts(e) {
     return;
   }
 
-  // Ctrl+Shift+F or Cmd+Shift+F to refresh page
+  // Ctrl+Shift+F or Cmd+Shift+F to refresh page and clear cache
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'f') {
     e.preventDefault();
-    window.location.reload();
+    // Clear browser cache and reload page
+    if ('caches' in window) {
+      // Clear all caches
+      caches.keys().then(names => {
+        names.forEach(name => {
+          caches.delete(name);
+        });
+      });
+    }
+    // Add cache-busting parameter and reload
+    const url = new URL(window.location);
+    url.searchParams.set('_cache_bust', Date.now());
+    window.location.href = url.toString();
     return;
   }
 
