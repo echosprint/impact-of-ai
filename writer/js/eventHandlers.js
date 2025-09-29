@@ -160,6 +160,32 @@ export function handleDocumentClick(e) {
   }
 }
 
+// Prevent scroll event propagation to main window
+function preventScrollPropagation(element) {
+  if (!element) return;
+
+  element.addEventListener('wheel', (e) => {
+    const { scrollTop, scrollHeight, clientHeight } = element;
+    const atTop = scrollTop === 0;
+    const atBottom = scrollTop + clientHeight >= scrollHeight;
+
+    // Prevent default and stop propagation when scrolling would go beyond bounds
+    if ((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, { passive: false });
+}
+
+// Initialize scroll isolation for dropdown and search elements
+function initializeScrollIsolation() {
+  const noteIdDropdown = document.getElementById('noteIdDropdown');
+  const searchResults = document.getElementById('searchResults');
+
+  preventScrollPropagation(noteIdDropdown);
+  preventScrollPropagation(searchResults);
+}
+
 // Initialize all event handlers
 export function initializeEventHandlers() {
   // Form and textarea events
@@ -192,4 +218,7 @@ export function initializeEventHandlers() {
   // Document and window events
   document.addEventListener('click', handleDocumentClick);
   window.addEventListener('load', handleWindowLoad);
+
+  // Initialize scroll isolation to prevent dropdown/search scroll conflicts
+  initializeScrollIsolation();
 }

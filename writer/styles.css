@@ -7,6 +7,31 @@ body {
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
+/* Global scrollbar styling - subtle and minimal */
+*::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(168, 162, 158, 0.03);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(168, 162, 158, 0.15);
+  border-radius: 2px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 162, 158, 0.25);
+}
+
+/* Firefox scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 162, 158, 0.15) rgba(168, 162, 158, 0.03);
+}
+
 .writing-font {
   font-family: 'Noto Serif', Georgia, 'Times New Roman', 'Songti SC', 'SimSun', serif;
   font-feature-settings: "liga", "kern";
@@ -82,37 +107,43 @@ body {
 
 #searchResults {
   max-height: 60vh;
+  overscroll-behavior: contain;
+}
+
+/* Note ID dropdown scroll isolation */
+#noteIdDropdown {
+  overscroll-behavior: contain;
 }
 
 /* Search results scrollbar styling */
 #searchResults::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 #searchResults::-webkit-scrollbar-track {
-  background: rgba(168, 162, 158, 0.1);
+  background: rgba(168, 162, 158, 0.03);
 }
 
 #searchResults::-webkit-scrollbar-thumb {
-  background: rgba(168, 162, 158, 0.3);
-  border-radius: 3px;
+  background: rgba(168, 162, 158, 0.15);
+  border-radius: 2px;
 }
 
 #searchResults::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 162, 158, 0.5);
+  background: rgba(168, 162, 158, 0.25);
 }
 
 /* Dark mode scrollbar */
 .dark-theme #searchResults::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .dark-theme #searchResults::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .dark-theme #searchResults::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .dropdown-item-natural:hover {
@@ -248,35 +279,35 @@ body.dark-theme {
 
 /* Dark theme scrollbar styles */
 .dark-theme #noteIdDropdown::-webkit-scrollbar {
-  width: 8px;
+  width: 4px;
 }
 
 .dark-theme #noteIdDropdown::-webkit-scrollbar-track {
-  background: #1e1e1e;
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .dark-theme #noteIdDropdown::-webkit-scrollbar-thumb {
-  background: #424242;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
 }
 
 .dark-theme #noteIdDropdown::-webkit-scrollbar-thumb:hover {
-  background: #4f4f4f;
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .dark-theme textarea::-webkit-scrollbar {
-  width: 8px;
+  width: 4px;
 }
 
 .dark-theme textarea::-webkit-scrollbar-track {
-  background: #252526;
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .dark-theme textarea::-webkit-scrollbar-thumb {
-  background: #424242;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
 }
 
 .dark-theme textarea::-webkit-scrollbar-thumb:hover {
-  background: #4f4f4f;
+  background: rgba(255, 255, 255, 0.18);
 }

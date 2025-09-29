@@ -56,8 +56,8 @@ export async function handleKeyboardShortcuts(e) {
     return;
   }
 
-  // Ctrl+Shift+R or Cmd+Shift+R to refresh page
-  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'r') {
+  // Ctrl+Shift+F or Cmd+Shift+F to refresh page
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'f') {
     e.preventDefault();
     window.location.reload();
     return;
