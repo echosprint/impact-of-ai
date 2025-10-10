@@ -131,13 +131,17 @@ export async function handleFormSubmit(e) {
   // Format as Note component with smart source detection (same logic for both modes)
   let finalContent;
   if (finalReference.trim()) {
+    // Has reference text
     const detection = TextUtils.detectSource(finalReference.trim());
 
     if (detection.isSource && detection.confidence > 0.5) {
-      // Auto-split detected source from reference content
+      // Case 1: Source detected in reference text - auto-split it
       const referenceLines = finalReference.trim().split('\n').filter(line => line.trim());
       const source = referenceLines[referenceLines.length - 1];
       const referenceContent = referenceLines.slice(0, -1).join('\n').trim();
+
+      // Store this source for future use
+      EditorState.updateLastSource(source);
 
       if (referenceContent) {
         finalContent = `<Note id="${currentNoteId}">\n${content.trim()}\n///\n${referenceContent}\n///\n${source}\n</Note>`;
@@ -146,10 +150,12 @@ export async function handleFormSubmit(e) {
         finalContent = `<Note id="${currentNoteId}">\n${content.trim()}\n///\n\n///\n${source}\n</Note>`;
       }
     } else {
-      // No source detected, treat entire reference as reference content
-      finalContent = `<Note id="${currentNoteId}">\n${content.trim()}\n///\n${finalReference.trim()}\n///\nSource: [Null]\n</Note>`;
+      // Case 2: No source detected, has reference text - use fallback or [Null]
+      const fallbackSource = EditorState.lastUsedSource || 'Source: [Null]';
+      finalContent = `<Note id="${currentNoteId}">\n${content.trim()}\n///\n${finalReference.trim()}\n///\n${fallbackSource}\n</Note>`;
     }
   } else {
+    // Case 3: No reference text - don't add source section
     finalContent = `<Note id="${currentNoteId}">\n${content.trim()}\n</Note>`;
   }
 

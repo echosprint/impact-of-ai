@@ -60,17 +60,47 @@ export function autoResize(textarea, preserveScroll = true) {
 // Show source indicator with split preview
 export function updateSourceIndicator(text) {
   const indicator = document.getElementById('sourceIndicator');
-  const detection = TextUtils.detectSource(text);
+  const lastSourceIndicator = document.getElementById('lastSourceIndicator');
+  const lastSourceText = document.getElementById('lastSourceText');
 
+  const detection = TextUtils.detectSource(text);
+  const hasFallback = EditorState.lastUsedSource && EditorState.lastUsedSource !== 'Source: [Null]';
+  const hasText = text && text.trim().length > 0;
+
+  // Case 1: Source detected in reference text (will be auto-split on submit)
   if (detection.isSource && detection.confidence > 0.5) {
     indicator.className = 'absolute bottom-4 right-4 text-xs transition-all duration-500 text-green-400/60 opacity-100';
     indicator.textContent = '◉';
-  } else if (detection.isSource && detection.confidence > 0.3) {
-    indicator.className = 'absolute bottom-4 right-4 text-xs transition-all duration-500 text-amber-500/60 opacity-100';
-    indicator.textContent = '◯';
-  } else {
+    indicator.title = 'Source detected - will be auto-split';
+
+    // Hide fallback indicator
+    if (lastSourceIndicator) {
+      lastSourceIndicator.classList.add('hidden');
+    }
+  }
+  // Case 2: No source detected, has text, and fallback available (will use last source on submit)
+  else if (hasText && hasFallback) {
+    // Hide the triangle indicator - we'll show the full fallback below
     indicator.className = 'absolute bottom-4 right-4 text-xs transition-all duration-500 opacity-0 pointer-events-none';
     indicator.textContent = '';
+    indicator.title = '';
+
+    // Show fallback source below reference area
+    if (lastSourceIndicator && lastSourceText) {
+      lastSourceText.textContent = EditorState.lastUsedSource;
+      lastSourceIndicator.classList.remove('hidden');
+    }
+  }
+  // Case 3: No source, no fallback (will use "Source: [Null]")
+  else {
+    indicator.className = 'absolute bottom-4 right-4 text-xs transition-all duration-500 opacity-0 pointer-events-none';
+    indicator.textContent = '';
+    indicator.title = '';
+
+    // Hide fallback indicator
+    if (lastSourceIndicator) {
+      lastSourceIndicator.classList.add('hidden');
+    }
   }
 }
 

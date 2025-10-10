@@ -73,14 +73,19 @@
 
         <!-- Reference Section -->
         <div class="relative">
-          <textarea 
-            id="referenceArea" 
-            name="reference" 
+          <textarea
+            id="referenceArea"
+            name="reference"
             class="w-full min-h-[200px] resize-none rounded-lg p-4 outline-none text-sm textarea-natural-ref focus:ring-1 focus:ring-blue-500" style="border: 1px solid #d6d3ce; background-color: #fefcf8; color: #57534e;" placeholder="Quotes..."
             style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif; word-spacing: -0.05em; letter-spacing: -0.01em; line-height: 1.6; overflow-y: auto;"
           ></textarea>
           <div id="sourceIndicator" class="absolute bottom-3 right-3 px-2 py-1 text-xs rounded-md transition-all duration-300 opacity-0 pointer-events-none">
           </div>
+        </div>
+
+        <!-- Last source indicator -->
+        <div id="lastSourceIndicator" class="text-xs text-gray-400 px-2 -mt-4 hidden">
+          <span>📚<span id="lastSourceText" class="italic"></span></span>
         </div>
       </form>
 

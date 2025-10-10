@@ -6,6 +6,7 @@ export const EditorState = {
   originalReference: '',
   currentNoteId: '',
   scrollTimeout: null,
+  lastUsedSource: localStorage.getItem('lastUsedSource') || '',
 
   reset: function() {
     this.currentNoteId = '';
@@ -20,5 +21,10 @@ export const EditorState = {
   setCurrentNote: function(noteId, reference) {
     this.currentNoteId = noteId;
     this.originalReference = reference || '';
+  },
+
+  updateLastSource: function(source) {
+    this.lastUsedSource = source;
+    localStorage.setItem('lastUsedSource', source);
   }
 };
