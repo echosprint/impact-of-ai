@@ -50,19 +50,21 @@ export const TextUtils = {
       // Explicit source indicators
       /^(Source|source|来源|出处)[：:]\s*.+/i,
 
-      // APA Format
+      // APA Format - must start with capital letter or be very specific
       /^[A-Z][a-zA-Z\s,.-]+\(\d{4}\)\./,                    // Author, A. (2024). Title
-      /.*\(\d{4}\)\.\s*.+/i,                                // (2024). Title...
+      /^\(\d{4}\)\.\s+[A-Z].+/,                             // (2024). Title (at start of line)
 
       // MLA Format
-      /^[A-Z][a-zA-Z\s,.-]+".+"\s+.+\d{4}/,               // Author. "Title" Publication 2024
+      /^[A-Z][a-zA-Z\s,.-]+".+"\s+.+\d{4}$/,              // Author. "Title" Publication 2024
 
-      // Chicago Style
-      /.*\d{4}\.\s*https?:\/\/.+/,                         // 2024. http://...
+      // Chinese Bibliography Format
+      /.*《.+》.*\d{4}/,                                    // 《书名》... 2019
+      /.*ISBN[\s:-]*[\dXx-]+/i,                            // ISBN number
+      /.*出版社.*\d{4}/,                                    // Chinese publisher with year
 
-      // URLs and DOIs
-      /.*doi:\s*10\.\d+/i,                                 // DOI
-      /^https?:\/\/.+/                                     // Direct URL
+      // URLs and DOIs (most reliable)
+      /^https?:\/\/.+/,                                    // Direct URL
+      /.*doi:\s*10\.\d+/i                                  // DOI
     ];
 
     for (const pattern of sourcePatterns) {
