@@ -5,6 +5,7 @@ export const EditorState = {
   selectedDropdownIndex: -1,
   originalReference: '',
   currentNoteId: '',
+  currentSection: null,
   scrollTimeout: null,
   lastUsedSource: localStorage.getItem('lastUsedSource') || '',
 
@@ -12,6 +13,7 @@ export const EditorState = {
     this.currentNoteId = '';
     this.originalReference = '';
     this.selectedDropdownIndex = -1;
+    this.currentSection = null;
     if (this.scrollTimeout) {
       clearTimeout(this.scrollTimeout);
       this.scrollTimeout = null;
@@ -28,3 +30,6 @@ export const EditorState = {
     localStorage.setItem('lastUsedSource', source);
   }
 };
+
+// Export as 'state' for convenience
+export const state = EditorState;

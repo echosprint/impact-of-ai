@@ -155,4 +155,14 @@ export async function handleKeyboardShortcuts(e) {
     const fileSelect = document.getElementById('fileSelect');
     fileSelect.focus();
   }
+
+  // S key to focus section selection
+  if (e.key === 's' && !isTyping) {
+    e.preventDefault();
+    const sectionSelect = document.getElementById('section-select');
+    // Only focus if not disabled
+    if (!sectionSelect.disabled) {
+      sectionSelect.focus();
+    }
+  }
 }

@@ -100,23 +100,58 @@ async function validateFile(filename) {
   }
 }
 
+function extractSections(content) {
+  const sections = [];
+  const lines = content.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // Match H2 headers (## Section Title)
+    const match = line.match(/^##\s+(.+)$/);
+    if (match) {
+      sections.push({
+        title: match[1].trim(),
+        lineNumber: i
+      });
+    }
+  }
+
+  return sections;
+}
+
 function extractNotes(content) {
   const noteRegex = /<Note id="([^"]+)"[^>]*>([\s\S]*?)<\/Note>/g;
   const notes = [];
+  const sections = extractSections(content);
+  const lines = content.split('\n');
   let match;
-  
+
   while ((match = noteRegex.exec(content)) !== null) {
     const noteId = match[1];
     const noteContent = match[2].trim();
-    
+
+    // Find which line the note starts on
+    const notePosition = match.index;
+    const contentBeforeNote = content.substring(0, notePosition);
+    const lineNumber = contentBeforeNote.split('\n').length - 1;
+
+    // Find which section this note belongs to
+    let section = null;
+    for (let i = sections.length - 1; i >= 0; i--) {
+      if (lineNumber >= sections[i].lineNumber) {
+        section = sections[i].title;
+        break;
+      }
+    }
+
     // Extract first line for preview (up to 10 chars)
-    const lines = noteContent.split('\n').filter(line => line.trim().length > 0);
-    const firstLine = lines.length > 0 ? lines[0].trim() : '';
+    const contentLines = noteContent.split('\n').filter(line => line.trim().length > 0);
+    const firstLine = contentLines.length > 0 ? contentLines[0].trim() : '';
     const preview = firstLine.length > 22 ? firstLine.substring(0, 22) + '..' : firstLine;
-    
-    notes.push({ id: noteId, preview });
+
+    notes.push({ id: noteId, preview, section });
   }
-  
+
   return notes;
 }
 
@@ -383,20 +418,33 @@ function highlightSearchTerm(text, term) {
 
 async function handleAppendContent(req, res) {
   try {
-    const { filename, content } = await parseBody(req);
-    
+    const { filename, content, section } = await parseBody(req);
+
     if (!filename || !content) {
       return sendError(res, 400, 'Missing filename or content');
     }
 
     const safePath = await validateFile(filename);
-    
-    // Append content with newlines
-    const appendContent = `\n\n${content}`;
-    await fs.appendFile(safePath, appendContent, 'utf8');
 
-    log('append', `src/content/chapters/${filename}`);
-    sendJson(res, 200, { success: true, message: `Content appended to ${filename}` });
+    if (section) {
+      // Insert at end of specific section
+      try {
+        await insertAtSectionEnd(safePath, section, content);
+        log('append', `src/content/chapters/${filename} (section: ${section})`);
+        sendJson(res, 200, { success: true, message: `Content appended to section "${section}" in ${filename}` });
+      } catch (error) {
+        if (error.message.includes('not found')) {
+          return sendError(res, 404, error.message);
+        }
+        throw error;
+      }
+    } else {
+      // Append to end of file (backward compatibility)
+      const appendContent = `\n\n${content}`;
+      await fs.appendFile(safePath, appendContent, 'utf8');
+      log('append', `src/content/chapters/${filename}`);
+      sendJson(res, 200, { success: true, message: `Content appended to ${filename}` });
+    }
   } catch (error) {
     if (error.message === 'File not found') {
       return sendError(res, 404, 'File not found');
@@ -411,7 +459,7 @@ async function handleGetNotes(req, res, filename) {
     const safePath = await validateFile(filename);
     const content = await fs.readFile(safePath, 'utf8');
     const notes = extractNotes(content);
-    
+
     sendJson(res, 200, { success: true, filename, notes });
   } catch (error) {
     if (error.message === 'File not found') {
@@ -420,6 +468,99 @@ async function handleGetNotes(req, res, filename) {
     log('error', `Error loading notes from ${filename}:`, error);
     sendError(res, 500, 'Failed to load notes', error.message);
   }
+}
+
+async function handleGetSections(req, res, filename) {
+  try {
+    const safePath = await validateFile(filename);
+    const content = await fs.readFile(safePath, 'utf8');
+    const sections = extractSections(content);
+    const lines = content.split('\n');
+
+    // For each section, find the most recent note timestamp
+    const sectionsWithTimestamps = sections.map((section, index) => {
+      const sectionStartLine = section.lineNumber;
+      const nextSection = sections[index + 1];
+      const sectionEndLine = nextSection ? nextSection.lineNumber : lines.length;
+
+      // Extract notes in this section
+      const sectionContent = lines.slice(sectionStartLine, sectionEndLine).join('\n');
+      const noteRegex = /<Note[^>]*time="([^"]+)"[^>]*>/g;
+      let mostRecentTime = null;
+      let match;
+
+      while ((match = noteRegex.exec(sectionContent)) !== null) {
+        const noteTime = new Date(match[1]);
+        if (!mostRecentTime || noteTime > mostRecentTime) {
+          mostRecentTime = noteTime;
+        }
+      }
+
+      return {
+        title: section.title,
+        lastModified: mostRecentTime ? mostRecentTime.getTime() : 0
+      };
+    });
+
+    // Sort sections by most recent note (descending)
+    sectionsWithTimestamps.sort((a, b) => b.lastModified - a.lastModified);
+
+    sendJson(res, 200, {
+      success: true,
+      filename,
+      sections: sectionsWithTimestamps.map(s => s.title)
+    });
+  } catch (error) {
+    if (error.message === 'File not found') {
+      return sendError(res, 404, 'File not found');
+    }
+    log('error', `Error loading sections from ${filename}:`, error);
+    sendError(res, 500, 'Failed to load sections', error.message);
+  }
+}
+
+async function insertAtSectionEnd(safePath, sectionTitle, content) {
+  const fileContent = await fs.readFile(safePath, 'utf8');
+  const lines = fileContent.split('\n');
+  const sections = extractSections(fileContent);
+
+  // Find the target section
+  const sectionIndex = sections.findIndex(s => s.title === sectionTitle);
+  if (sectionIndex === -1) {
+    throw new Error(`Section "${sectionTitle}" not found`);
+  }
+
+  const currentSection = sections[sectionIndex];
+  const nextSection = sections[sectionIndex + 1];
+
+  // Determine insert position
+  let insertLineNumber;
+  if (nextSection) {
+    // Insert before the next section
+    insertLineNumber = nextSection.lineNumber;
+  } else {
+    // This is the last section, insert at end of file
+    insertLineNumber = lines.length;
+  }
+
+  // Find the last non-empty line before insert position
+  let actualInsertLine = insertLineNumber;
+  for (let i = insertLineNumber - 1; i > currentSection.lineNumber; i--) {
+    if (lines[i].trim() !== '') {
+      actualInsertLine = i + 1;
+      break;
+    }
+  }
+
+  // Insert the content with proper spacing
+  const beforeContent = lines.slice(0, actualInsertLine).join('\n');
+  const afterContent = lines.slice(actualInsertLine).join('\n');
+
+  // Ensure proper spacing: add newlines before and after the note
+  const spacing = beforeContent.endsWith('\n\n') ? '' : '\n';
+  const updatedContent = beforeContent + spacing + '\n' + content + '\n' + afterContent;
+
+  await fs.writeFile(safePath, updatedContent, 'utf8');
 }
 
 async function handleGetNote(req, res, noteId) {
@@ -547,6 +688,14 @@ const routes = [
     handler: (req, res, pathname) => {
       const filename = decodeURIComponent(pathname.split('/api/notes/')[1]);
       return handleGetNotes(req, res, filename);
+    }
+  },
+  {
+    method: 'GET',
+    pattern: '/api/sections/',
+    handler: (req, res, pathname) => {
+      const filename = decodeURIComponent(pathname.split('/api/sections/')[1]);
+      return handleGetSections(req, res, filename);
     }
   },
   {

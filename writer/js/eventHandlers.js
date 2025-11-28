@@ -17,11 +17,23 @@ import {
   loadFiles
 } from './noteManager.js';
 import { handleKeyboardShortcuts } from './keyboardShortcuts.js';
+import { loadSections } from './sectionManager.js';
 
 // Handle chapter selection change
 export async function handleFileSelectChange(e) {
   const select = e.target;
+  const sectionSelect = document.getElementById('section-select');
+
   await loadNotesForChapter(select.value);
+
+  // Load sections for the selected chapter
+  if (select.value) {
+    await loadSections(select.value);
+    sectionSelect.disabled = false;
+  } else {
+    sectionSelect.disabled = true;
+    sectionSelect.innerHTML = '<option value="">Sections...</option>';
+  }
 
   // Clear content and reset to append mode when changing chapters
   const contentArea = document.getElementById('contentArea');
@@ -33,6 +45,16 @@ export async function handleFileSelectChange(e) {
   referenceArea.style.color = '';
   autoResize(contentArea);
   autoResize(referenceArea);
+}
+
+// Handle section selection change
+export function handleSectionSelectChange(e) {
+  const section = e.target.value;
+  EditorState.currentSection = section || null;
+
+  // Refresh the note dropdown to show only notes from the selected section
+  const noteIdInput = document.getElementById('noteIdSelect');
+  filterNotes(noteIdInput.value || '');
 }
 
 // Handle note selection change (UI state only, not loading)
@@ -208,6 +230,7 @@ export function initializeEventHandlers() {
 
   // File and note selection events
   document.getElementById('fileSelect').addEventListener('change', handleFileSelectChange);
+  document.getElementById('section-select').addEventListener('change', handleSectionSelectChange);
   document.getElementById('noteIdSelect').addEventListener('change', handleNoteIdSelectChange);
   document.getElementById('noteIdSelect').addEventListener('input', handleNoteIdInput);
   document.getElementById('noteIdSelect').addEventListener('focus', handleNoteIdFocus);

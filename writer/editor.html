@@ -20,14 +20,23 @@
   <header class="fixed top-0 left-0 right-0 backdrop-blur-md z-10" style="background-color: rgba(250, 249, 245, 0.95);">
     <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-4">
-        <select 
-          id="fileSelect" 
-          name="filename" 
+        <select
+          id="fileSelect"
+          name="filename"
           class="text-xs border-none bg-transparent focus:outline-none text-gray-400 hover:text-gray-600 transition-colors appearance-none cursor-pointer"
         >
           <option value="">Chapters...</option>
         </select>
-        
+
+        <select
+          id="section-select"
+          name="section"
+          class="text-xs border-none bg-transparent focus:outline-none text-gray-400 hover:text-gray-600 transition-colors appearance-none cursor-pointer"
+          disabled
+        >
+          <option value="">Section</option>
+        </select>
+
         <div class="relative">
           <input 
             id="noteIdSelect" 
@@ -114,6 +123,7 @@
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">] , I</span><span>Focus Quotes Area</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">e</span><span>Focus Note ID</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">c</span><span>Focus Chapters (then Space)</span></div>
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">s</span><span>Focus Sections (then Space)</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">Esc</span><span>Blur Field / Close Search</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + Enter</span><span>Save & Clear</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + S</span><span>Save & Stay</span></div>
@@ -154,6 +164,7 @@
     import { loadFiles } from './js/noteManager.js';
     import { initializeEventHandlers } from './js/eventHandlers.js';
     import { initializeSearchModal } from './js/searchNotes.js';
+    import { loadSections } from './js/sectionManager.js';
 
     // Apply saved theme and quotes area state immediately before showing page
     const savedTheme = localStorage.getItem('editor-theme');
@@ -186,7 +197,7 @@
 
         // Force window size after page loads
         setTimeout(() => {
-          window.resizeTo(450, 720);
+          window.resizeTo(510, 720);
           //window.moveTo(1200, -900);
         }, 100);
 

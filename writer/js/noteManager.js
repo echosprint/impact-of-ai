@@ -3,6 +3,7 @@ import { TextUtils } from './textUtils.js';
 import { UIFeedback } from './uiFeedback.js';
 import { EditorState } from './editorState.js';
 import { autoResize, updateSourceIndicator, updateCharacterCounter, clearEditorAndReset } from './textareaManager.js';
+import { getCurrentSection } from './sectionManager.js';
 
 // Load available files
 export async function loadFiles() {
@@ -20,10 +21,23 @@ export async function loadFiles() {
       select.appendChild(option);
     });
 
-    // Auto-select the most recently modified file
+    // Auto-select the most recently modified file and trigger section loading
     if (data.lastModified) {
       select.value = data.lastModified;
       await loadNotesForChapter(data.lastModified);
+
+      // Import and trigger section loading
+      const { loadSections } = await import('./sectionManager.js');
+      const sections = await loadSections(data.lastModified);
+
+      // Enable section dropdown and auto-select first section
+      const sectionSelect = document.getElementById('section-select');
+      sectionSelect.disabled = false;
+
+      if (sections && sections.length > 0) {
+        sectionSelect.value = sections[0];
+        EditorState.currentSection = sections[0];
+      }
     }
   } catch (error) {
     await UIFeedback.showMessage('Failed to load files', 'error');
@@ -128,6 +142,9 @@ export async function handleFormSubmit(e) {
     currentNoteId = noteId;
   }
 
+  // Get current timestamp in ISO format
+  const timestamp = new Date().toISOString();
+
   // Format as Note component with smart source detection (same logic for both modes)
   let finalContent;
   if (finalReference.trim()) {
@@ -144,19 +161,19 @@ export async function handleFormSubmit(e) {
       EditorState.updateLastSource(source);
 
       if (referenceContent) {
-        finalContent = `<Note id="${currentNoteId}">\n${content.trim()}\n///\n${referenceContent}\n///\n${source}\n</Note>`;
+        finalContent = `<Note id="${currentNoteId}" time="${timestamp}">\n${content.trim()}\n///\n${referenceContent}\n///\n${source}\n</Note>`;
       } else {
         // Only source, no reference content
-        finalContent = `<Note id="${currentNoteId}">\n${content.trim()}\n///\n\n///\n${source}\n</Note>`;
+        finalContent = `<Note id="${currentNoteId}" time="${timestamp}">\n${content.trim()}\n///\n\n///\n${source}\n</Note>`;
       }
     } else {
       // Case 2: No source detected, has reference text - use fallback or [Null]
       const fallbackSource = EditorState.lastUsedSource || 'Source: [Null]';
-      finalContent = `<Note id="${currentNoteId}">\n${content.trim()}\n///\n${finalReference.trim()}\n///\n${fallbackSource}\n</Note>`;
+      finalContent = `<Note id="${currentNoteId}" time="${timestamp}">\n${content.trim()}\n///\n${finalReference.trim()}\n///\n${fallbackSource}\n</Note>`;
     }
   } else {
     // Case 3: No reference text - don't add source section
-    finalContent = `<Note id="${currentNoteId}">\n${content.trim()}\n</Note>`;
+    finalContent = `<Note id="${currentNoteId}" time="${timestamp}">\n${content.trim()}\n</Note>`;
   }
 
   // Disable submit button temporarily
@@ -182,12 +199,17 @@ export async function handleFormSubmit(e) {
       });
     } else {
       // Append new note
+      const section = getCurrentSection();
       response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.append}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ filename, content: finalContent })
+        body: JSON.stringify({
+          filename,
+          content: finalContent,
+          section: section || undefined
+        })
       });
     }
 
@@ -281,6 +303,7 @@ export async function loadNotesForChapter(filename) {
       EditorState.allNotes = data.notes.map(note => ({
         id: note.id,
         preview: note.preview,
+        section: note.section,
         text: note.preview ? `#${note.id} - ${note.preview}` : `#${note.id}`
       }));
       noteIdSelect.disabled = false;
@@ -368,9 +391,12 @@ export function filterNotes(searchTerm) {
     return;
   }
 
+  // Get currently selected section
+  const currentSection = getCurrentSection();
+
   let filtered;
   if (!searchTerm.trim()) {
-    // Show all notes when no search term
+    // Show all notes when no search term, but filter by section
     filtered = EditorState.allNotes;
   } else {
     // Clean search term (remove # if present)
@@ -381,6 +407,11 @@ export function filterNotes(searchTerm) {
       note.id.toLowerCase().includes(cleanSearchTerm) ||
       (note.preview && note.preview.toLowerCase().includes(cleanSearchTerm))
     );
+  }
+
+  // Further filter by selected section if one is selected
+  if (currentSection) {
+    filtered = filtered.filter(note => note.section === currentSection);
   }
 
   if (filtered.length === 0) {
