@@ -306,21 +306,20 @@ export async function loadNotesForChapter(filename) {
         section: note.section,
         text: note.preview ? `#${note.id} - ${note.preview}` : `#${note.id}`
       }));
-      noteIdSelect.disabled = false;
-      noteIdSelect.placeholder = 'Note';
     } else {
       EditorState.allNotes = [];
-      noteIdSelect.disabled = true;
-      noteIdSelect.placeholder = 'No notes found';
     }
 
+    // Always keep note field enabled
+    noteIdSelect.disabled = false;
+    noteIdSelect.placeholder = 'Note';
     noteIdSelect.value = '';
     dropdown.classList.add('hidden');
   } catch (error) {
     console.error('Failed to load notes for chapter:', error);
     EditorState.allNotes = [];
-    noteIdSelect.disabled = true;
-    noteIdSelect.placeholder = 'Error loading notes';
+    noteIdSelect.disabled = false;
+    noteIdSelect.placeholder = 'Note';
     dropdown.classList.add('hidden');
   }
 }

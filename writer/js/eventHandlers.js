@@ -28,8 +28,15 @@ export async function handleFileSelectChange(e) {
 
   // Load sections for the selected chapter
   if (select.value) {
-    await loadSections(select.value);
+    const sections = await loadSections(select.value);
     sectionSelect.disabled = false;
+
+    // Auto-select the first section (most recently modified)
+    if (sections && sections.length > 0) {
+      sectionSelect.value = sections[0];
+      EditorState.currentSection = sections[0];
+      // Note: filterNotes will automatically use currentSection when user focuses on note field
+    }
   } else {
     sectionSelect.disabled = true;
     sectionSelect.innerHTML = '<option value="">Sections...</option>';
@@ -38,11 +45,17 @@ export async function handleFileSelectChange(e) {
   // Clear content and reset to append mode when changing chapters
   const contentArea = document.getElementById('contentArea');
   const referenceArea = document.getElementById('referenceArea');
+  const noteIdInput = document.getElementById('noteIdSelect');
+  const noteIdDropdown = document.getElementById('noteIdDropdown');
+
   contentArea.value = '';
   referenceArea.value = '';
   referenceArea.disabled = false;
   referenceArea.style.backgroundColor = '#fefcf8';
   referenceArea.style.color = '';
+  noteIdInput.value = '';
+  noteIdDropdown.classList.add('hidden');
+
   autoResize(contentArea);
   autoResize(referenceArea);
 }
