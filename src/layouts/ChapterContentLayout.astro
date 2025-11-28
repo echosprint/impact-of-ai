@@ -24,14 +24,14 @@ let readingTime = 0;
 try {
   // Get the chapter entry from the content collection
   chapterData = await getEntry('chapters', targetChapter);
-  
+
   if (chapterData) {
     title = chapterData.data.title;
-    
+
     // Calculate word count and reading time from the raw content
     wordCount = calculateWordCount(chapterData.body);
     readingTime = calculateReadingTime(wordCount);
-    
+
     // Render the MDX content with components available
     const rendered = await render(chapterData);
     Content = rendered.Content;
@@ -112,26 +112,24 @@ try {
   }
   
   .book-content :global(h2) {
-    font-size: 2rem;
-    font-weight: 700;
+    font-size: 1.75rem;
+    font-weight: 600;
     color: #0f172a;
-    margin-top: 4.5rem;
-    margin-bottom: 3rem;
+    margin-top: 2.5rem;
+    margin-bottom: 1.25rem;
     line-height: 1.2;
     letter-spacing: -0.03em;
-    padding-bottom: 1.5rem;
+    padding-bottom: 0;
     position: relative;
   }
-  
-  .book-content :global(h2)::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    height: 1px;
-    background: rgba(51, 65, 85, 0.25);
-    border: none;
+
+  .book-content :global(h2) :global(.section-number) {
+    font-size: 1.4rem !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+    font-family: 'Inter', 'Noto Serif SC', 'SimSun', 'Helvetica Neue', sans-serif !important;
+    letter-spacing: -0.03em !important;
+    margin-right: 0.5rem !important;
   }
   
   .book-content :global(h3) {
@@ -284,9 +282,13 @@ try {
     }
     
     .book-content :global(h2) {
-      font-size: 1.625rem;
-      margin-top: 3.5rem;
-      margin-bottom: 2rem;
+      font-size: 1.5rem;
+      margin-top: 2.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .book-content :global(h2 .section-number) {
+      font-size: 1.2rem;
     }
     
     .book-content :global(h3) {
