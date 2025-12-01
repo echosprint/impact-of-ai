@@ -25,13 +25,13 @@ const { slug } = Astro.params;
 let chapter = slug;
 
 // Handle special cases if needed
-if (slug === 'preface') {
-  chapter = 'preface';
+if (slug === '前言') {
+  chapter = '前言';
 } else if (slug?.startsWith('chapter-')) {
   chapter = slug;
 } else {
-  // Default fallback
-  chapter = 'preface';
+  // Default fallback - use the slug as-is
+  chapter = slug;
 }
 ---
 
