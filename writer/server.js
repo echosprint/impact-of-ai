@@ -214,21 +214,41 @@ async function handleGetFiles(req, res) {
   try {
     const files = await fs.readdir(CHAPTERS_DIR);
     const mdFiles = files.filter(file => file.endsWith('.md') || file.endsWith('.mdx'));
-    
-    // Get file stats and sort by modification time
-    const filesWithStats = await Promise.all(
+
+    // Get file stats and extract chapter number from frontmatter
+    const filesWithChapters = await Promise.all(
       mdFiles.map(async (file) => {
         const filePath = join(CHAPTERS_DIR, file);
+        const content = await fs.readFile(filePath, 'utf8');
         const stats = await fs.stat(filePath);
-        return { name: file, mtime: stats.mtime.getTime() };
+
+        // Extract chapter number from frontmatter
+        let chapterNumber = 999; // Default for files without chapter number
+        const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
+        if (frontmatterMatch) {
+          const chapterMatch = frontmatterMatch[1].match(/^chapter:\s*(\d+)/m);
+          if (chapterMatch) {
+            chapterNumber = parseInt(chapterMatch[1], 10);
+          }
+        }
+
+        return {
+          name: file,
+          chapterNumber,
+          mtime: stats.mtime.getTime()
+        };
       })
     );
-    
-    filesWithStats.sort((a, b) => b.mtime - a.mtime);
-    
+
+    // Sort by chapter number (ascending)
+    filesWithChapters.sort((a, b) => a.chapterNumber - b.chapterNumber);
+
+    // Find most recently modified file for default selection
+    const mostRecent = [...filesWithChapters].sort((a, b) => b.mtime - a.mtime)[0];
+
     sendJson(res, 200, {
-      files: filesWithStats.map(f => f.name),
-      lastModified: filesWithStats.length > 0 ? filesWithStats[0].name : null
+      files: filesWithChapters.map(f => f.name),
+      lastModified: mostRecent ? mostRecent.name : null
     });
   } catch (error) {
     log('error', 'Error reading chapters directory:', error);
@@ -475,40 +495,13 @@ async function handleGetSections(req, res, filename) {
     const safePath = await validateFile(filename);
     const content = await fs.readFile(safePath, 'utf8');
     const sections = extractSections(content);
-    const lines = content.split('\n');
 
-    // For each section, find the most recent note timestamp
-    const sectionsWithTimestamps = sections.map((section, index) => {
-      const sectionStartLine = section.lineNumber;
-      const nextSection = sections[index + 1];
-      const sectionEndLine = nextSection ? nextSection.lineNumber : lines.length;
-
-      // Extract notes in this section
-      const sectionContent = lines.slice(sectionStartLine, sectionEndLine).join('\n');
-      const noteRegex = /<Note[^>]*time="([^"]+)"[^>]*>/g;
-      let mostRecentTime = null;
-      let match;
-
-      while ((match = noteRegex.exec(sectionContent)) !== null) {
-        const noteTime = new Date(match[1]);
-        if (!mostRecentTime || noteTime > mostRecentTime) {
-          mostRecentTime = noteTime;
-        }
-      }
-
-      return {
-        title: section.title,
-        lastModified: mostRecentTime ? mostRecentTime.getTime() : 0
-      };
-    });
-
-    // Sort sections by most recent note (descending)
-    sectionsWithTimestamps.sort((a, b) => b.lastModified - a.lastModified);
-
+    // Sections are already in file order by lineNumber from extractSections
+    // No need to sort - maintain the order they appear in the markdown file
     sendJson(res, 200, {
       success: true,
       filename,
-      sections: sectionsWithTimestamps.map(s => s.title)
+      sections: sections.map(s => s.title)
     });
   } catch (error) {
     if (error.message === 'File not found') {
