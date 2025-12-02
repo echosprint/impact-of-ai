@@ -14,10 +14,11 @@ export async function loadFiles() {
     const select = document.getElementById('fileSelect');
     select.innerHTML = '<option value="">Chapters...</option>';
 
-    data.files.forEach((file) => {
+    data.files.forEach((fileData) => {
       const option = document.createElement('option');
-      option.value = file;
-      option.textContent = file.replace(/\.(md|mdx)$/, '');
+      const fileName = fileData.name || fileData; // Handle both object and string format
+      option.value = fileName;
+      option.textContent = fileName.replace(/\.(md|mdx)$/, '');
       select.appendChild(option);
     });
 

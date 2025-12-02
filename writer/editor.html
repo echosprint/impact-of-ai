@@ -122,8 +122,8 @@
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">i</span><span>Focus Note Content</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">] , I</span><span>Focus Quotes Area</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">e</span><span>Focus Note ID</span></div>
-        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">c</span><span>Focus Chapters (then Space)</span></div>
-        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">s</span><span>Focus Sections (then Space)</span></div>
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">c</span><span>Focus Chapters</span></div>
+        <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">Space</span><span>Quick Chapter/Section Nav</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">Esc</span><span>Blur Field / Close Search</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + Enter</span><span>Save & Clear</span></div>
         <div class="flex justify-between"><span class="modal-shortcuts" style="color: #a8a29e;">⌘/Ctrl + S</span><span>Save & Stay</span></div>
@@ -160,10 +160,24 @@
     </div>
   </div>
 
+  <!-- Chapter/Section Navigation Modal -->
+  <div id="navModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 opacity-0 pointer-events-none transition-all duration-300">
+    <div class="rounded-xl shadow-2xl w-full mx-4 p-3 modal-bg" style="background-color: #f5f4f0;">
+      <!-- Navigation Title -->
+      <div id="navTitle" class="text-stone-700">
+      </div>
+
+      <!-- Navigation Content -->
+      <div id="navContent">
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { loadFiles } from './js/noteManager.js';
     import { initializeEventHandlers } from './js/eventHandlers.js';
     import { initializeSearchModal } from './js/searchNotes.js';
+    import { initializeNavModal } from './js/chapterSectionNav.js';
     import { loadSections } from './js/sectionManager.js';
 
     // Apply saved theme and quotes area state immediately before showing page
@@ -194,6 +208,9 @@
 
         // Initialize search modal
         initializeSearchModal();
+
+        // Initialize navigation modal
+        initializeNavModal();
 
         // Force window size after page loads
         setTimeout(() => {

@@ -215,26 +215,32 @@ async function handleGetFiles(req, res) {
     const files = await fs.readdir(CHAPTERS_DIR);
     const mdFiles = files.filter(file => file.endsWith('.md') || file.endsWith('.mdx'));
 
-    // Get file stats and extract chapter number from frontmatter
+    // Get file stats and extract chapter number and shortcut from frontmatter
     const filesWithChapters = await Promise.all(
       mdFiles.map(async (file) => {
         const filePath = join(CHAPTERS_DIR, file);
         const content = await fs.readFile(filePath, 'utf8');
         const stats = await fs.stat(filePath);
 
-        // Extract chapter number from frontmatter
+        // Extract chapter number and shortcut from frontmatter
         let chapterNumber = 999; // Default for files without chapter number
+        let shortcut = null;
         const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
         if (frontmatterMatch) {
           const chapterMatch = frontmatterMatch[1].match(/^chapter:\s*(\d+)/m);
           if (chapterMatch) {
             chapterNumber = parseInt(chapterMatch[1], 10);
           }
+          const shortcutMatch = frontmatterMatch[1].match(/^shortcut:\s*([a-z])/m);
+          if (shortcutMatch) {
+            shortcut = shortcutMatch[1];
+          }
         }
 
         return {
           name: file,
           chapterNumber,
+          shortcut,
           mtime: stats.mtime.getTime()
         };
       })
@@ -247,7 +253,7 @@ async function handleGetFiles(req, res) {
     const mostRecent = [...filesWithChapters].sort((a, b) => b.mtime - a.mtime)[0];
 
     sendJson(res, 200, {
-      files: filesWithChapters.map(f => f.name),
+      files: filesWithChapters.map(f => ({ name: f.name, shortcut: f.shortcut })),
       lastModified: mostRecent ? mostRecent.name : null
     });
   } catch (error) {

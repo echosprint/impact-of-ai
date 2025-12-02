@@ -3,6 +3,7 @@ import { clearEditorAndReset } from './textareaManager.js';
 import { loadMostRecentNote } from './noteManager.js';
 import { toggleDarkTheme, toggleQuotesArea } from './themeManager.js';
 import { showSearchModal, hideSearchModal, SearchState } from './searchNotes.js';
+import { showNavModal, hideNavModal, NavState, handleNavKeypress } from './chapterSectionNav.js';
 
 // Handle keyboard shortcuts
 export async function handleKeyboardShortcuts(e) {
@@ -103,10 +104,26 @@ export async function handleKeyboardShortcuts(e) {
     return;
   }
 
+  // If navigation modal is open, handle keys specially
+  if (NavState.isNavModalOpen) {
+    const handled = handleNavKeypress(e.key);
+    if (handled) {
+      e.preventDefault();
+      return;
+    }
+  }
+
   // Forward slash (/) to show search modal
   if (e.key === '/' && !isTyping) {
     e.preventDefault();
     showSearchModal();
+    return;
+  }
+
+  // Space key to show chapter/section navigation modal
+  if (e.key === ' ' && !isTyping && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    showNavModal();
     return;
   }
 

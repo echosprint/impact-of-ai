@@ -110,6 +110,83 @@ body {
   overscroll-behavior: contain;
 }
 
+/* Chapter/Section Navigation Modal */
+.nav-item {
+  background-color: #fefcf8;
+  border: 1px solid #d6d3ce;
+  color: #57534e;
+  padding: 0.5rem 0.75rem;
+}
+.nav-item:hover {
+  background-color: #f5f4f0;
+  border-color: #a8a29e;
+}
+.nav-shortcut {
+  background-color: #e7e5e4;
+  color: #57534e;
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  font-weight: 600;
+  border: 1px solid #d6d3ce;
+  font-size: 0.75rem;
+  min-width: 1.5rem;
+  text-align: center;
+}
+.nav-back-btn {
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.dark-theme .nav-item {
+  background-color: #1f1f1f;
+  border-color: #404040;
+  color: #e5e5e5;
+}
+.dark-theme .nav-item:hover {
+  background-color: #2a2a2a;
+  border-color: #606060;
+}
+.dark-theme .nav-shortcut {
+  background-color: #2a2a2a;
+  color: #e5e5e5;
+  border-color: #404040;
+}
+.dark-theme #navTitle {
+  color: #e5e5e5 !important;
+}
+.dark-theme .nav-back-btn {
+  color: #a8a29e !important;
+}
+.dark-theme .nav-back-btn:hover {
+  color: #e5e5e5 !important;
+}
+#navModal .modal-bg {
+  max-width: 42rem;
+  max-height: 90vh;
+}
+#navContent {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.375rem;
+  overflow-y: auto;
+  max-height: calc(90vh - 6rem);
+}
+#navTitle {
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+.nav-chapter-header {
+  grid-column: span 2;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #78716c;
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+  padding-left: 0.25rem;
+}
+.dark-theme .nav-chapter-header {
+  color: #a8a29e;
+}
+
 /* Note ID dropdown scroll isolation */
 #noteIdDropdown {
   overscroll-behavior: contain;
