@@ -98,6 +98,9 @@ export async function handleKeyboardShortcuts(e) {
       hideShortcutHelper();
     } else if (SearchState.isSearchModalOpen) {
       hideSearchModal();
+    } else if (NavState.isNavModalOpen) {
+      // Ensure Escape closes the chapter/section navigation modal
+      hideNavModal();
     } else if (isTyping) {
       activeElement.blur();
     }

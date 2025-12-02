@@ -261,12 +261,13 @@ function displaySections() {
   contentElement.querySelectorAll('.nav-item').forEach(element => {
     element.addEventListener('click', () => {
       const section = element.getAttribute('data-section');
+      // Select section without moving focus to content area
       selectSection(section);
     });
   });
 }
 
-// Select a section and apply to dropdowns
+// Select a section and apply to dropdowns (no auto-focus on content area)
 async function selectSection(section) {
   // Get the chapter for this section
   const chapter = NavState.sectionChapterMap[section];
@@ -292,12 +293,6 @@ async function selectSection(section) {
       // Wait a moment for sections to populate, then set section
       setTimeout(() => {
         setCurrentSection(section);
-
-        // Focus the content area so user can start typing
-        const contentArea = document.getElementById('contentArea');
-        if (contentArea) {
-          contentArea.focus();
-        }
       }, 200);
     }
   } catch (error) {
@@ -339,6 +334,7 @@ export function handleNavKeypress(key) {
       const shortcut = item.getAttribute('data-shortcut');
       if (shortcut === keyLower) {
         const section = item.getAttribute('data-section');
+        // Keyboard shortcut selection: select section without focusing content area
         selectSection(section);
         return true;
       }
