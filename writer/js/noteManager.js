@@ -3,7 +3,7 @@ import { TextUtils } from './textUtils.js';
 import { UIFeedback } from './uiFeedback.js';
 import { EditorState } from './editorState.js';
 import { autoResize, updateSourceIndicator, updateCharacterCounter, clearEditorAndReset } from './textareaManager.js';
-import { getCurrentSection } from './sectionManager.js';
+import { getCurrentSection, setCurrentSection, loadSections } from './sectionManager.js';
 
 // Load available files
 export async function loadFiles() {
@@ -27,8 +27,7 @@ export async function loadFiles() {
       select.value = data.lastModified;
       await loadNotesForChapter(data.lastModified);
 
-      // Import and trigger section loading
-      const { loadSections } = await import('./sectionManager.js');
+      // Trigger section loading
       const sections = await loadSections(data.lastModified);
 
       // Enable section dropdown and auto-select first section
@@ -217,6 +216,10 @@ export async function handleFormSubmit(e) {
     const result = await response.json();
 
     if (result.success) {
+      // Preserve current chapter and section selection
+      const prevFilename = filename;
+      const prevSection = getCurrentSection();
+
       if (isEditMode) {
         await UIFeedback.showMessage(`Note #${currentNoteId} updated successfully`, 'success');
         if (shouldClear) {
@@ -229,11 +232,20 @@ export async function handleFormSubmit(e) {
         }
       }
 
-      // Refresh chapters and notes after successful commit
+      // Refresh chapters and notes after successful commit while restoring selection
       await loadFiles();
+
       const fileSelect = document.getElementById('fileSelect');
-      if (fileSelect.value) {
-        await loadNotesForChapter(fileSelect.value);
+      if (prevFilename) {
+        // Restore chapter selection and load its notes/sections
+        fileSelect.value = prevFilename;
+        await loadNotesForChapter(prevFilename);
+        await loadSections(prevFilename);
+      }
+
+      // Restore previous section selection if any
+      if (prevSection) {
+        setCurrentSection(prevSection);
       }
 
       // Handle note ID management based on clear behavior
