@@ -120,7 +120,7 @@ function extractSections(content) {
 }
 
 function extractNotes(content) {
-  const noteRegex = /<Note id="([^"]+)"[^>]*>([\s\S]*?)<\/Note>/g;
+  const noteRegex = /<Note id="([^"]+)"(?:\s+time="([^"]*)")?[^>]*>([\s\S]*?)<\/Note>/g;
   const notes = [];
   const sections = extractSections(content);
   const lines = content.split('\n');
@@ -128,7 +128,8 @@ function extractNotes(content) {
 
   while ((match = noteRegex.exec(content)) !== null) {
     const noteId = match[1];
-    const noteContent = match[2].trim();
+    const noteTime = match[2] || null; // Extract time attribute (may be null for old notes)
+    const noteContent = match[3].trim();
 
     // Find which line the note starts on
     const notePosition = match.index;
@@ -149,7 +150,7 @@ function extractNotes(content) {
     const firstLine = contentLines.length > 0 ? contentLines[0].trim() : '';
     const preview = firstLine.length > 22 ? firstLine.substring(0, 22) + '..' : firstLine;
 
-    notes.push({ id: noteId, preview, section });
+    notes.push({ id: noteId, preview, section, time: noteTime });
   }
 
   return notes;
@@ -496,6 +497,39 @@ async function handleGetNotes(req, res, filename) {
   }
 }
 
+async function handleGetAllNotes(req, res) {
+  try {
+    const files = await fs.readdir(CHAPTERS_DIR);
+    const mdFiles = files.filter(file => file.endsWith('.md') || file.endsWith('.mdx'));
+
+    const allNotes = [];
+
+    // Collect all notes from all chapters
+    for (const file of mdFiles) {
+      try {
+        const filePath = join(CHAPTERS_DIR, file);
+        const content = await fs.readFile(filePath, 'utf8');
+        const notes = extractNotes(content);
+
+        // Add filename to each note
+        notes.forEach(note => {
+          allNotes.push({
+            ...note,
+            filename: file
+          });
+        });
+      } catch (error) {
+        console.warn(`Failed to extract notes from ${file}:`, error);
+      }
+    }
+
+    sendJson(res, 200, { success: true, notes: allNotes });
+  } catch (error) {
+    log('error', 'Error loading all notes:', error);
+    sendError(res, 500, 'Failed to load all notes', error.message);
+  }
+}
+
 async function handleGetSections(req, res, filename) {
   try {
     const safePath = await validateFile(filename);
@@ -678,6 +712,7 @@ const routes = [
   { method: 'GET', pattern: '/styles.css', handler: handleCss },
   { method: 'GET', pattern: '/js/', handler: handleJs },
   { method: 'GET', pattern: '/api/files', handler: handleGetFiles },
+  { method: 'GET', pattern: '/api/all-notes', handler: handleGetAllNotes },
   { method: 'GET', pattern: '/api/search', handler: handleSearch },
   { method: 'POST', pattern: '/api/append', handler: handleAppendContent },
   { method: 'POST', pattern: '/api/warm-cache', handler: handleWarmCache },

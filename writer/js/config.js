@@ -7,6 +7,7 @@ export const API_CONFIG = {
     updateNote: (id) => `/api/note/${id}`,
     append: '/api/append',
     files: '/api/files',
+    allNotes: '/api/all-notes',
     search: (query) => `/api/search?q=${encodeURIComponent(query)}`
   }
 };

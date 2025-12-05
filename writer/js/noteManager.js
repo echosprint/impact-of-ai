@@ -373,25 +373,56 @@ export async function loadNoteById(noteId) {
   }
 }
 
-// Load most recent note using existing allNotes array
+// Load most recent note across all chapters by checking time field
 export async function loadMostRecentNote() {
-  const fileSelect = document.getElementById('fileSelect');
+  try {
+    // Fetch all notes from all chapters
+    const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.allNotes}`);
+    const data = await response.json();
 
-  if (!fileSelect.value) {
-    await UIFeedback.showMessage('Please select a chapter first', 'info');
-    return;
+    if (!data.success || !data.notes || data.notes.length === 0) {
+      await UIFeedback.showMessage('No notes found in any chapter', 'info');
+      return;
+    }
+
+    // Filter notes that have a time field and sort by time (most recent first)
+    const notesWithTime = data.notes.filter(note => note.time);
+
+    if (notesWithTime.length === 0) {
+      await UIFeedback.showMessage('No notes with timestamps found', 'info');
+      return;
+    }
+
+    // Sort by time in descending order (most recent first)
+    notesWithTime.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+    // Get the most recent note
+    const mostRecentNote = notesWithTime[0];
+
+    // Switch to the chapter containing this note
+    const fileSelect = document.getElementById('fileSelect');
+    fileSelect.value = mostRecentNote.filename;
+
+    // Load notes and sections for this chapter
+    await loadNotesForChapter(mostRecentNote.filename);
+    await loadSections(mostRecentNote.filename);
+
+    // Set the section dropdown before loading the note
+    if (mostRecentNote.section) {
+      const sectionSelect = document.getElementById('section-select');
+      if (sectionSelect) {
+        sectionSelect.value = mostRecentNote.section;
+        setCurrentSection(mostRecentNote.section);
+      }
+    }
+
+    // Load the note itself
+    await selectNote(mostRecentNote.id);
+
+  } catch (error) {
+    console.error('Error loading most recent note:', error);
+    await UIFeedback.showMessage('Failed to load most recent note', 'error');
   }
-
-  if (EditorState.allNotes.length === 0) {
-    await UIFeedback.showMessage('No notes found in current chapter', 'info');
-    return;
-  }
-
-  // Get the last note (most recent)
-  const mostRecentNote = EditorState.allNotes[EditorState.allNotes.length - 1];
-
-  // Use existing selectNote function to load the note
-  await selectNote(mostRecentNote.id);
 }
 
 // Filter and display notes based on search input
