@@ -26,14 +26,14 @@ const { reference, noteId } = Astro.props;
     </div>
     
     <!-- Scrollable content area -->
-    <div class="reference-content overflow-y-auto px-3 py-3" style="max-height: calc(70vh - 80px);">
-      <div class="text-gray-700 text-xs leading-relaxed mb-3">
-        <div set:html={formatReferenceContent(reference.text)}></div>
+    <div class="reference-content overflow-y-auto px-3 py-3" style="max-height: calc(70vh - 80px); overflow-x: hidden;">
+      <div class="text-gray-700 text-xs leading-relaxed mb-3" style="word-break: break-word; overflow-wrap: break-word;">
+        <div style="word-break: break-word; overflow-wrap: break-word;" set:html={formatReferenceContent(reference.text)}></div>
       </div>
       
       {reference.source && !reference.source.endsWith('[Null]') && (
-        <div class="text-xs text-amber-700 pt-2 border-t border-amber-200/50 sticky bottom-0 bg-amber-50/95 backdrop-blur-sm mt-3">
-          <div class="py-1" set:html={processMarkdownLinks(reference.source)}></div>
+        <div class="text-xs text-amber-700 pt-2 border-t border-amber-200/50 sticky bottom-0 bg-amber-50/95 backdrop-blur-sm mt-3" style="overflow-wrap: break-word; word-break: break-word;">
+          <div class="py-1" style="overflow-wrap: break-word; word-break: break-word;" set:html={processMarkdownLinks(reference.source)}></div>
         </div>
       )}
     </div>

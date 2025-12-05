@@ -9,6 +9,17 @@
   scrollbar-color: rgba(139, 69, 19, 0.3) transparent;
 }
 
+/* Force links to wrap and break long URLs */
+.reference-content a,
+.reference-link {
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  white-space: normal !important;
+  hyphens: auto;
+  display: inline;
+  max-width: 100%;
+}
+
 .reference-content::-webkit-scrollbar {
   width: 6px;
 }
