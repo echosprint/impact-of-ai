@@ -186,7 +186,10 @@ export function handleReferenceAreaPaste(e) {
 
   // Get paste data
   const clipboardData = e.clipboardData || window.clipboardData;
-  const pastedData = clipboardData?.getData('Text') || '';
+  let pastedData = clipboardData?.getData('Text') || '';
+
+  // Remove Zotero citations: patterns like ([text](zotero://...))
+  pastedData = pastedData.replace(/ \(\[[^\]]+\]\(zotero:\/\/[^\)]+\)\)/g, '');
 
   // If it's a large paste, handle it specially
   if (pastedData.length > 100) {
