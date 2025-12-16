@@ -191,6 +191,13 @@ export function handleReferenceAreaPaste(e) {
   // Remove Zotero citations: patterns like ([text](zotero://...))
   pastedData = pastedData.replace(/\s*\(\[[^\]]*\]\s*\(zotero:\/\/[^)]+\)\)/g, '');
 
+  // Trim whitespace first
+  pastedData = pastedData.trim();
+
+  // Remove surrounding quotes if text starts with ", ends with ", and has no " in middle
+  // Handles both straight quotes (") and smart quotes ("")
+  pastedData = pastedData.replace(/^["\u201C]([^"\u201C\u201D]+)["\u201D]$/, '$1');
+
   // Always prevent default paste to use our cleaned data
   e.preventDefault();
 
