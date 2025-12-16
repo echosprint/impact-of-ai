@@ -189,23 +189,25 @@ export function handleReferenceAreaPaste(e) {
   let pastedData = clipboardData?.getData('Text') || '';
 
   // Remove Zotero citations: patterns like ([text](zotero://...))
-  pastedData = pastedData.replace(/ \(\[[^\]]+\]\(zotero:\/\/[^\)]+\)\)/g, '');
+  pastedData = pastedData.replace(/\s*\(\[[^\]]*\]\s*\(zotero:\/\/[^)]+\)\)/g, '');
 
-  // If it's a large paste, handle it specially
+  // Always prevent default paste to use our cleaned data
+  e.preventDefault();
+
+  // Get current cursor position
+  const cursorStart = textarea.selectionStart;
+
+  // Insert the cleaned text manually
+  const before = textarea.value.substring(0, cursorStart);
+  const after = textarea.value.substring(textarea.selectionEnd);
+  textarea.value = before + pastedData + after;
+
+  // Set cursor position after pasted text
+  const newCursorPos = cursorStart + pastedData.length;
+  textarea.setSelectionRange(newCursorPos, newCursorPos);
+
+  // For large pastes, use smart scrolling
   if (pastedData.length > 100) {
-    e.preventDefault(); // Prevent default paste behavior
-
-    // Get current cursor position
-    const cursorStart = textarea.selectionStart;
-
-    // Insert the text manually
-    const before = textarea.value.substring(0, cursorStart);
-    const after = textarea.value.substring(textarea.selectionEnd);
-    textarea.value = before + pastedData + after;
-
-    // Set cursor position after pasted text
-    const newCursorPos = cursorStart + pastedData.length;
-
     // Resize without changing scroll position initially
     autoResize(textarea, true);
 
@@ -215,23 +217,17 @@ export function handleReferenceAreaPaste(e) {
     const lineHeight = parseInt(getComputedStyle(textarea).lineHeight) || 22;
     const visibleLines = Math.floor(textarea.clientHeight / lineHeight);
 
-    // Position cursor
-    textarea.setSelectionRange(newCursorPos, newCursorPos);
-
     // Smart scroll: show some context above the cursor
     const targetScrollTop = Math.max(0, (linesBeforeCursor - Math.floor(visibleLines * 0.7)) * lineHeight);
     textarea.scrollTop = targetScrollTop;
-
-    // Update source indicator
-    updateSourceIndicator(textarea.value);
-
-    // Trigger input event for any other listeners
-    textarea.dispatchEvent(new Event('input', { bubbles: true }));
   } else {
-    // For small pastes, use normal handling with slight delay
-    setTimeout(() => {
-      autoResize(textarea, true);
-      updateSourceIndicator(textarea.value);
-    }, 10);
+    // For small pastes, just resize
+    autoResize(textarea, true);
   }
+
+  // Update source indicator
+  updateSourceIndicator(textarea.value);
+
+  // Trigger input event for any other listeners
+  textarea.dispatchEvent(new Event('input', { bubbles: true }));
 }
