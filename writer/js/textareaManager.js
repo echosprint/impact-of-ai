@@ -73,9 +73,13 @@ export function updateSourceIndicator(text) {
     indicator.textContent = '◉';
     indicator.title = 'Source detected - will be auto-split';
 
-    // Hide fallback indicator
-    if (lastSourceIndicator) {
-      lastSourceIndicator.classList.add('hidden');
+    // Show detected source text below reference area
+    if (lastSourceIndicator && lastSourceText) {
+      // Extract the last line as the detected source (Harvard format is on last line)
+      const lines = text.trim().split('\n').filter(line => line.trim());
+      const detectedSource = lines.length > 0 ? lines[lines.length - 1].trim() : '';
+      lastSourceText.textContent = detectedSource;
+      lastSourceIndicator.classList.remove('hidden');
     }
   }
   // Case 2: No source detected, has text, and fallback available (will use last source on submit)
