@@ -1,6 +1,5 @@
 import { EditorState } from './editorState.js';
 import { hideShortcutHelper } from './uiFeedback.js';
-import { autoResize } from './textareaManager.js';
 import {
   handleContentAreaInput,
   handleCompositionStart,
@@ -42,22 +41,17 @@ export async function handleFileSelectChange(e) {
     sectionSelect.innerHTML = '<option value="">Sections...</option>';
   }
 
-  // Clear content and reset to append mode when changing chapters
-  const contentArea = document.getElementById('contentArea');
+  // Reset to append mode when changing chapters (but preserve content)
   const referenceArea = document.getElementById('referenceArea');
   const noteIdInput = document.getElementById('noteIdSelect');
   const noteIdDropdown = document.getElementById('noteIdDropdown');
 
-  contentArea.value = '';
-  referenceArea.value = '';
+  // Reset UI state without clearing content
   referenceArea.disabled = false;
   referenceArea.style.backgroundColor = '#fefcf8';
   referenceArea.style.color = '';
   noteIdInput.value = '';
   noteIdDropdown.classList.add('hidden');
-
-  autoResize(contentArea);
-  autoResize(referenceArea);
 }
 
 // Handle section selection change
