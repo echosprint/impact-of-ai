@@ -118,23 +118,39 @@ function displayChapters() {
   const chaptersHTML = NavState.chapters.map((chapterData, index) => {
     const chapterName = chapterData.name;
     const shortcut = chapterData.shortcut || 'z'; // Fallback to 'z' if no shortcut
+    const chapterNumber = chapterData.chapterNumber;
 
-    // Store mapping of shortcut to chapters (multiple chapters can share one key)
+    // Store mapping of letter shortcut to chapters
     if (!NavState.chapterShortcutMap[shortcut]) {
       NavState.chapterShortcutMap[shortcut] = [];
     }
     NavState.chapterShortcutMap[shortcut].push(chapterName);
 
+    // Also store mapping of chapter number to chapters (if available)
+    if (chapterNumber !== null && chapterNumber !== undefined) {
+      const numKey = chapterNumber.toString();
+      if (!NavState.chapterShortcutMap[numKey]) {
+        NavState.chapterShortcutMap[numKey] = [];
+      }
+      NavState.chapterShortcutMap[numKey].push(chapterName);
+    }
+
     const displayName = chapterName.replace(/\.(md|mdx)$/, '');
+
+    // Show both shortcuts if chapter number is available
+    const shortcutDisplay = chapterNumber !== null && chapterNumber !== undefined
+      ? `<kbd class="nav-shortcut px-1.5 py-0.5 rounded">${chapterNumber}</kbd><kbd class="nav-shortcut px-1.5 py-0.5 rounded ml-1">${shortcut}</kbd>`
+      : `<kbd class="nav-shortcut px-1.5 py-0.5 rounded">${shortcut}</kbd>`;
 
     return `
       <div class="nav-item rounded cursor-pointer transition-colors"
            data-chapter="${chapterName}"
            data-shortcut="${shortcut}"
+           data-chapter-number="${chapterNumber || ''}"
            data-index="${index}">
         <div class="flex items-center justify-between gap-2">
           <div class="flex-1 text-xs truncate">${displayName}</div>
-          <kbd class="nav-shortcut px-1.5 py-0.5 rounded">${shortcut}</kbd>
+          <div class="flex gap-1">${shortcutDisplay}</div>
         </div>
       </div>
     `;

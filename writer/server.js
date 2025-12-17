@@ -254,7 +254,11 @@ async function handleGetFiles(req, res) {
     const mostRecent = [...filesWithChapters].sort((a, b) => b.mtime - a.mtime)[0];
 
     sendJson(res, 200, {
-      files: filesWithChapters.map(f => ({ name: f.name, shortcut: f.shortcut })),
+      files: filesWithChapters.map(f => ({
+        name: f.name,
+        shortcut: f.shortcut,
+        chapterNumber: f.chapterNumber !== 999 ? f.chapterNumber : null
+      })),
       lastModified: mostRecent ? mostRecent.name : null
     });
   } catch (error) {
