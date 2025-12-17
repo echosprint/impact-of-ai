@@ -6,12 +6,12 @@ import { loadNotesForChapter } from './noteManager.js';
 export const NavState = {
   isNavModalOpen: false,
   currentLevel: 'chapters', // 'chapters' or 'sections'
-  chapters: [], // Array of { name, shortcut }
+  chapters: [], // Array of { name, chapterNumber }
   sections: [],
-  selectedChapters: [], // Multiple chapters can share one shortcut
+  selectedChapters: [], // Multiple chapters can share one numeric shortcut
   sectionsByChapter: [], // Sections grouped by chapter: [{chapter, sections}]
-  shortcuts: 'abcdefghijklmnopqrstuvwxyz0123456789',
-  chapterShortcutMap: {}, // Maps shortcut key to array of chapter names
+  shortcuts: '123456789abcdefghijklmnopqrstuvwxyz', // Start from 1-9 for sections, then letters
+  chapterShortcutMap: {}, // Maps numeric shortcut key to array of chapter names
   sectionChapterMap: {} // Maps section to its chapter
 };
 
@@ -117,40 +117,49 @@ function displayChapters() {
 
   const chaptersHTML = NavState.chapters.map((chapterData, index) => {
     const chapterName = chapterData.name;
-    const shortcut = chapterData.shortcut || 'z'; // Fallback to 'z' if no shortcut
     const chapterNumber = chapterData.chapterNumber;
 
-    // Store mapping of letter shortcut to chapters
-    if (!NavState.chapterShortcutMap[shortcut]) {
-      NavState.chapterShortcutMap[shortcut] = [];
-    }
-    NavState.chapterShortcutMap[shortcut].push(chapterName);
-
-    // Also store mapping of chapter number to chapters (if available)
+    // Store mapping for chapter numbers only (no letter shortcuts)
+    // 1-9: Direct number keys
+    // 10-19: Shift+0 through Shift+9
     if (chapterNumber !== null && chapterNumber !== undefined) {
-      const numKey = chapterNumber.toString();
-      if (!NavState.chapterShortcutMap[numKey]) {
-        NavState.chapterShortcutMap[numKey] = [];
+      if (chapterNumber >= 1 && chapterNumber <= 9) {
+        // Single digit: use number key directly
+        const numKey = chapterNumber.toString();
+        if (!NavState.chapterShortcutMap[numKey]) {
+          NavState.chapterShortcutMap[numKey] = [];
+        }
+        NavState.chapterShortcutMap[numKey].push(chapterName);
+      } else if (chapterNumber >= 10 && chapterNumber <= 19) {
+        // 10-19: use Shift+digit (10=Shift+0, 11=Shift+1, etc.)
+        const shiftKey = `shift+${chapterNumber - 10}`;
+        if (!NavState.chapterShortcutMap[shiftKey]) {
+          NavState.chapterShortcutMap[shiftKey] = [];
+        }
+        NavState.chapterShortcutMap[shiftKey].push(chapterName);
       }
-      NavState.chapterShortcutMap[numKey].push(chapterName);
     }
 
     const displayName = chapterName.replace(/\.(md|mdx)$/, '');
 
-    // Show both shortcuts if chapter number is available
-    const shortcutDisplay = chapterNumber !== null && chapterNumber !== undefined
-      ? `<kbd class="nav-shortcut px-1.5 py-0.5 rounded">${chapterNumber}</kbd><kbd class="nav-shortcut px-1.5 py-0.5 rounded ml-1">${shortcut}</kbd>`
-      : `<kbd class="nav-shortcut px-1.5 py-0.5 rounded">${shortcut}</kbd>`;
+    // Build shortcut display based on chapter number (numeric only)
+    let shortcutDisplay = '';
+    if (chapterNumber !== null && chapterNumber !== undefined) {
+      if (chapterNumber >= 1 && chapterNumber <= 9) {
+        shortcutDisplay = `<kbd class="nav-shortcut px-1.5 py-0.5 rounded">${chapterNumber}</kbd>`;
+      } else if (chapterNumber >= 10 && chapterNumber <= 19) {
+        shortcutDisplay = `<kbd class="nav-shortcut px-1.5 py-0.5 rounded">⇧${chapterNumber - 10}</kbd>`;
+      }
+    }
 
     return `
       <div class="nav-item rounded cursor-pointer transition-colors"
            data-chapter="${chapterName}"
-           data-shortcut="${shortcut}"
            data-chapter-number="${chapterNumber || ''}"
            data-index="${index}">
         <div class="flex items-center justify-between gap-2">
           <div class="flex-1 text-xs truncate">${displayName}</div>
-          <div class="flex gap-1">${shortcutDisplay}</div>
+          ${shortcutDisplay ? `<div class="flex gap-1">${shortcutDisplay}</div>` : ''}
         </div>
       </div>
     `;
@@ -304,7 +313,7 @@ async function selectSection(section) {
 
       // Load sections for this chapter
       await loadNotesForChapter(chapter);
-      const sections = await loadSections(chapter);
+      await loadSections(chapter);
 
       // Wait a moment for sections to populate, then set section
       setTimeout(() => {
@@ -317,8 +326,12 @@ async function selectSection(section) {
 }
 
 // Handle keyboard navigation
-export function handleNavKeypress(key) {
+export function handleNavKeypress(event) {
   if (!NavState.isNavModalOpen) return false;
+
+  const key = event.key;
+  const code = event.code;
+  const shiftKey = event.shiftKey;
 
   // Escape to close
   if (key === 'Escape') {
@@ -337,18 +350,36 @@ export function handleNavKeypress(key) {
   const keyLower = key.toLowerCase();
 
   if (NavState.currentLevel === 'chapters') {
+    let lookupKey = keyLower;
+
+    // Check for Shift+number combinations (for chapters 10-19)
+    // Use event.code to get physical key (Digit0-Digit9) regardless of Shift
+    if (shiftKey && code && code.match(/^Digit[0-9]$/)) {
+      const digit = code.replace('Digit', '');
+      lookupKey = `shift+${digit}`;
+    }
+
     // Check if this key maps to any chapters
-    const chapters = NavState.chapterShortcutMap[keyLower];
+    const chapters = NavState.chapterShortcutMap[lookupKey];
     if (chapters && chapters.length > 0) {
       selectChapters(chapters);
       return true;
     }
   } else {
+    // Section level navigation
+    let lookupKey = keyLower;
+
+    // For digits without Shift, use the digit directly
+    if (!shiftKey && code && code.match(/^Digit[0-9]$/)) {
+      const digit = code.replace('Digit', '');
+      lookupKey = digit;
+    }
+
     // Find section with matching shortcut
     const items = document.querySelectorAll('.nav-item');
     for (const item of items) {
       const shortcut = item.getAttribute('data-shortcut');
-      if (shortcut === keyLower) {
+      if (shortcut === lookupKey) {
         const section = item.getAttribute('data-section');
         // Keyboard shortcut selection: select section without focusing content area
         selectSection(section);

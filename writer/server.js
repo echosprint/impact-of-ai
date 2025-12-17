@@ -223,25 +223,19 @@ async function handleGetFiles(req, res) {
         const content = await fs.readFile(filePath, 'utf8');
         const stats = await fs.stat(filePath);
 
-        // Extract chapter number and shortcut from frontmatter
+        // Extract chapter number from frontmatter
         let chapterNumber = 999; // Default for files without chapter number
-        let shortcut = null;
         const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
         if (frontmatterMatch) {
           const chapterMatch = frontmatterMatch[1].match(/^chapter:\s*(\d+)/m);
           if (chapterMatch) {
             chapterNumber = parseInt(chapterMatch[1], 10);
           }
-          const shortcutMatch = frontmatterMatch[1].match(/^shortcut:\s*([a-z])/m);
-          if (shortcutMatch) {
-            shortcut = shortcutMatch[1];
-          }
         }
 
         return {
           name: file,
           chapterNumber,
-          shortcut,
           mtime: stats.mtime.getTime()
         };
       })
@@ -256,7 +250,6 @@ async function handleGetFiles(req, res) {
     sendJson(res, 200, {
       files: filesWithChapters.map(f => ({
         name: f.name,
-        shortcut: f.shortcut,
         chapterNumber: f.chapterNumber !== 999 ? f.chapterNumber : null
       })),
       lastModified: mostRecent ? mostRecent.name : null

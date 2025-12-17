@@ -109,7 +109,7 @@ export async function handleKeyboardShortcuts(e) {
 
   // If navigation modal is open, handle keys specially
   if (NavState.isNavModalOpen) {
-    const handled = handleNavKeypress(e.key);
+    const handled = handleNavKeypress(e);
     if (handled) {
       e.preventDefault();
       return;
