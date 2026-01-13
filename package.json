@@ -12,9 +12,9 @@
     "chapter": "node scripts/create-chapter.js"
   },
   "dependencies": {
-    "@astrojs/mdx": "^4.3.3",
+    "@astrojs/mdx": "^4.3.13",
     "@tailwindcss/vite": "^4.1.10",
-    "astro": "^5.9.4",
+    "astro": "^5.16.9",
     "rehype-katex": "^7.0.0",
     "rehype-stringify": "^10.0.1",
     "remark-math": "^6.0.0",
