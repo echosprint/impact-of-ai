@@ -10,18 +10,16 @@ const slots = await Astro.slots.render('default');
 ---
 
 <!-- Note content flows inline with main book content -->
-<div 
-  class="note-inline-content" 
-  data-note-id={noteId} 
+<div
+  class="note-inline-content"
+  data-note-id={noteId}
   data-has-reference={hasReference ? 'true' : 'false'}
 >
   <div set:html={slots}></div>
-  {hasReference && (
-    <>
-      <span class="connection-line"></span>
-      <span class="connection-circle"></span>
-    </>
-  )}
+  <!-- Always show connection indicators and note ID for all notes -->
+  <span class="connection-line"></span>
+  <span class="connection-circle"></span>
+  <span class="note-id-label">#{noteId}</span>
 </div>
 
 <style>

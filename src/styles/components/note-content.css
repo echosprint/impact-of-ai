@@ -9,15 +9,21 @@
   position: relative;
 }
 
-/* Inactive notes with references - show subtle clickable indicators */
-.note-inline-content[data-has-reference="true"]:not(.note-active) {
+/* All inactive notes show subtle indicators */
+.note-inline-content:not(.note-active) {
   position: relative;
-  cursor: pointer;
+  cursor: default;
   border-radius: 4px;
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
-.note-inline-content[data-has-reference="true"]:not(.note-active):hover {
+/* Notes with references are clickable */
+.note-inline-content[data-has-reference="true"]:not(.note-active) {
+  cursor: pointer;
+}
+
+/* Hover effect for all inactive notes */
+.note-inline-content:not(.note-active):hover {
   background: rgba(255, 251, 235, 0.3);
   box-shadow: 0 1px 3px rgba(139, 69, 19, 0.1);
   position: relative;
@@ -58,8 +64,8 @@
   transition: opacity 0.3s ease, border-color 0.3s ease, width 0.3s ease, height 0.3s ease;
 }
 
-/* Enhanced indicators on hover for inactive notes */
-.note-inline-content[data-has-reference="true"]:not(.note-active):hover .connection-line {
+/* Enhanced indicators on hover for all inactive notes */
+.note-inline-content:not(.note-active):hover .connection-line {
   opacity: 1;
   background: repeating-linear-gradient(
     to right,
@@ -70,7 +76,7 @@
   );
 }
 
-.note-inline-content[data-has-reference="true"]:not(.note-active):hover .connection-circle {
+.note-inline-content:not(.note-active):hover .connection-circle {
   opacity: 1;
   border-color: rgba(139, 69, 19, 0.7);
   border-width: 2px;
@@ -155,4 +161,49 @@
 .note-inline-content:not(.note-active) {
   background: transparent;
   box-shadow: none;
+}
+
+/* ============================================================================
+   NOTE ID LABEL - Shown for all notes (with or without references)
+   ============================================================================ */
+
+.note-id-label {
+  position: absolute;
+  left: calc(100% + 20px); /* Start 20px after the note's right edge (5px after circle) */
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  color: rgba(139, 69, 19, 0.5);
+  background: rgba(255, 251, 235, 0.8);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid rgba(139, 69, 19, 0.2);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0.7;
+  transition: opacity 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  z-index: 5;
+}
+
+/* Hover state for notes without references */
+.note-inline-content:not([data-has-reference="true"]):hover .note-id-label {
+  opacity: 1;
+  color: rgba(139, 69, 19, 0.8);
+  border-color: rgba(139, 69, 19, 0.4);
+}
+
+/* Hover state for notes with references */
+.note-inline-content[data-has-reference="true"]:not(.note-active):hover .note-id-label {
+  opacity: 1;
+  color: rgba(139, 69, 19, 0.8);
+  border-color: rgba(139, 69, 19, 0.4);
+}
+
+/* Show note ID prominently for all active notes */
+.note-inline-content.note-active .note-id-label {
+  opacity: 1;
+  color: rgba(139, 69, 19, 0.9);
+  background: rgba(255, 251, 235, 1);
+  border-color: rgba(139, 69, 19, 0.5);
 }
