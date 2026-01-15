@@ -1,5 +1,6 @@
 import { API_CONFIG } from './config.js';
 import { selectNote } from './noteManager.js';
+import { CommandParser } from './commandParser.js';
 
 // Search state management
 export const SearchState = {

@@ -651,36 +651,36 @@ async function handleGetNote(req, res, noteId) {
 async function handleUpdateNote(req, res, noteId) {
   try {
     const { filename, content } = await parseBody(req);
-    
+
     if (!filename || !content || !noteId) {
       return sendError(res, 400, 'Missing filename, content, or noteId');
     }
 
     const safePath = await validateFile(filename);
-    
+
     // Read the file
     const fileContent = await fs.readFile(safePath, 'utf8');
 
     // Find and replace the specific note using manual position detection
     const noteStartPattern = `<Note id="${noteId}"`;
     const noteStart = fileContent.indexOf(noteStartPattern);
-    
+
     if (noteStart === -1) {
       return sendError(res, 404, `Note #${noteId} not found in ${filename}`);
     }
-    
+
     // Find the opening tag end
     const openTagEnd = fileContent.indexOf('>', noteStart);
     if (openTagEnd === -1) {
       return sendError(res, 500, 'Malformed Note tag');
     }
-    
+
     // Find the closing tag
     const noteEnd = fileContent.indexOf('</Note>', openTagEnd);
     if (noteEnd === -1) {
       return sendError(res, 500, 'Note closing tag not found');
     }
-    
+
     // Replace the note content
     const beforeNote = fileContent.substring(0, noteStart);
     const afterNote = fileContent.substring(noteEnd + 7); // +7 for '</Note>'
@@ -700,6 +700,193 @@ async function handleUpdateNote(req, res, noteId) {
   }
 }
 
+async function handleMoveNote(req, res) {
+  try {
+    const { sourceNoteId, targetNoteId, position } = await parseBody(req);
+
+    if (!sourceNoteId || !targetNoteId || !position) {
+      return sendError(res, 400, 'Missing sourceNoteId, targetNoteId, or position');
+    }
+
+    if (position !== 'before' && position !== 'after') {
+      return sendError(res, 400, 'Position must be "before" or "after"');
+    }
+
+    // Find both notes across all files
+    const files = await fs.readdir(CHAPTERS_DIR);
+    const mdFiles = files.filter(file => file.endsWith('.md') || file.endsWith('.mdx'));
+
+    let sourceFile = null;
+    let targetFile = null;
+    let sourceNoteContent = null;
+    let targetNotePosition = null;
+
+    // Search for both notes
+    for (const file of mdFiles) {
+      const filePath = join(CHAPTERS_DIR, file);
+      const content = await fs.readFile(filePath, 'utf8');
+
+      // Check for source note
+      const sourcePattern = `<Note id="${sourceNoteId}"`;
+      const sourceStart = content.indexOf(sourcePattern);
+      if (sourceStart !== -1 && !sourceFile) {
+        const openTagEnd = content.indexOf('>', sourceStart);
+        const noteEnd = content.indexOf('</Note>', openTagEnd);
+        if (noteEnd !== -1) {
+          sourceFile = file;
+          sourceNoteContent = content.substring(sourceStart, noteEnd + 7);
+        }
+      }
+
+      // Check for target note
+      const targetPattern = `<Note id="${targetNoteId}"`;
+      const targetStart = content.indexOf(targetPattern);
+      if (targetStart !== -1 && !targetFile) {
+        targetFile = file;
+        targetNotePosition = targetStart;
+      }
+    }
+
+    if (!sourceFile) {
+      return sendError(res, 404, `Source note #${sourceNoteId} not found`);
+    }
+    if (!targetFile) {
+      return sendError(res, 404, `Target note #${targetNoteId} not found`);
+    }
+
+    // Check if they're the same note
+    if (sourceNoteId === targetNoteId) {
+      return sendError(res, 400, 'Cannot move a note relative to itself');
+    }
+
+    // Perform the move operation
+    if (sourceFile === targetFile) {
+      // Both notes in same file - single file operation
+      await moveSameFile(sourceFile, sourceNoteId, targetNoteId, position, sourceNoteContent);
+    } else {
+      // Notes in different files - two file operations
+      await moveDifferentFiles(sourceFile, targetFile, sourceNoteId, targetNoteId, position, sourceNoteContent);
+    }
+
+    log('move', `Note #${sourceNoteId} moved ${position} #${targetNoteId} in ${targetFile}`);
+    sendJson(res, 200, { success: true, filename: targetFile, message: `Note moved successfully` });
+  } catch (error) {
+    log('error', 'Error moving note:', error);
+    sendError(res, 500, 'Failed to move note', error.message);
+  }
+}
+
+async function moveSameFile(filename, sourceNoteId, targetNoteId, position, sourceNoteContent) {
+  const filePath = join(CHAPTERS_DIR, filename);
+  let content = await fs.readFile(filePath, 'utf8');
+
+  // Remove source note from original position
+  const sourcePattern = `<Note id="${sourceNoteId}"`;
+  const sourceStart = content.indexOf(sourcePattern);
+  const openTagEnd = content.indexOf('>', sourceStart);
+  const sourceEnd = content.indexOf('</Note>', openTagEnd) + 7;
+
+  // Extract source note with surrounding newlines
+  let beforeSource = content.substring(0, sourceStart);
+  let afterSource = content.substring(sourceEnd);
+
+  // Clean up extra newlines left behind
+  if (beforeSource.endsWith('\n\n') && afterSource.startsWith('\n')) {
+    afterSource = afterSource.substring(1);
+  }
+
+  // Remove source note
+  content = beforeSource + afterSource;
+
+  // Find target note position in updated content
+  const targetPattern = `<Note id="${targetNoteId}"`;
+  const targetStart = content.indexOf(targetPattern);
+
+  if (targetStart === -1) {
+    throw new Error('Target note not found after removal');
+  }
+
+  // Find insertion point
+  let insertPoint;
+  if (position === 'before') {
+    // Insert right before target note
+    insertPoint = targetStart;
+  } else {
+    // Insert right after target note
+    const targetOpenEnd = content.indexOf('>', targetStart);
+    const targetEnd = content.indexOf('</Note>', targetOpenEnd) + 7;
+    insertPoint = targetEnd;
+    // Add newline after target if not present
+    if (!content.substring(targetEnd, targetEnd + 1).match(/\n/)) {
+      sourceNoteContent = '\n' + sourceNoteContent;
+    }
+  }
+
+  // Insert source note at new position
+  const beforeInsert = content.substring(0, insertPoint);
+  const afterInsert = content.substring(insertPoint);
+
+  // Ensure proper newlines
+  let finalContent;
+  if (position === 'before') {
+    finalContent = beforeInsert + sourceNoteContent + '\n\n' + afterInsert;
+  } else {
+    finalContent = beforeInsert + '\n\n' + sourceNoteContent + afterInsert;
+  }
+
+  await fs.writeFile(filePath, finalContent, 'utf8');
+}
+
+async function moveDifferentFiles(sourceFile, targetFile, sourceNoteId, targetNoteId, position, sourceNoteContent) {
+  // Remove from source file
+  const sourceFilePath = join(CHAPTERS_DIR, sourceFile);
+  let sourceContent = await fs.readFile(sourceFilePath, 'utf8');
+
+  const sourcePattern = `<Note id="${sourceNoteId}"`;
+  const sourceStart = sourceContent.indexOf(sourcePattern);
+  const openTagEnd = sourceContent.indexOf('>', sourceStart);
+  const sourceEnd = sourceContent.indexOf('</Note>', openTagEnd) + 7;
+
+  let beforeSource = sourceContent.substring(0, sourceStart);
+  let afterSource = sourceContent.substring(sourceEnd);
+
+  // Clean up newlines
+  if (beforeSource.endsWith('\n\n') && afterSource.startsWith('\n')) {
+    afterSource = afterSource.substring(1);
+  }
+
+  sourceContent = beforeSource + afterSource;
+  await fs.writeFile(sourceFilePath, sourceContent, 'utf8');
+
+  // Insert into target file
+  const targetFilePath = join(CHAPTERS_DIR, targetFile);
+  let targetContent = await fs.readFile(targetFilePath, 'utf8');
+
+  const targetPattern = `<Note id="${targetNoteId}"`;
+  const targetStart = targetContent.indexOf(targetPattern);
+
+  let insertPoint;
+  if (position === 'before') {
+    insertPoint = targetStart;
+  } else {
+    const targetOpenEnd = targetContent.indexOf('>', targetStart);
+    const targetEnd = targetContent.indexOf('</Note>', targetOpenEnd) + 7;
+    insertPoint = targetEnd;
+  }
+
+  const beforeInsert = targetContent.substring(0, insertPoint);
+  const afterInsert = targetContent.substring(insertPoint);
+
+  let finalContent;
+  if (position === 'before') {
+    finalContent = beforeInsert + sourceNoteContent + '\n\n' + afterInsert;
+  } else {
+    finalContent = beforeInsert + '\n\n' + sourceNoteContent + afterInsert;
+  }
+
+  await fs.writeFile(targetFilePath, finalContent, 'utf8');
+}
+
 // =============================================================================
 // ROUTING
 // =============================================================================
@@ -713,6 +900,7 @@ const routes = [
   { method: 'GET', pattern: '/api/search', handler: handleSearch },
   { method: 'POST', pattern: '/api/append', handler: handleAppendContent },
   { method: 'POST', pattern: '/api/warm-cache', handler: handleWarmCache },
+  { method: 'POST', pattern: '/api/move-note', handler: handleMoveNote },
   {
     method: 'GET',
     pattern: '/api/notes/',

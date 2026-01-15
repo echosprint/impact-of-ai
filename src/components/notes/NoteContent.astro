@@ -25,3 +25,10 @@ const slots = await Astro.slots.render('default');
 <style>
   @import '../../styles/components/note-content.css';
 </style>
+
+<script>
+  import { initializeNoteIdCopy } from '../../utils/note-id-copy';
+
+  // Initialize note ID copy functionality
+  initializeNoteIdCopy();
+</script>
