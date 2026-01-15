@@ -80,8 +80,24 @@ export async function searchNotes(query) {
     return;
   }
 
+  // Check if query is a note ID pattern: # followed by 5 alphanumeric chars
+  const noteIdPattern = /^#?([a-zA-Z0-9]{5})$/;
+  const noteIdMatch = query.trim().match(noteIdPattern);
+
   try {
-    // Use server search endpoint
+    if (noteIdMatch) {
+      // Search by note ID
+      const noteId = noteIdMatch[1];
+      const exactMatch = await findExactNoteById(noteId);
+
+      if (exactMatch) {
+        // Exact match found - load note directly, bypass results list
+        await selectSearchResult(exactMatch.id, exactMatch.filename);
+        return;
+      }
+    }
+
+    // Regular content search
     const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.search(query)}`);
     const data = await response.json();
 
@@ -104,6 +120,29 @@ export async function searchNotes(query) {
   } catch (error) {
     console.error('Search failed:', error);
     displaySearchResults([]);
+  }
+}
+
+// Find exact note by ID
+async function findExactNoteById(noteId) {
+  try {
+    // Get all notes from all chapters
+    const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.allNotes}`);
+    const data = await response.json();
+
+    if (!data.success || !data.notes) {
+      return null;
+    }
+
+    // Find exact match (case-insensitive)
+    const exactMatch = data.notes.find(note =>
+      note.id.toLowerCase() === noteId.toLowerCase()
+    );
+
+    return exactMatch || null;
+  } catch (error) {
+    console.error('Note ID search failed:', error);
+    return null;
   }
 }
 
