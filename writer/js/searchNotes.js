@@ -73,7 +73,7 @@ function clearSearchResults() {
   }
 }
 
-// Search notes across all files using server endpoint
+// Search notes across all files using server endpoint (called as user types)
 export async function searchNotes(query) {
   if (!query.trim()) {
     clearSearchResults();
@@ -86,13 +86,20 @@ export async function searchNotes(query) {
 
   try {
     if (noteIdMatch) {
-      // Search by note ID
+      // Search by note ID - show in results, don't auto-jump yet
       const noteId = noteIdMatch[1];
       const exactMatch = await findExactNoteById(noteId);
 
       if (exactMatch) {
-        // Exact match found - load note directly, bypass results list
-        await selectSearchResult(exactMatch.id, exactMatch.filename);
+        // Show exact match in results list
+        SearchState.searchResults = [{
+          id: exactMatch.id,
+          filename: exactMatch.filename,
+          preview: exactMatch.preview || '',
+          highlightedPreview: `<mark style="background-color: #fef3c7; color: #92400e;">#${exactMatch.id}</mark> ${exactMatch.preview || 'No preview'}`
+        }];
+        SearchState.selectedIndex = 0;
+        displaySearchResults(SearchState.searchResults);
         return;
       }
     }
@@ -120,6 +127,46 @@ export async function searchNotes(query) {
   } catch (error) {
     console.error('Search failed:', error);
     displaySearchResults([]);
+  }
+}
+
+// Execute search query when user presses Enter (check for commands and exact matches)
+export async function executeSearchQuery(query) {
+  if (!query.trim()) {
+    return;
+  }
+
+  try {
+    // FIRST: Check if query is a COMMAND (has > or < operators)
+    const command = CommandParser.parseCommand(query);
+    if (command) {
+      // Execute move command
+      await CommandParser.executeCommand(command);
+      // Close search modal after command execution
+      hideSearchModal();
+      return;
+    }
+
+    // SECOND: Check if query is a note ID pattern and user pressed Enter
+    const noteIdPattern = /^#?([a-zA-Z0-9]{5})$/;
+    const noteIdMatch = query.trim().match(noteIdPattern);
+
+    if (noteIdMatch) {
+      const noteId = noteIdMatch[1];
+      const exactMatch = await findExactNoteById(noteId);
+
+      if (exactMatch) {
+        // Exact match found - load note directly
+        await selectSearchResult(exactMatch.id, exactMatch.filename);
+        return;
+      }
+    }
+
+    // THIRD: If there's a selected result in the list, use that
+    selectCurrentResult();
+
+  } catch (error) {
+    console.error('Execute search query failed:', error);
   }
 }
 
@@ -322,7 +369,8 @@ export function initializeSearchModal() {
           break;
         case 'Enter':
           e.preventDefault();
-          selectCurrentResult();
+          // Execute query: check for commands, exact matches, or select result
+          executeSearchQuery(searchInput.value);
           break;
         case 'Escape':
           e.preventDefault();
