@@ -80,11 +80,50 @@ export async function searchNotes(query) {
     return;
   }
 
-  // Check if query is a note ID pattern: # followed by 5 alphanumeric chars
-  const noteIdPattern = /^#?([a-zA-Z0-9]{5})$/;
-  const noteIdMatch = query.trim().match(noteIdPattern);
-
   try {
+    // Check if query is a MOVE COMMAND pattern: #id1 > #id2 or #id1 < #id2
+    const moveCommandPattern = /^#?([a-zA-Z0-9]{5})\s*[><]\s*#?([a-zA-Z0-9]{5})$/;
+    const commandMatch = query.trim().match(moveCommandPattern);
+
+    if (commandMatch) {
+      // Extract both note IDs from the command
+      const noteId1 = commandMatch[1];
+      const noteId2 = commandMatch[2];
+
+      // Search for both notes
+      const [note1, note2] = await Promise.all([
+        findExactNoteById(noteId1),
+        findExactNoteById(noteId2)
+      ]);
+
+      const results = [];
+      if (note1) {
+        results.push({
+          id: note1.id,
+          filename: note1.filename,
+          preview: note1.preview || '',
+          highlightedPreview: `<mark style="background-color: #fef3c7; color: #92400e;">#${note1.id}</mark> ${note1.preview || 'No preview'}`
+        });
+      }
+      if (note2) {
+        results.push({
+          id: note2.id,
+          filename: note2.filename,
+          preview: note2.preview || '',
+          highlightedPreview: `<mark style="background-color: #fef3c7; color: #92400e;">#${note2.id}</mark> ${note2.preview || 'No preview'}`
+        });
+      }
+
+      SearchState.searchResults = results;
+      SearchState.selectedIndex = results.length > 0 ? 0 : -1;
+      displaySearchResults(SearchState.searchResults);
+      return;
+    }
+
+    // Check if query is a single note ID pattern: # followed by 5 alphanumeric chars
+    const noteIdPattern = /^#?([a-zA-Z0-9]{5})$/;
+    const noteIdMatch = query.trim().match(noteIdPattern);
+
     if (noteIdMatch) {
       // Search by note ID - show in results, don't auto-jump yet
       const noteId = noteIdMatch[1];
@@ -170,23 +209,31 @@ export async function executeSearchQuery(query) {
   }
 }
 
-// Find exact note by ID
+// Find exact note by ID using cache-based search
 async function findExactNoteById(noteId) {
   try {
-    // Get all notes from all chapters
-    const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.allNotes}`);
+    // Use the cache-based search endpoint with note ID
+    const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.search(`#${noteId}`)}`);
     const data = await response.json();
 
-    if (!data.success || !data.notes) {
+    if (!response.ok || !data.results || data.results.length === 0) {
       return null;
     }
 
     // Find exact match (case-insensitive)
-    const exactMatch = data.notes.find(note =>
-      note.id.toLowerCase() === noteId.toLowerCase()
+    const exactMatch = data.results.find(result =>
+      result.noteId.toLowerCase() === noteId.toLowerCase()
     );
 
-    return exactMatch || null;
+    if (exactMatch) {
+      return {
+        id: exactMatch.noteId,
+        filename: exactMatch.filename,
+        preview: exactMatch.preview
+      };
+    }
+
+    return null;
   } catch (error) {
     console.error('Note ID search failed:', error);
     return null;

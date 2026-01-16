@@ -280,6 +280,11 @@ async function handleSearch(req, res) {
       });
     }
 
+    // Check if search is for a note ID pattern: # followed by 5 alphanumeric chars
+    const noteIdPattern = /^#?([a-zA-Z0-9]{5})$/;
+    const noteIdMatch = searchTerm.match(noteIdPattern);
+    const isNoteIdSearch = noteIdMatch ? noteIdMatch[1].toLowerCase() : null;
+
     // Search through cached files only (no file I/O)
     for (const [filename, cachedData] of fileCache) {
       try {
@@ -287,34 +292,53 @@ async function handleSearch(req, res) {
 
         // Search through cached notes
         for (const note of notes) {
-          const fullContent = note.content;
+          let isMatch = false;
+          let preview = '';
+          let highlightedPreview = '';
 
-          if (fullContent.toLowerCase().includes(searchTerm)) {
-            // Create preview that includes the search term
-            const searchIndex = fullContent.toLowerCase().indexOf(searchTerm);
-            let preview;
-
-            if (searchIndex !== -1) {
-              // Extract context around the search term (50 chars before and after)
-              const start = Math.max(0, searchIndex - 50);
-              const end = Math.min(fullContent.length, searchIndex + searchTerm.length + 50);
-              let snippet = fullContent.substring(start, end);
-
-              // Add ellipsis if we truncated
-              if (start > 0) snippet = '...' + snippet;
-              if (end < fullContent.length) snippet = snippet + '...';
-
-              preview = snippet.trim();
-            } else {
-              // Fallback to first line if somehow search term not found
-              const lines = fullContent.split('\n').filter(line => line.trim().length > 0);
+          if (isNoteIdSearch) {
+            // Search by note ID
+            if (note.noteId.toLowerCase() === isNoteIdSearch || note.noteId.toLowerCase().includes(isNoteIdSearch)) {
+              isMatch = true;
+              // Get note content preview
+              const lines = note.content.split('\n').filter(line => line.trim().length > 0);
               const firstLine = lines.length > 0 ? lines[0].trim() : '';
               preview = firstLine.length > 100 ? firstLine.substring(0, 100) + '...' : firstLine;
+              // Highlight the note ID
+              highlightedPreview = `<mark style="background-color: #fef3c7; color: #92400e;">#${note.noteId}</mark> ${preview}`;
             }
+          } else {
+            // Content search
+            const fullContent = note.content;
+            if (fullContent.toLowerCase().includes(searchTerm)) {
+              isMatch = true;
+              // Create preview that includes the search term
+              const searchIndex = fullContent.toLowerCase().indexOf(searchTerm);
 
-            // Create highlighted preview
-            const highlightedPreview = highlightSearchTerm(preview, searchQuery);
+              if (searchIndex !== -1) {
+                // Extract context around the search term (50 chars before and after)
+                const start = Math.max(0, searchIndex - 50);
+                const end = Math.min(fullContent.length, searchIndex + searchTerm.length + 50);
+                let snippet = fullContent.substring(start, end);
 
+                // Add ellipsis if we truncated
+                if (start > 0) snippet = '...' + snippet;
+                if (end < fullContent.length) snippet = snippet + '...';
+
+                preview = snippet.trim();
+              } else {
+                // Fallback to first line
+                const lines = fullContent.split('\n').filter(line => line.trim().length > 0);
+                const firstLine = lines.length > 0 ? lines[0].trim() : '';
+                preview = firstLine.length > 100 ? firstLine.substring(0, 100) + '...' : firstLine;
+              }
+
+              // Create highlighted preview
+              highlightedPreview = highlightSearchTerm(preview, searchQuery);
+            }
+          }
+
+          if (isMatch) {
             results.push({
               filename,
               noteId: note.noteId,
@@ -328,12 +352,22 @@ async function handleSearch(req, res) {
       }
     }
 
-    // Sort results by relevance (position of match in text)
-    results.sort((a, b) => {
-      const aIndex = a.preview.toLowerCase().indexOf(searchTerm);
-      const bIndex = b.preview.toLowerCase().indexOf(searchTerm);
-      return aIndex - bIndex;
-    });
+    // Sort results by relevance
+    if (isNoteIdSearch) {
+      // For note ID search: exact match first, then partials
+      results.sort((a, b) => {
+        const aExact = a.noteId.toLowerCase() === isNoteIdSearch ? 0 : 1;
+        const bExact = b.noteId.toLowerCase() === isNoteIdSearch ? 0 : 1;
+        return aExact - bExact;
+      });
+    } else {
+      // For content search: sort by position of match
+      results.sort((a, b) => {
+        const aIndex = a.preview.toLowerCase().indexOf(searchTerm);
+        const bIndex = b.preview.toLowerCase().indexOf(searchTerm);
+        return aIndex - bIndex;
+      });
+    }
 
     // Limit results to 20
     const limitedResults = results.slice(0, 20);
