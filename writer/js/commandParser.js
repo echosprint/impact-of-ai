@@ -10,31 +10,23 @@ import { UIFeedback } from './uiFeedback.js';
 export const CommandParser = {
   /**
    * Parse a command string
-   * @param {string} commandStr - Command string like "#45x8c > #4ds8c"
+   * @param {string} commandStr - Command string like "#45x8c > #4ds8c" or partial "#sc > #sd"
    * @returns {Object|null} Parsed command or null if invalid
    */
   parseCommand(commandStr) {
     const trimmed = commandStr.trim();
 
     // Match patterns: #noteId1 > #noteId2 or #noteId1 < #noteId2
-    const moveBeforeMatch = trimmed.match(/^#?([a-zA-Z0-9]+)\s*>\s*#?([a-zA-Z0-9]+)$/);
-    const moveAfterMatch = trimmed.match(/^#?([a-zA-Z0-9]+)\s*<\s*#?([a-zA-Z0-9]+)$/);
+    // Note IDs must be 1-5 alphanumeric characters
+    const moveCommandMatch = trimmed.match(/^#([a-zA-Z0-9]{1,5})\s*([><])\s*#([a-zA-Z0-9]{1,5})$/);
 
-    if (moveBeforeMatch) {
+    if (moveCommandMatch) {
+      const operator = moveCommandMatch[2];
       return {
         type: 'move',
-        sourceNoteId: moveBeforeMatch[1],
-        targetNoteId: moveBeforeMatch[2],
-        position: 'before'
-      };
-    }
-
-    if (moveAfterMatch) {
-      return {
-        type: 'move',
-        sourceNoteId: moveAfterMatch[1],
-        targetNoteId: moveAfterMatch[2],
-        position: 'after'
+        sourceNoteId: moveCommandMatch[1],
+        targetNoteId: moveCommandMatch[3],
+        position: operator === '>' ? 'before' : 'after'
       };
     }
 
