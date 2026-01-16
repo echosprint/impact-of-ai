@@ -71,11 +71,7 @@ export const CommandParser = {
       const result = await response.json();
 
       if (result.success) {
-        const positionText = position === 'before' ? 'before' : 'after';
-        await UIFeedback.showMessage(
-          `Moved #${sourceNoteId} ${positionText} #${targetNoteId} in ${result.filename}`,
-          'success'
-        );
+        await UIFeedback.showMessage('Move note successfully', 'success');
       } else {
         await UIFeedback.showMessage(result.error || 'Failed to move note', 'error');
       }
