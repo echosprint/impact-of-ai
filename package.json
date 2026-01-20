@@ -10,7 +10,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "chapter": "node scripts/create-chapter.js",
-    "mv": "node scripts/move-note.js"
+    "mv": "node scripts/move-note.js",
+    "del": "node scripts/delete-note.js"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
