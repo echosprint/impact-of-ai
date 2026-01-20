@@ -44,50 +44,74 @@ export async function loadFiles() {
   }
 }
 
-// Generate unique noteId ensuring no conflicts within the same file
+// Generate unique noteId with unique 2-char prefix (base36), fallback to 3-char
 export async function generateUniqueNoteId(content, reference, filename) {
-  // Get existing note IDs from the current file
-  const existingIds = await getExistingNoteIds(filename);
+  const allIds = await getAllNoteIds();
+  const existing2Prefixes = new Set(allIds.map(id => id.substring(0, 2)));
+  const existing3Prefixes = new Set(allIds.map(id => id.substring(0, 3)));
 
-  let counter = 0;
-  let noteId = generateBaseNoteId(content, reference, counter);
-
-  // Ensure uniqueness by incrementing counter if needed
-  while (existingIds.has(noteId)) {
-    counter++;
-    noteId = generateBaseNoteId(content, reference, counter);
+  // Try to find unique 2-char prefix
+  const prefix2 = findUniquePrefix(2, existing2Prefixes);
+  if (prefix2) {
+    return prefix2 + randomBase36(3);
   }
 
+  // Fallback: try unique 3-char prefix
+  const prefix3 = findUniquePrefix(3, existing3Prefixes);
+  if (prefix3) {
+    console.warn(`No unique 2-char prefix available, using 3-char: ${prefix3}`);
+    return prefix3 + randomBase36(2);
+  }
+
+  // Last resort: fully random until unique
+  let noteId;
+  const existingIds = new Set(allIds);
+  do {
+    noteId = randomBase36(5);
+  } while (existingIds.has(noteId));
+
+  console.warn(`No unique prefix available, using random ID: ${noteId}`);
   return noteId;
 }
 
-// Generate base noteId using content + reference + timestamp + counter, then hash to 5 chars
-function generateBaseNoteId(content, reference, counter = 0) {
-  const timestamp = Date.now().toString();
-  const combined = content.trim() + '|' + reference.trim() + '|' + timestamp + '|' + counter;
+// Find a unique prefix of given length not in existingSet
+function findUniquePrefix(length, existingSet) {
+  const max = Math.pow(36, length);
 
-  // Better hash function (FNV-1a variant)
-  let hash = 2166136261 + counter; // Add counter to initial hash
-  for (let i = 0; i < combined.length; i++) {
-    hash ^= combined.charCodeAt(i);
-    hash = (hash * 16777619) >>> 0; // Keep as 32-bit unsigned
+  // Random start point to distribute IDs
+  const start = Math.floor(Math.random() * max);
+
+  for (let i = 0; i < max; i++) {
+    const num = (start + i) % max;
+    const prefix = num.toString(36).padStart(length, '0');
+    if (!existingSet.has(prefix)) {
+      return prefix;
+    }
   }
-
-  // Convert to hex and take first 5 chars
-  return hash.toString(16).substring(0, 5);
+  return null;
 }
 
-// Get existing note IDs from a file
-async function getExistingNoteIds(filename) {
+// Generate random base36 string of given length
+function randomBase36(length) {
+  const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars[Math.floor(Math.random() * 36)];
+  }
+  return result;
+}
+
+// Get all note IDs across all files
+async function getAllNoteIds() {
   try {
-    const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.notes(filename)}`);
-    if (!response.ok) return new Set();
+    const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.allNotes}`);
+    if (!response.ok) return [];
 
     const data = await response.json();
-    return new Set(data.notes?.map((note) => note.id) || []);
+    return data.notes?.map((note) => note.id) || [];
   } catch (error) {
-    console.warn('Failed to fetch existing note IDs:', error);
-    return new Set();
+    console.warn('Failed to fetch all note IDs:', error);
+    return [];
   }
 }
 
