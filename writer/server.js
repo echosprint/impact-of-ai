@@ -354,11 +354,11 @@ async function handleSearch(req, res) {
 
     // Sort results by relevance
     if (isNoteIdSearch) {
-      // For note ID search: exact match first, then partials
+      // For note ID search: earlier match position is better
       results.sort((a, b) => {
-        const aExact = a.noteId.toLowerCase() === isNoteIdSearch ? 0 : 1;
-        const bExact = b.noteId.toLowerCase() === isNoteIdSearch ? 0 : 1;
-        return aExact - bExact;
+        const aIndex = a.noteId.toLowerCase().indexOf(isNoteIdSearch);
+        const bIndex = b.noteId.toLowerCase().indexOf(isNoteIdSearch);
+        return aIndex - bIndex;
       });
     } else {
       // For content search: sort by position of match
