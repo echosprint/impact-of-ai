@@ -39,14 +39,29 @@ export function formatReferenceContent(content: string): string {
 
 /**
  * Calculate word count from markdown content (supports Chinese and English)
+ * Only counts note content, excludes reference text after ///
  */
 export function calculateWordCount(content: string): number {
   if (!content || typeof content !== 'string') {
     return 0;
   }
-  
+
+  // Extract only note content (before ///) from each Note
+  const noteRegex = /<Note[^>]*>([\s\S]*?)<\/Note>/g;
+  let noteContents: string[] = [];
+  let match;
+
+  while ((match = noteRegex.exec(content)) !== null) {
+    const noteBody = match[1];
+    // Get content before first /// (the actual note content)
+    const contentPart = noteBody.split('///')[0].trim();
+    if (contentPart) {
+      noteContents.push(contentPart);
+    }
+  }
+
   // Remove markdown syntax (headers, links, code blocks, etc.)
-  const plainText = content
+  const plainText = noteContents.join(' ')
     .replace(/#{1,6}\s+/g, '') // Remove headers
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to text
     .replace(/`{1,3}[^`]*`{1,3}/g, '') // Remove code blocks and inline code
@@ -54,32 +69,30 @@ export function calculateWordCount(content: string): number {
     .replace(/_{1,2}([^_]+)_{1,2}/g, '$1') // Remove bold/italic
     .replace(/^[\s\-\*\+]\s+/gm, '') // Remove list markers
     .replace(/^\s*>/gm, '') // Remove blockquotes
-    .replace(/^\s*---+\s*$/gm, '') // Remove horizontal rules
-    .replace(/---/g, '') // Remove frontmatter separators
     .trim();
-  
+
   // Count Chinese characters and English words separately
   let wordCount = 0;
-  
+
   // Regular expressions for different character types
   const chineseRegex = /[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]/g;
   const englishWordRegex = /[a-zA-Z0-9]+/g;
-  
+
   // Count Chinese characters (each character is typically one word)
   const chineseMatches = plainText.match(chineseRegex);
   if (chineseMatches) {
     wordCount += chineseMatches.length;
   }
-  
+
   // Remove Chinese characters to avoid double counting
   const textWithoutChinese = plainText.replace(chineseRegex, ' ');
-  
+
   // Count English words
   const englishMatches = textWithoutChinese.match(englishWordRegex);
   if (englishMatches) {
     wordCount += englishMatches.length;
   }
-  
+
   return wordCount;
 }
 
