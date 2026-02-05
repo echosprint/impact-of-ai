@@ -82,8 +82,8 @@ export async function searchNotes(query) {
 
   try {
     // Check if query is a MOVE COMMAND pattern: #id1 > #id2 or #id1 < #id2
-    // Supports partial IDs (1-5 chars) and incomplete commands like "#sdcsc > "
-    const moveCommandPattern = /^#([a-zA-Z0-9]{1,5})\s*([><])\s*#?([a-zA-Z0-9]{0,5})$/;
+    // Supports partial IDs (1-4 chars) and incomplete commands like "#sdcs > "
+    const moveCommandPattern = /^#([a-zA-Z0-9]{1,4})\s*([><])\s*#?([a-zA-Z0-9]{0,4})$/;
     const commandMatch = query.trim().match(moveCommandPattern);
 
     if (commandMatch) {
@@ -115,8 +115,8 @@ export async function searchNotes(query) {
       return;
     }
 
-    // Check if query is a single note ID pattern: # followed by 1-5 alphanumeric chars
-    const noteIdPattern = /^#([a-zA-Z0-9]{1,5})$/;
+    // Check if query is a single note ID pattern: # followed by 1-4 alphanumeric chars
+    const noteIdPattern = /^#([a-zA-Z0-9]{1,4})$/;
     const noteIdMatch = query.trim().match(noteIdPattern);
 
     if (noteIdMatch) {
@@ -174,14 +174,14 @@ export async function executeSearchQuery(query) {
     }
 
     // SECOND: Check if query is a note ID pattern and user pressed Enter
-    const noteIdPattern = /^#([a-zA-Z0-9]{1,5})$/;
+    const noteIdPattern = /^#([a-zA-Z0-9]{1,4})$/;
     const noteIdMatch = query.trim().match(noteIdPattern);
 
     if (noteIdMatch) {
       const partialId = noteIdMatch[1];
 
-      // If it's 5 characters (full ID), try exact match first
-      if (partialId.length === 5) {
+      // If it's 4 characters (full ID), try exact match first
+      if (partialId.length === 4) {
         const exactMatch = await findExactNoteById(partialId);
         if (exactMatch) {
           // Exact match found - load note directly

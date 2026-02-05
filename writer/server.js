@@ -280,8 +280,8 @@ async function handleSearch(req, res) {
       });
     }
 
-    // Check if search is for a note ID pattern: # followed by 1-5 alphanumeric chars
-    const noteIdPattern = /^#([a-zA-Z0-9]{1,5})$/;
+    // Check if search is for a note ID pattern: # followed by 1-4 alphanumeric chars
+    const noteIdPattern = /^#([a-zA-Z0-9]{1,4})$/;
     const noteIdMatch = searchTerm.match(noteIdPattern);
     const isNoteIdSearch = noteIdMatch ? noteIdMatch[1].toLowerCase() : null;
 

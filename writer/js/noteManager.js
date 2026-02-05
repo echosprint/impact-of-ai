@@ -53,21 +53,21 @@ export async function generateUniqueNoteId(content, reference, filename) {
   // Try to find unique 2-char prefix
   const prefix2 = findUniquePrefix(2, existing2Prefixes);
   if (prefix2) {
-    return prefix2 + randomBase36(3);
+    return prefix2 + randomBase36(2);
   }
 
   // Fallback: try unique 3-char prefix
   const prefix3 = findUniquePrefix(3, existing3Prefixes);
   if (prefix3) {
     console.warn(`No unique 2-char prefix available, using 3-char: ${prefix3}`);
-    return prefix3 + randomBase36(2);
+    return prefix3 + randomBase36(1);
   }
 
   // Last resort: fully random until unique
   let noteId;
   const existingIds = new Set(allIds);
   do {
-    noteId = randomBase36(5);
+    noteId = randomBase36(4);
   } while (existingIds.has(noteId));
 
   console.warn(`No unique prefix available, using random ID: ${noteId}`);

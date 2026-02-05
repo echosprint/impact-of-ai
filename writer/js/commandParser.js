@@ -17,8 +17,8 @@ export const CommandParser = {
     const trimmed = commandStr.trim();
 
     // Match patterns: #noteId1 > #noteId2 or #noteId1 < #noteId2
-    // Note IDs must be 1-5 alphanumeric characters
-    const moveCommandMatch = trimmed.match(/^#([a-zA-Z0-9]{1,5})\s*([><])\s*#([a-zA-Z0-9]{1,5})$/);
+    // Note IDs must be 1-4 alphanumeric characters
+    const moveCommandMatch = trimmed.match(/^#([a-zA-Z0-9]{1,4})\s*([><])\s*#([a-zA-Z0-9]{1,4})$/);
 
     if (moveCommandMatch) {
       const operator = moveCommandMatch[2];
