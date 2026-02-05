@@ -19,8 +19,8 @@ function generateNoteId(content, reference) {
     hash = (hash * 16777619) >>> 0; // Keep as 32-bit unsigned
   }
   
-  // Convert to hex and take first 5 chars
-  return hash.toString(16).substring(0, 5);
+  // Convert to hex and take first 4 chars
+  return hash.toString(16).substring(0, 4);
 }
 
 // Extract content from Note component

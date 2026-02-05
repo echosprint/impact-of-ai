@@ -128,8 +128,8 @@ function moveNote(sourceId, targetId) {
 const args = process.argv.slice(2);
 if (args.length !== 2) {
   console.error('Usage: pnpm mv <source_id> <target_id>');
-  console.error('Example: pnpm mv abc12 def34');
-  console.error('         pnpm mv "#abc12" "#def34"');
+  console.error('Example: pnpm mv abc1 def3');
+  console.error('         pnpm mv "#abc1" "#def3"');
   process.exit(1);
 }
 
