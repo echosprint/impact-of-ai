@@ -193,7 +193,8 @@ export function handleReferenceAreaPaste(e) {
   let pastedData = clipboardData?.getData('Text') || '';
 
   // Remove Zotero citations: patterns like ([text](zotero://...))
-  pastedData = pastedData.replace(/\s*\(\[[^\]]*\]\s*\(zotero:\/\/[^)]+\)\)/g, '');
+  // Use .*? instead of [^)]+ because Zotero URLs can contain parentheses (e.g., sel=Anth-child(10))
+  pastedData = pastedData.replace(/\s*\(\[[^\]]*\]\s*\(zotero:\/\/.*?\)\)/g, '');
 
   // Trim whitespace first
   pastedData = pastedData.trim();
