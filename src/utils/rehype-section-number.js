@@ -1,4 +1,4 @@
-import { visit } from 'unist-util-visit';
+import { visit, SKIP } from 'unist-util-visit';
 
 /**
  * Rehype plugin to add section numbers to h2 headings
@@ -11,8 +11,15 @@ export function rehypeSectionNumber(options = {}) {
     const chapterNumber = file.data?.astro?.frontmatter?.chapter ?? 0;
     let sectionNumber = 0;
 
-    visit(tree, 'element', (node) => {
+    visit(tree, 'element', (node, index, parent) => {
       if (node.tagName === 'h2') {
+        // Remove ## preamble heading entirely
+        const text = node.children.map(c => c.value || '').join('').trim().toLowerCase();
+        if (text === 'preamble') {
+          parent.children.splice(index, 1);
+          return [SKIP, index];
+        }
+
         sectionNumber++;
 
         // Create a span element for the section number
