@@ -10,7 +10,7 @@ export const NavState = {
   sections: [],
   selectedChapters: [], // Multiple chapters can share one numeric shortcut
   sectionsByChapter: [], // Sections grouped by chapter: [{chapter, sections}]
-  shortcuts: '123456789abcdefghijklmnopqrstuvwxyz', // Start from 1-9 for sections, then letters
+  shortcuts: '0123456789abcdefghijklmnopqrstuvwxyz', // Start from 0 for preamble, then 1-9, then letters
   chapterShortcutMap: {}, // Maps numeric shortcut key to array of chapter names
   sectionChapterMap: {} // Maps section to its chapter
 };
